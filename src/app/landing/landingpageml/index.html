@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PropAfric — Gestion Locative Intelligente pour l'Afrique</title>
+  <meta name="description" content="PropAfric simplifie la gestion locative pour les agences immobilières d'Afrique de l'Ouest. Baux, loyers, quittances, relevés propriétaires — tout en un.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --green-deep:   #1a3d2e;
+      --green-main:   #2D6A4F;
+      --green-mid:    #3d8b6a;
+      --green-light:  #52b788;
+      --gold-main:    #C9A84C;
+      --gold-light:   #e8c96e;
+      --gold-pale:    #f5e8c0;
+      --cream:        #faf8f3;
+      --cream-dark:   #f0ebe0;
+      --ink:          #0d1f17;
+      --ink-mid:      #2a3d32;
+      --ink-light:    #4a6357;
+      --white:        #ffffff;
+      --shadow-green: 0 24px 80px rgba(45,106,79,0.18);
+      --shadow-gold:  0 8px 32px rgba(201,168,76,0.25);
+      --font-display: 'Cormorant Garamond', Georgia, serif;
+      --font-body:    'DM Sans', sans-serif;
+      --font-mono:    'DM Mono', monospace;
+      --radius:       16px;
+      --radius-sm:    8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--cream);
+      color: var(--ink);
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ─── CUSTOM CURSOR ─── */
+    .cursor {
+      width: 12px; height: 12px;
+      background: var(--gold-main);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9999;
+      transition: transform 0.15s ease;
+      mix-blend-mode: multiply;
+    }
+    .cursor-ring {
+      width: 36px; height: 36px;
+      border: 1.5px solid var(--green-main);
+      border-radius: 50%;
+      position: fixed;
+      top: 0; left: 0;
+      pointer-events: none;
+      z-index: 9998;
+      transition: transform 0.35s cubic-bezier(0.23,1,0.32,1), width 0.3s, height 0.3s, border-color 0.3s;
+    }
+    .cursor-ring.hovering {
+      width: 56px; height: 56px;
+      border-color: var(--gold-main);
+      background: rgba(201,168,76,0.08);
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--cream-dark); }
+    ::-webkit-scrollbar-thumb { background: var(--green-main); border-radius: 2px; }
+
+    /* ─── NAVBAR ─── */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 20px 60px;
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background 0.4s, padding 0.4s, box-shadow 0.4s;
+    }
+    nav.scrolled {
+      background: rgba(250,248,243,0.96);
+      backdrop-filter: blur(16px);
+      padding: 14px 60px;
+      box-shadow: 0 1px 0 rgba(45,106,79,0.12);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 12px;
+      text-decoration: none;
+    }
+    .nav-logo-mark {
+      width: 40px; height: 40px;
+      background: var(--green-main);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .nav-logo-mark::after {
+      content: '';
+      position: absolute;
+      width: 20px; height: 20px;
+      border: 2px solid var(--gold-main);
+      border-radius: 3px;
+      transform: rotate(45deg);
+    }
+    .nav-logo-text {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: -0.3px;
+    }
+    .nav-logo-text span { color: var(--green-main); }
+    .nav-links {
+      display: flex; align-items: center; gap: 36px;
+      list-style: none;
+    }
+    .nav-links a {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--ink-mid);
+      text-decoration: none;
+      letter-spacing: 0.2px;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--green-main); }
+    .nav-cta {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .btn-outline {
+      padding: 10px 22px;
+      border: 1.5px solid var(--green-main);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--green-main);
+      text-decoration: none;
+      transition: all 0.25s;
+      white-space: nowrap;
+    }
+    .btn-outline:hover {
+      background: var(--green-main);
+      color: var(--white);
+    }
+    .btn-primary {
+      padding: 10px 22px;
+      background: var(--green-main);
+      border: 1.5px solid var(--green-main);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--white);
+      text-decoration: none;
+      transition: all 0.25s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover {
+      background: var(--green-deep);
+      border-color: var(--green-deep);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-green);
+    }
+
+    /* ─── HERO ─── */
+    .hero {
+      min-height: 100vh;
+      display: flex; align-items: center;
+      position: relative;
+      overflow: hidden;
+      padding: 120px 60px 80px;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background: var(--cream);
+      z-index: 0;
+    }
+    /* Motif géométrique africain SVG en arrière-plan */
+    .hero-pattern {
+      position: absolute; inset: 0;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232D6A4F' fill-opacity='1'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z'/%3E%3Cpath d='M40 16L64 40L40 64L16 40Z' fill='none' stroke='%232D6A4F' stroke-width='2'/%3E%3Cpath d='M40 32L52 40L40 48L28 40Z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      background-size: 80px 80px;
+    }
+    .hero-blob-1 {
+      position: absolute;
+      width: 600px; height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(45,106,79,0.12) 0%, transparent 70%);
+      top: -100px; right: -100px;
+      animation: float1 8s ease-in-out infinite;
+    }
+    .hero-blob-2 {
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,168,76,0.1) 0%, transparent 70%);
+      bottom: 0; left: 200px;
+      animation: float2 10s ease-in-out infinite;
+    }
+    @keyframes float1 {
+      0%, 100% { transform: translate(0,0) scale(1); }
+      50% { transform: translate(-30px, 40px) scale(1.05); }
+    }
+    @keyframes float2 {
+      0%, 100% { transform: translate(0,0); }
+      50% { transform: translate(20px, -30px); }
+    }
+    .hero-content {
+      position: relative; z-index: 2;
+      max-width: 680px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 6px 16px;
+      background: rgba(45,106,79,0.08);
+      border: 1px solid rgba(45,106,79,0.2);
+      border-radius: 100px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green-main);
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+      opacity: 0;
+      animation: fadeUp 0.8s 0.2s forwards;
+    }
+    .hero-badge-dot {
+      width: 6px; height: 6px;
+      background: var(--green-light);
+      border-radius: 50%;
+      animation: pulse-dot 2s infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.8); }
+    }
+    .hero h1 {
+      font-family: var(--font-display);
+      font-size: clamp(48px, 6vw, 82px);
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -1px;
+      color: var(--ink);
+      margin-bottom: 24px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.35s forwards;
+    }
+    .hero h1 em {
+      font-style: italic;
+      color: var(--green-main);
+    }
+    .hero h1 .gold { color: var(--gold-main); }
+    .hero-sub {
+      font-size: 18px;
+      font-weight: 400;
+      line-height: 1.7;
+      color: var(--ink-light);
+      max-width: 520px;
+      margin-bottom: 44px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.5s forwards;
+    }
+    .hero-actions {
+      display: flex; align-items: center; gap: 16px;
+      flex-wrap: wrap;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.65s forwards;
+    }
+    .btn-hero-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 32px;
+      background: var(--green-main);
+      color: var(--white);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.3s cubic-bezier(0.23,1,0.32,1);
+      box-shadow: 0 4px 24px rgba(45,106,79,0.3);
+    }
+    .btn-hero-primary:hover {
+      background: var(--green-deep);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 40px rgba(45,106,79,0.4);
+    }
+    .btn-hero-primary svg { transition: transform 0.3s; }
+    .btn-hero-primary:hover svg { transform: translateX(4px); }
+    .btn-hero-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 28px;
+      background: transparent;
+      color: var(--ink-mid);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.25s;
+      border: 1.5px solid rgba(0,0,0,0.12);
+    }
+    .btn-hero-secondary:hover {
+      border-color: var(--green-main);
+      color: var(--green-main);
+      background: rgba(45,106,79,0.04);
+    }
+    .hero-trust {
+      margin-top: 56px;
+      display: flex; align-items: center; gap: 20px;
+      opacity: 0;
+      animation: fadeUp 0.9s 0.8s forwards;
+    }
+    .hero-trust-avatars {
+      display: flex;
+    }
+    .hero-trust-avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 2.5px solid var(--cream);
+      margin-left: -10px;
+      background: var(--green-mid);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+    }
+    .hero-trust-avatar:first-child { margin-left: 0; }
+    .hero-trust-text {
+      font-size: 13px;
+      color: var(--ink-light);
+      line-height: 1.4;
+    }
+    .hero-trust-text strong { color: var(--ink); }
+    .hero-visual {
+      position: absolute;
+      right: 60px; top: 50%;
+      transform: translateY(-50%);
+      width: 480px;
+      z-index: 2;
+      opacity: 0;
+      animation: slideLeft 1s 0.6s forwards;
+    }
+    @keyframes slideLeft {
+      from { opacity: 0; transform: translateY(-50%) translateX(40px); }
+      to { opacity: 1; transform: translateY(-50%) translateX(0); }
+    }
+    .hero-card {
+      background: var(--white);
+      border-radius: 20px;
+      box-shadow: var(--shadow-green);
+      padding: 28px;
+      border: 1px solid rgba(45,106,79,0.08);
+    }
+    .hero-card-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .hero-card-title {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ink);
+    }
+    .hero-card-badge {
+      padding: 4px 12px;
+      background: rgba(82,183,136,0.12);
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--green-light);
+    }
+    .hero-card-stat {
+      display: flex; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+    .hero-card-stat-item { flex: 1; }
+    .hero-card-stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--ink-light);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+    .hero-card-stat-value {
+      font-family: var(--font-display);
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+    .hero-card-stat-value.gold { color: var(--gold-main); }
+    .hero-card-bar {
+      height: 6px;
+      background: var(--cream-dark);
+      border-radius: 3px;
+      margin-bottom: 24px;
+      overflow: hidden;
+    }
+    .hero-card-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--green-main), var(--green-light));
+      width: 72%;
+      animation: barFill 2s 1.2s both;
+    }
+    @keyframes barFill {
+      from { width: 0; }
+      to { width: 72%; }
+    }
+    .hero-card-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+    .hero-card-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .hero-card-row-left {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .hero-card-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .dot-green { background: var(--green-light); }
+    .dot-gold { background: var(--gold-main); }
+    .dot-red { background: #e57373; }
+    .hero-card-row-name { font-size: 13px; color: var(--ink-mid); font-weight: 500; }
+    .hero-card-row-amount { font-size: 13px; font-weight: 600; color: var(--ink); font-family: var(--font-mono); }
+    .hero-card-float {
+      position: absolute;
+      background: var(--white);
+      border-radius: 14px;
+      padding: 14px 18px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      border: 1px solid rgba(45,106,79,0.08);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .float-1 {
+      bottom: -20px; left: -50px;
+      animation: floatCard1 6s ease-in-out infinite;
+    }
+    .float-2 {
+      top: -20px; right: -40px;
+      animation: floatCard2 7s ease-in-out infinite;
+    }
+    @keyframes floatCard1 {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-10px) rotate(-2deg); }
+    }
+    @keyframes floatCard2 {
+      0%, 100% { transform: translateY(0) rotate(2deg); }
+      50% { transform: translateY(10px) rotate(2deg); }
+    }
+    .float-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .float-icon.green { background: rgba(45,106,79,0.1); }
+    .float-icon.gold  { background: rgba(201,168,76,0.12); }
+    .float-text-label { font-size: 11px; color: var(--ink-light); }
+    .float-text-value { font-size: 15px; font-weight: 700; color: var(--ink); font-family: var(--font-mono); }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── LOGOS CLIENTS ─── */
+    .logos-section {
+      padding: 40px 60px;
+      border-top: 1px solid rgba(0,0,0,0.06);
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      background: var(--white);
+    }
+    .logos-label {
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-light);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 28px;
+    }
+    .logos-row {
+      display: flex; align-items: center; justify-content: center;
+      gap: 60px; flex-wrap: wrap;
+    }
+    .logo-item {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: rgba(0,0,0,0.2);
+      letter-spacing: -0.3px;
+      transition: color 0.3s;
+      cursor: default;
+    }
+    .logo-item:hover { color: var(--green-main); }
+
+    /* ─── SECTION HEADERS ─── */
+    .section-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--green-main);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .section-eyebrow::before {
+      content: '';
+      width: 24px; height: 2px;
+      background: var(--gold-main);
+    }
+    h2.section-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 4vw, 56px);
+      font-weight: 600;
+      line-height: 1.1;
+      letter-spacing: -0.5px;
+      color: var(--ink);
+      margin-bottom: 16px;
+    }
+    h2.section-title em { font-style: italic; color: var(--green-main); }
+    .section-desc {
+      font-size: 17px;
+      line-height: 1.7;
+      color: var(--ink-light);
+      max-width: 520px;
+    }
+
+    /* ─── PROBLÈME / SOLUTION ─── */
+    .problem-section {
+      padding: 100px 60px;
+      background: var(--ink);
+      position: relative;
+      overflow: hidden;
+    }
+    .problem-pattern {
+      position: absolute; inset: 0;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff'%3E%3Cpolygon points='30,0 60,30 30,60 0,30'/%3E%3C/g%3E%3C/svg%3E");
+      background-size: 60px 60px;
+    }
+    .problem-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 80px;
+      align-items: center;
+      position: relative; z-index: 1;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .problem-eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600;
+      color: var(--gold-main);
+      letter-spacing: 1.5px; text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .problem-eyebrow::before { content: ''; width: 24px; height: 2px; background: var(--gold-main); }
+    .problem-title {
+      font-family: var(--font-display);
+      font-size: clamp(32px, 3.5vw, 52px);
+      font-weight: 600;
+      line-height: 1.1;
+      color: var(--white);
+      margin-bottom: 24px;
+    }
+    .problem-title em { font-style: italic; color: var(--gold-main); }
+    .problem-text { font-size: 16px; line-height: 1.75; color: rgba(255,255,255,0.55); margin-bottom: 40px; }
+    .pain-list { list-style: none; }
+    .pain-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 16px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .pain-item:last-child { border-bottom: none; }
+    .pain-icon {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: rgba(255,255,255,0.06);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px;
+    }
+    .pain-text { font-size: 15px; color: rgba(255,255,255,0.65); line-height: 1.5; }
+    .pain-text strong { color: var(--white); display: block; margin-bottom: 2px; }
+    .solution-cards { display: flex; flex-direction: column; gap: 16px; }
+    .solution-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 24px;
+      transition: all 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+    .solution-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--green-main), var(--gold-main));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .solution-card:hover { background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15); }
+    .solution-card:hover::before { opacity: 1; }
+    .solution-card-icon {
+      width: 44px; height: 44px;
+      background: linear-gradient(135deg, var(--green-main), var(--green-mid));
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+    .solution-card-title { font-size: 16px; font-weight: 600; color: var(--white); margin-bottom: 6px; }
+    .solution-card-text { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.6; }
+
+    /* ─── FEATURES ─── */
+    .features-section {
+      padding: 100px 60px;
+      background: var(--cream);
+      max-width: 100%;
+    }
+    .features-header {
+      text-align: center; margin-bottom: 70px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .feature-card {
+      background: var(--white);
+      border-radius: var(--radius);
+      padding: 36px 32px;
+      border: 1px solid rgba(0,0,0,0.06);
+      transition: all 0.35s cubic-bezier(0.23,1,0.32,1);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--green-main), var(--green-light));
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.4s cubic-bezier(0.23,1,0.32,1);
+    }
+    .feature-card:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--shadow-green);
+      border-color: rgba(45,106,79,0.15);
+    }
+    .feature-card:hover::after { transform: scaleX(1); }
+    .feature-card.featured {
+      background: var(--green-main);
+      border-color: var(--green-main);
+      grid-row: span 2;
+    }
+    .feature-card.featured::after { background: var(--gold-main); }
+    .feature-icon {
+      width: 52px; height: 52px;
+      border-radius: 14px;
+      background: rgba(45,106,79,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+    .feature-card.featured .feature-icon { background: rgba(255,255,255,0.15); }
+    .feature-number {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--green-light);
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+    .feature-card.featured .feature-number { color: rgba(255,255,255,0.5); }
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .feature-card.featured .feature-title { color: var(--white); }
+    .feature-text {
+      font-size: 14px;
+      line-height: 1.7;
+      color: var(--ink-light);
+    }
+    .feature-card.featured .feature-text { color: rgba(255,255,255,0.65); }
+    .feature-tag {
+      display: inline-block;
+      margin-top: 16px;
+      padding: 4px 12px;
+      background: rgba(45,106,79,0.08);
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--green-main);
+      letter-spacing: 0.5px;
+    }
+    .feature-card.featured .feature-tag { background: rgba(255,255,255,0.15); color: var(--white); }
+
+    /* ─── STATS ─── */
+    .stats-section {
+      padding: 80px 60px;
+      background: linear-gradient(135deg, var(--green-deep) 0%, var(--green-main) 100%);
+      position: relative; overflow: hidden;
+    }
+    .stats-section::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='50' cy='50' r='40' fill='none' stroke='rgba(255,255,255,0.05)' stroke-width='1'/%3E%3Ccircle cx='50' cy='50' r='25' fill='none' stroke='rgba(255,255,255,0.03)' stroke-width='1'/%3E%3C/svg%3E");
+      background-size: 100px 100px;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 40px;
+      max-width: 1000px; margin: 0 auto;
+      position: relative; z-index: 1;
+    }
+    .stat-item { text-align: center; }
+    .stat-number {
+      font-family: var(--font-display);
+      font-size: 56px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .stat-number span { color: var(--gold-main); }
+    .stat-label {
+      font-size: 14px;
+      color: rgba(255,255,255,0.55);
+      line-height: 1.4;
+    }
+
+    /* ─── TÉMOIGNAGES ─── */
+    .testimonials-section {
+      padding: 100px 60px;
+      background: var(--white);
+    }
+    .testimonials-header { text-align: center; margin-bottom: 60px; }
+    .testimonials-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .testimonial-card {
+      background: var(--cream);
+      border-radius: var(--radius);
+      padding: 36px;
+      border: 1px solid rgba(0,0,0,0.05);
+      position: relative;
+      transition: all 0.3s;
+    }
+    .testimonial-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.08);
+    }
+    .testimonial-card.featured-t {
+      background: var(--green-main);
+      border-color: var(--green-main);
+    }
+    .testimonial-quote {
+      font-size: 48px;
+      line-height: 1;
+      color: var(--gold-main);
+      font-family: var(--font-display);
+      margin-bottom: 16px;
+      opacity: 0.6;
+    }
+    .testimonial-text {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 1.6;
+      color: var(--ink);
+      margin-bottom: 28px;
+    }
+    .testimonial-card.featured-t .testimonial-text { color: var(--white); }
+    .testimonial-stars { color: var(--gold-main); font-size: 14px; margin-bottom: 20px; letter-spacing: 2px; }
+    .testimonial-author { display: flex; align-items: center; gap: 14px; }
+    .testimonial-avatar {
+      width: 46px; height: 46px;
+      border-radius: 50%;
+      background: var(--green-main);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--white);
+      flex-shrink: 0;
+    }
+    .testimonial-card.featured-t .testimonial-avatar { background: rgba(255,255,255,0.2); }
+    .testimonial-name { font-size: 15px; font-weight: 600; color: var(--ink); }
+    .testimonial-card.featured-t .testimonial-name { color: var(--white); }
+    .testimonial-role { font-size: 13px; color: var(--ink-light); }
+    .testimonial-card.featured-t .testimonial-role { color: rgba(255,255,255,0.6); }
+
+    /* ─── PRICING ─── */
+    .pricing-section {
+      padding: 100px 60px;
+      background: var(--cream);
+    }
+    .pricing-header { text-align: center; margin-bottom: 60px; }
+    .pricing-toggle {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: var(--white);
+      border-radius: 100px;
+      padding: 6px;
+      border: 1px solid rgba(0,0,0,0.08);
+      margin: 0 auto 48px;
+      display: flex; width: fit-content; margin: 0 auto 48px;
+    }
+    .toggle-btn {
+      padding: 8px 20px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s;
+      border: none;
+      background: transparent;
+      color: var(--ink-light);
+    }
+    .toggle-btn.active {
+      background: var(--green-main);
+      color: var(--white);
+    }
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      max-width: 1100px; margin: 0 auto;
+      align-items: start;
+    }
+    .pricing-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 40px 36px;
+      border: 1.5px solid rgba(0,0,0,0.06);
+      position: relative;
+      transition: all 0.35s;
+    }
+    .pricing-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-green); }
+    .pricing-card.popular {
+      background: var(--green-main);
+      border-color: var(--green-main);
+      transform: scale(1.04);
+    }
+    .pricing-card.popular:hover { transform: scale(1.04) translateY(-6px); }
+    .pricing-badge {
+      position: absolute; top: -14px; left: 50%; transform: translateX(-50%);
+      padding: 6px 20px;
+      background: var(--gold-main);
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--ink);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .pricing-plan {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--green-main);
+      margin-bottom: 12px;
+    }
+    .pricing-card.popular .pricing-plan { color: rgba(255,255,255,0.7); }
+    .pricing-price {
+      font-family: var(--font-display);
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--ink);
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+    .pricing-card.popular .pricing-price { color: var(--white); }
+    .pricing-currency {
+      font-size: 20px;
+      vertical-align: super;
+      font-weight: 400;
+    }
+    .pricing-period {
+      font-size: 14px;
+      color: var(--ink-light);
+      margin-bottom: 28px;
+    }
+    .pricing-card.popular .pricing-period { color: rgba(255,255,255,0.55); }
+    .pricing-desc {
+      font-size: 14px;
+      color: var(--ink-light);
+      line-height: 1.6;
+      margin-bottom: 28px;
+      padding-bottom: 28px;
+      border-bottom: 1px solid rgba(0,0,0,0.07);
+    }
+    .pricing-card.popular .pricing-desc { color: rgba(255,255,255,0.6); border-color: rgba(255,255,255,0.12); }
+    .pricing-features { list-style: none; margin-bottom: 36px; }
+    .pricing-feature {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 8px 0;
+      font-size: 14px;
+      color: var(--ink-mid);
+      line-height: 1.4;
+    }
+    .pricing-card.popular .pricing-feature { color: rgba(255,255,255,0.8); }
+    .pricing-check {
+      width: 18px; height: 18px; flex-shrink: 0;
+      border-radius: 50%;
+      background: rgba(45,106,79,0.1);
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px;
+    }
+    .pricing-card.popular .pricing-check { background: rgba(255,255,255,0.2); }
+    .pricing-check::after {
+      content: '✓';
+      font-size: 10px;
+      color: var(--green-main);
+      font-weight: 700;
+    }
+    .pricing-card.popular .pricing-check::after { color: var(--white); }
+    .btn-pricing {
+      display: block;
+      text-align: center;
+      padding: 14px;
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+    .btn-pricing-outline {
+      border: 1.5px solid var(--green-main);
+      color: var(--green-main);
+    }
+    .btn-pricing-outline:hover { background: var(--green-main); color: var(--white); }
+    .btn-pricing-white {
+      background: var(--white);
+      color: var(--green-main);
+    }
+    .btn-pricing-white:hover { background: var(--gold-pale); }
+
+    /* ─── CTA FINAL ─── */
+    .cta-section {
+      padding: 100px 60px;
+      background: var(--ink);
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: '';
+      position: absolute;
+      width: 800px; height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(45,106,79,0.2) 0%, transparent 70%);
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .cta-content { position: relative; z-index: 1; max-width: 700px; margin: 0 auto; }
+    .cta-title {
+      font-family: var(--font-display);
+      font-size: clamp(40px, 5vw, 70px);
+      font-weight: 600;
+      color: var(--white);
+      line-height: 1.08;
+      letter-spacing: -0.5px;
+      margin-bottom: 20px;
+    }
+    .cta-title em { font-style: italic; color: var(--gold-main); }
+    .cta-sub { font-size: 17px; color: rgba(255,255,255,0.5); margin-bottom: 44px; line-height: 1.6; }
+    .cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .btn-cta-primary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 18px 36px;
+      background: var(--gold-main);
+      color: var(--ink);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all 0.3s;
+    }
+    .btn-cta-primary:hover {
+      background: var(--gold-light);
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-gold);
+    }
+    .btn-cta-secondary {
+      display: inline-flex; align-items: center; gap: 10px;
+      padding: 18px 32px;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      color: var(--white);
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+    .btn-cta-secondary:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.05); }
+
+    /* ─── FOOTER ─── */
+    footer {
+      background: var(--green-deep);
+      padding: 60px 60px 32px;
+    }
+    .footer-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
+      gap: 60px;
+      margin-bottom: 48px;
+    }
+    .footer-brand-name {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--white);
+      margin-bottom: 12px;
+    }
+    .footer-brand-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.4);
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+    .footer-social { display: flex; gap: 12px; }
+    .footer-social-btn {
+      width: 36px; height: 36px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.08);
+      display: flex; align-items: center; justify-content: center;
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      text-decoration: none;
+      transition: all 0.25s;
+    }
+    .footer-social-btn:hover { background: var(--green-main); color: var(--white); }
+    .footer-col-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+    .footer-links { list-style: none; }
+    .footer-links li { margin-bottom: 10px; }
+    .footer-links a {
+      font-size: 14px;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      transition: color 0.25s;
+    }
+    .footer-links a:hover { color: var(--white); }
+    .footer-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .footer-copy { font-size: 13px; color: rgba(255,255,255,0.3); }
+    .footer-legal { display: flex; gap: 24px; }
+    .footer-legal a { font-size: 13px; color: rgba(255,255,255,0.3); text-decoration: none; }
+    .footer-legal a:hover { color: rgba(255,255,255,0.6); }
+    .footer-flag { font-size: 18px; }
+
+    /* ─── REVEAL ANIMATION ─── */
+    .reveal { opacity: 0; transform: translateY(30px); transition: all 0.7s cubic-bezier(0.23,1,0.32,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .reveal-delay-1 { transition-delay: 0.1s; }
+    .reveal-delay-2 { transition-delay: 0.2s; }
+    .reveal-delay-3 { transition-delay: 0.3s; }
+    .reveal-delay-4 { transition-delay: 0.4s; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1100px) {
+      .hero-visual { display: none; }
+      .hero-content { max-width: 100%; }
+      .features-grid { grid-template-columns: repeat(2, 1fr); }
+      .features-grid .feature-card.featured { grid-row: auto; }
+      .testimonials-grid { grid-template-columns: 1fr 1fr; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 480px; }
+      .pricing-card.popular { transform: scale(1); }
+      .pricing-card.popular:hover { transform: translateY(-6px); }
+      .footer-grid { grid-template-columns: 1fr 1fr; gap: 40px; }
+    }
+    @media (max-width: 768px) {
+      nav { padding: 16px 24px; }
+      nav.scrolled { padding: 12px 24px; }
+      .nav-links, .nav-cta { display: none; }
+      .hero { padding: 100px 24px 60px; }
+      .logos-section { padding: 32px 24px; }
+      .logos-row { gap: 32px; }
+      .problem-section, .features-section, .testimonials-section,
+      .pricing-section, .cta-section { padding: 70px 24px; }
+      .stats-section { padding: 60px 24px; }
+      .problem-grid { grid-template-columns: 1fr; gap: 48px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 32px; }
+      .testimonials-grid { grid-template-columns: 1fr; }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
+      footer { padding: 48px 24px 24px; }
+      .footer-bottom { flex-direction: column; gap: 16px; text-align: center; }
+      .hero-trust { flex-direction: column; align-items: flex-start; gap: 12px; }
+      body { cursor: auto; }
+      .cursor, .cursor-ring { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ─── NAVBAR ─── -->
+<nav id="navbar">
+  <a href="#" class="nav-logo">
+    <div class="nav-logo-mark"></div>
+    <span class="nav-logo-text">Prop<span>Afric</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#fonctionnalites">Fonctionnalités</a></li>
+    <li><a href="#temoignages">Témoignages</a></li>
+    <li><a href="#tarifs">Tarifs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a href="#" class="btn-outline">Se connecter</a>
+    <a href="#contact" class="btn-primary">Demander une démo</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-pattern"></div>
+  <div class="hero-blob-1"></div>
+  <div class="hero-blob-2"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Nouveau — Gestion Locative SaaS
+    </div>
+    <h1>
+      Gérez vos biens<br>
+      locatifs avec <em>élégance</em><br>
+      <span class="gold">en Afrique.</span>
+    </h1>
+    <p class="hero-sub">
+      PropAfric centralise la gestion locative de votre agence — baux, loyers, quittances, relevés propriétaires et bien plus. Conçu pour l'Afrique de l'Ouest, pensé pour vos clients.
+    </p>
+    <div class="hero-actions">
+      <a href="#contact" class="btn-hero-primary">
+        Démarrer gratuitement
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#fonctionnalites" class="btn-hero-secondary">
+        <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M10 8l6 4-6 4V8z" fill="currentColor" stroke="none"/></svg>
+        Voir la démo
+      </a>
+    </div>
+    <div class="hero-trust">
+      <div class="hero-trust-avatars">
+        <div class="hero-trust-avatar" style="background:#2d6a4f">AK</div>
+        <div class="hero-trust-avatar" style="background:#3d8b6a">MD</div>
+        <div class="hero-trust-avatar" style="background:#52b788">IF</div>
+        <div class="hero-trust-avatar" style="background:#c9a84c">SO</div>
+      </div>
+      <div class="hero-trust-text">
+        <strong>+50 agences</strong> font confiance à PropAfric<br>
+        au Sénégal et en Afrique de l'Ouest
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard preview card -->
+  <div class="hero-visual">
+    <div style="position:relative">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <span class="hero-card-title">Tableau de bord — Mars 2026</span>
+          <span class="hero-card-badge">● En direct</span>
+        </div>
+        <div class="hero-card-stat">
+          <div class="hero-card-stat-item">
+            <div class="hero-card-stat-label">Loyers collectés</div>
+            <div class="hero-card-stat-value">5,2M</div>
+          </div>
+          <div class="hero-card-stat-item">
+            <div class="hero-card-stat-label">Taux de collecte</div>
+            <div class="hero-card-stat-value gold">87%</div>
+          </div>
+          <div class="hero-card-stat-item">
+            <div class="hero-card-stat-label">Biens actifs</div>
+            <div class="hero-card-stat-value">124</div>
+          </div>
+        </div>
+        <div class="hero-card-bar"><div class="hero-card-bar-fill"></div></div>
+        <div class="hero-card-row">
+          <div class="hero-card-row-left">
+            <div class="hero-card-dot dot-green"></div>
+            <div class="hero-card-row-name">Almadies — Apt. RDC</div>
+          </div>
+          <div class="hero-card-row-amount">215 260 F</div>
+        </div>
+        <div class="hero-card-row">
+          <div class="hero-card-row-left">
+            <div class="hero-card-dot dot-green"></div>
+            <div class="hero-card-row-name">Plateau — Villa duplex</div>
+          </div>
+          <div class="hero-card-row-amount">380 000 F</div>
+        </div>
+        <div class="hero-card-row">
+          <div class="hero-card-row-left">
+            <div class="hero-card-dot dot-gold"></div>
+            <div class="hero-card-row-name">Mermoz — Bureau S3</div>
+          </div>
+          <div class="hero-card-row-amount">480 000 F</div>
+        </div>
+        <div class="hero-card-row">
+          <div class="hero-card-row-left">
+            <div class="hero-card-dot dot-red"></div>
+            <div class="hero-card-row-name">Ouakam — Apt. F4</div>
+          </div>
+          <div class="hero-card-row-amount" style="color:#e57373">En retard</div>
+        </div>
+      </div>
+
+      <!-- Floating cards -->
+      <div class="hero-card-float float-1">
+        <div class="float-icon green">📄</div>
+        <div>
+          <div class="float-text-label">Quittance générée</div>
+          <div class="float-text-value">QUIT-2026-087</div>
+        </div>
+      </div>
+      <div class="hero-card-float float-2">
+        <div class="float-icon gold">💰</div>
+        <div>
+          <div class="float-text-label">Net propriétaire</div>
+          <div class="float-text-value">183 000 F</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── LOGOS ─── -->
+<div class="logos-section">
+  <div class="logos-label">Ils nous font confiance</div>
+  <div class="logos-row">
+    <div class="logo-item">Citron Vert Immo</div>
+    <div class="logo-item">Zénith Immobilier</div>
+    <div class="logo-item">Dakar Habitat</div>
+    <div class="logo-item">Prestige Realty</div>
+    <div class="logo-item">West Africa Properties</div>
+  </div>
+</div>
+
+<!-- ─── PROBLÈME / SOLUTION ─── -->
+<section class="problem-section">
+  <div class="problem-pattern"></div>
+  <div class="problem-grid">
+    <div>
+      <div class="problem-eyebrow">Le constat</div>
+      <h2 class="problem-title">La gestion locative<br><em>manuelle, c'est fini.</em></h2>
+      <p class="problem-text">
+        Les agences immobilières africaines perdent des heures chaque semaine sur des tâches qui pourraient être automatisées. Erreurs de calcul, quittances perdues, propriétaires insatisfaits.
+      </p>
+      <ul class="pain-list">
+        <li class="pain-item reveal">
+          <div class="pain-icon">📋</div>
+          <div class="pain-text">
+            <strong>Baux gérés sur papier ou Excel</strong>
+            Risques d'erreurs, révisions oubliées, pas de traçabilité.
+          </div>
+        </li>
+        <li class="pain-item reveal reveal-delay-1">
+          <div class="pain-icon">💸</div>
+          <div class="pain-text">
+            <strong>Calcul TOM et TVA manuel</strong>
+            Erreurs fréquentes sur les 3,6% et la TVA 18% sur frais de gestion.
+          </div>
+        </li>
+        <li class="pain-item reveal reveal-delay-2">
+          <div class="pain-icon">📞</div>
+          <div class="pain-text">
+            <strong>Propriétaires qui appellent tout le temps</strong>
+            Sans portail dédié, ils ne savent pas ce qui se passe avec leurs biens.
+          </div>
+        </li>
+        <li class="pain-item reveal reveal-delay-3">
+          <div class="pain-icon">⏰</div>
+          <div class="pain-text">
+            <strong>Relances loyers chronophages</strong>
+            Sans automatisation, chaque impayé demande une intervention manuelle.
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="solution-cards">
+      <div class="solution-card reveal">
+        <div class="solution-card-icon">⚡</div>
+        <div class="solution-card-title">Automatisation complète</div>
+        <div class="solution-card-text">Génération automatique des échéances, rappels par SMS, quittances PDF en un clic. Zéro saisie répétitive.</div>
+      </div>
+      <div class="solution-card reveal reveal-delay-1">
+        <div class="solution-card-icon">🧮</div>
+        <div class="solution-card-title">Calculs conformes OHADA</div>
+        <div class="solution-card-text">TOM, TVA sur frais de gestion, révision triennale selon indice ANSD — tout est calculé automatiquement et sans erreur.</div>
+      </div>
+      <div class="solution-card reveal reveal-delay-2">
+        <div class="solution-card-icon">👥</div>
+        <div class="solution-card-title">Portails propriétaires & locataires</div>
+        <div class="solution-card-text">Chaque propriétaire et locataire accède à son espace personnel. Relevés, quittances, baux — disponibles 24h/24.</div>
+      </div>
+      <div class="solution-card reveal reveal-delay-3">
+        <div class="solution-card-icon">📊</div>
+        <div class="solution-card-title">Tableaux de bord en temps réel</div>
+        <div class="solution-card-text">Taux d'occupation, collecte mensuelle, alertes retards — votre agence pilotée par la donnée, pas par l'intuition.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FONCTIONNALITÉS ─── -->
+<section class="features-section" id="fonctionnalites">
+  <div class="features-header reveal">
+    <div class="section-eyebrow">Fonctionnalités</div>
+    <h2 class="section-title">Tout ce dont votre<br>agence a <em>besoin</em></h2>
+    <p class="section-desc" style="margin:0 auto">Une plateforme pensée pour les réalités du marché immobilier africain — de Dakar à Abidjan.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card featured reveal">
+      <div class="feature-icon">🏘️</div>
+      <div class="feature-number">01</div>
+      <div class="feature-title">Gestion complète des baux</div>
+      <p class="feature-text" style="margin-bottom:16px">
+        Créez vos contrats en quelques minutes. Loyer de base avec postes dynamiques, TOM automatique, frais de gestion TTC, dépôt de garantie, révision triennale selon l'indice ANSD.
+      </p>
+      <p class="feature-text">
+        Génération du contrat de bail en PDF, prêt à signer. Historique complet de toutes les révisions.
+      </p>
+      <span class="feature-tag">⭐ Fonctionnalité phare</span>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-icon">🧾</div>
+      <div class="feature-number">02</div>
+      <div class="feature-title">Quittances PDF automatiques</div>
+      <p class="feature-text">Quittance générée et envoyée automatiquement à chaque paiement. Wave, Orange Money, Free Money, virement — tous les modes acceptés.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-icon">📊</div>
+      <div class="feature-number">03</div>
+      <div class="feature-title">Relevés propriétaires</div>
+      <p class="feature-text">Relevé mensuel avec décompte net propriétaire : loyers − TOM − frais de gestion − dépenses − frais d'envoi + avoir mois précédent.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">🔔</div>
+      <div class="feature-number">04</div>
+      <div class="feature-title">Alertes & rappels automatiques</div>
+      <p class="feature-text">Rappels loyers J-3, alertes retards, fin de bail 30/7 jours, révision triennale 60 jours, assurance locataire expirée.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-icon">🏢</div>
+      <div class="feature-number">05</div>
+      <div class="feature-title">Multi-agences & multi-biens</div>
+      <p class="feature-text">Architecture multi-tenant — chaque agence a son espace isolé. Immeubles avec gestion d'unités individuelles.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-icon">📱</div>
+      <div class="feature-number">06</div>
+      <div class="feature-title">Portails dédiés</div>
+      <p class="feature-text">Portail propriétaire pour consulter biens, relevés et dépenses. Portail locataire pour bails, échéances et quittances.</p>
+    </div>
+    <div class="feature-card reveal">
+      <div class="feature-icon">💼</div>
+      <div class="feature-number">07</div>
+      <div class="feature-title">Gestion des dépenses</div>
+      <p class="feature-text">Travaux, entretien, assurance — chaque dépense liée à un bien et imputée automatiquement au propriétaire si nécessaire.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-icon">📥</div>
+      <div class="feature-number">08</div>
+      <div class="feature-title">Exports Excel & PDF</div>
+      <p class="feature-text">Exportez baux, paiements, échéances, dépenses et propriétaires en Excel formaté. Contrats de bail en PDF signables.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STATS ─── -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-item reveal">
+      <div class="stat-number">50<span>+</span></div>
+      <div class="stat-label">Agences actives<br>au Sénégal & Afrique de l'Ouest</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-1">
+      <div class="stat-number">2<span>K+</span></div>
+      <div class="stat-label">Baux gérés<br>sur la plateforme</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-2">
+      <div class="stat-number">98<span>%</span></div>
+      <div class="stat-label">Taux de satisfaction<br>client</div>
+    </div>
+    <div class="stat-item reveal reveal-delay-3">
+      <div class="stat-number">5<span>h</span></div>
+      <div class="stat-label">Économisées par semaine<br>par agence en moyenne</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TÉMOIGNAGES ─── -->
+<section class="testimonials-section" id="temoignages">
+  <div class="testimonials-header reveal">
+    <div class="section-eyebrow">Témoignages</div>
+    <h2 class="section-title">Ce que disent nos <em>clients</em></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="testimonial-card reveal">
+      <div class="testimonial-quote">"</div>
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">PropAfric a transformé notre façon de gérer nos 80 biens. Les relevés propriétaires qu'on faisait à la main en 3 jours, maintenant c'est 10 minutes.</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">AK</div>
+        <div>
+          <div class="testimonial-name">Amadou Kane</div>
+          <div class="testimonial-role">Directeur — Citron Vert Immobilier, Dakar</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card featured-t reveal reveal-delay-1">
+      <div class="testimonial-quote">"</div>
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">Le portail propriétaire, c'est ce qui nous a fait choisir PropAfric. Nos clients ne nous appellent plus pour savoir où en sont leurs loyers. Ils consultent eux-mêmes.</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">MI</div>
+        <div>
+          <div class="testimonial-name">Mariama Isabelle Diallo</div>
+          <div class="testimonial-role">Gérante — Prestige Realty, Dakar</div>
+        </div>
+      </div>
+    </div>
+    <div class="testimonial-card reveal reveal-delay-2">
+      <div class="testimonial-quote">"</div>
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">La gestion des TOM et de la TVA sur les frais de gestion était notre casse-tête. Avec PropAfric, tout est calculé automatiquement. Zéro erreur depuis 6 mois.</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">DT</div>
+        <div>
+          <div class="testimonial-name">Djim Thiam</div>
+          <div class="testimonial-role">Fondateur —  ImmoAfric, Dakar</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ─── -->
+<section class="pricing-section" id="tarifs">
+  <div class="pricing-header reveal">
+    <div class="section-eyebrow">Tarifs</div>
+    <h2 class="section-title">Simple, <em>transparent</em>,<br>sans surprise</h2>
+    <p class="section-desc" style="margin:16px auto 32px">Tous les plans incluent les mises à jour, le support et la migration de vos données.</p>
+    <div class="pricing-toggle">
+      <button class="toggle-btn active" onclick="setToggle(this, 'mensuel')">Mensuel</button>
+      <button class="toggle-btn" onclick="setToggle(this, 'annuel')">Annuel <span style="color:var(--green-main);font-size:11px">-20%</span></button>
+    </div>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card reveal">
+      <div class="pricing-plan">Starter</div>
+      <div class="pricing-price">
+        <span class="pricing-currency">F</span>
+        <span class="price-val" data-mensuel="25 000" data-annuel="20 000">25 000</span>
+      </div>
+      <div class="pricing-period">FCFA / mois · jusqu'à 20 biens</div>
+      <div class="pricing-desc">Idéal pour les petites agences qui démarrent leur digitalisation.</div>
+      <ul class="pricing-features">
+        <li class="pricing-feature"><span class="pricing-check"></span>Jusqu'à 20 biens</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Baux + échéances + paiements</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Quittances PDF automatiques</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Portail locataire</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>1 utilisateur agence</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Support email</li>
+      </ul>
+      <a href="#contact" class="btn-pricing btn-pricing-outline">Commencer</a>
+    </div>
+    <div class="pricing-card popular reveal reveal-delay-1">
+      <div class="pricing-badge">Le plus populaire</div>
+      <div class="pricing-plan">Professionnel</div>
+      <div class="pricing-price">
+        <span class="pricing-currency">F</span>
+        <span class="price-val" data-mensuel="55 000" data-annuel="44 000">55 000</span>
+      </div>
+      <div class="pricing-period">FCFA / mois · jusqu'à 100 biens</div>
+      <div class="pricing-desc">Pour les agences en croissance qui veulent tout gérer depuis une seule plateforme.</div>
+      <ul class="pricing-features">
+        <li class="pricing-feature"><span class="pricing-check"></span>Jusqu'à 100 biens</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Tout le plan Starter</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Relevés propriétaires PDF</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Portail propriétaire</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Exports Excel (5 types)</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Gestion dépenses & prestataires</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>5 utilisateurs agence</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Support prioritaire</li>
+      </ul>
+      <a href="#contact" class="btn-pricing btn-pricing-white">Commencer</a>
+    </div>
+    <div class="pricing-card reveal reveal-delay-2">
+      <div class="pricing-plan">Entreprise</div>
+      <div class="pricing-price">
+        <span class="pricing-currency"></span>
+        <span style="font-size:36px">Sur mesure</span>
+      </div>
+      <div class="pricing-period">Biens illimités · Multi-agences</div>
+      <div class="pricing-desc">Pour les grands groupes immobiliers et les réseaux d'agences en Afrique de l'Ouest.</div>
+      <ul class="pricing-features">
+        <li class="pricing-feature"><span class="pricing-check"></span>Biens illimités</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Tout le plan Professionnel</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Multi-agences (réseau)</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>API access</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Intégration NabooPay/Wave</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>Onboarding dédié</li>
+        <li class="pricing-feature"><span class="pricing-check"></span>SLA garanti</li>
+      </ul>
+      <a href="#contact" class="btn-pricing btn-pricing-outline">Nous contacter</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA FINAL ─── -->
+<section class="cta-section" id="contact">
+  <div class="cta-content">
+    <div class="section-eyebrow" style="justify-content:center;color:var(--gold-main)">Prêt à démarrer ?</div>
+    <h2 class="cta-title">Votre agence mérite<br>le <em>meilleur</em> outil.</h2>
+    <p class="cta-sub">Rejoignez les agences immobilières d'Afrique de l'Ouest qui ont déjà digitalisé leur gestion locative avec PropAfric. Démo gratuite, migration offerte.</p>
+    <div class="cta-actions">
+      <a href="mailto:contact@propafric.com" class="btn-cta-primary">
+        Demander une démo gratuite
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="tel:+221000000000" class="btn-cta-secondary">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.64 3.42 2 2 0 013.6 1.26h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 8.96a16 16 0 006.08 6.08l.96-.96a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        Appeler l'équipe
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-name">PropAfric</div>
+      <div class="footer-brand-desc">
+        La plateforme de gestion locative conçue pour les agences immobilières d'Afrique de l'Ouest. Simple, puissant, conforme aux réalités du marché.
+      </div>
+      <div class="footer-social">
+        <a href="#" class="footer-social-btn">in</a>
+        <a href="#" class="footer-social-btn">𝕏</a>
+        <a href="#" class="footer-social-btn">fb</a>
+        <a href="#" class="footer-social-btn">▶</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Produit</div>
+      <ul class="footer-links">
+        <li><a href="#">Fonctionnalités</a></li>
+        <li><a href="#">Tarifs</a></li>
+        <li><a href="#">Nouveautés</a></li>
+        <li><a href="#">Roadmap</a></li>
+        <li><a href="#">API</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Agences</div>
+      <ul class="footer-links">
+        <li><a href="#">Démo gratuite</a></li>
+        <li><a href="#">Migration données</a></li>
+        <li><a href="#">Formation</a></li>
+        <li><a href="#">Partenaires</a></li>
+        <li><a href="#">Témoignages</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Entreprise</div>
+      <ul class="footer-links">
+        <li><a href="#">À propos</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Carrières</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Presse</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">
+      © 2026 PropAfric — Gestion Locative Intelligente pour l'Afrique
+      <span class="footer-flag" style="margin-left:8px">🇸🇳</span>
+    </div>
+    <div class="footer-legal">
+      <a href="#">Confidentialité</a>
+      <a href="#">CGU</a>
+      <a href="#">Mentions légales</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // ─── Custom Cursor ───
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mouseX = 0, mouseY = 0;
+  let ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursor.style.transform = `translate(${mouseX - 6}px, ${mouseY - 6}px)`;
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX - 18) * 0.12;
+    ringY += (mouseY - ringY - 18) * 0.12;
+    ring.style.transform = `translate(${ringX}px, ${ringY}px)`;
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button, .feature-card, .solution-card, .pricing-card').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+  });
+
+  // ─── Navbar scroll ───
+  const navbar = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    navbar.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // ─── Scroll reveal ───
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  revealEls.forEach(el => observer.observe(el));
+
+  // ─── Pricing toggle ───
+  let currentMode = 'mensuel';
+  function setToggle(btn, mode) {
+    currentMode = mode;
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.price-val').forEach(el => {
+      el.textContent = el.dataset[mode];
+    });
+  }
+
+  // ─── Counter animation ───
+  function animateCounter(el, target, suffix = '') {
+    const start = 0;
+    const duration = 2000;
+    const startTime = performance.now();
+    function update(currentTime) {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(eased * target) + suffix;
+      if (progress < 1) requestAnimationFrame(update);
+    }
+    requestAnimationFrame(update);
+  }
+
+  const statsObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const numbers = entry.target.querySelectorAll('.stat-number');
+        numbers[0]?.querySelector('span') && animateCounter(numbers[0], 50, '+');
+        statsObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.5 });
+
+  const statsSection = document.querySelector('.stats-section');
+  if (statsSection) statsObserver.observe(statsSection);
+</script>
+</body>
+</html>
