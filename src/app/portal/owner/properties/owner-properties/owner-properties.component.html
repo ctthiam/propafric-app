@@ -1,0 +1,63 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mes biens</h1>
+    <p class="page-subtitle">{{ properties().length }} bien(s) dans votre patrimoine</p>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher un bien…" (input)="onSearch($event)" />
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="props-grid">
+    @for (i of [1,2,3]; track i) { <p-skeleton height="220px" borderRadius="16px" /> }
+  </div>
+} @else {
+  <div class="props-grid">
+    @if (filteredProperties().length === 0) {
+      <div class="empty-state"><i class="pi pi-building"></i><p>Aucun bien trouvé</p></div>
+    }
+    @for (p of filteredProperties(); track p.id) {
+      <div class="prop-card">
+        <div class="prop-card-header">
+          <div>
+            <div class="prop-ref">{{ p.reference }}</div>
+            <div class="prop-name">{{ p.name }}</div>
+            <div class="prop-address">{{ p.address }}, {{ p.city }}</div>
+          </div>
+          <span class="badge {{ statusClass(p.status) }}">{{ statusLabel(p.status) }}</span>
+        </div>
+
+        <div class="prop-meta">
+          <div class="meta-item"><i class="pi pi-tag"></i><span>{{ typeLabel(p.type) }}</span></div>
+          @if (p.surface) { <div class="meta-item"><i class="pi pi-expand"></i><span>{{ p.surface }} m²</span></div> }
+          @if (p.rooms) { <div class="meta-item"><i class="pi pi-th-large"></i><span>{{ p.rooms }} pièces</span></div> }
+        </div>
+
+        <div class="prop-card-footer">
+          @if (p.current_tenant) {
+            <div class="tenant-info">
+              <div class="tenant-avatar">{{ p.current_tenant.full_name[0] }}</div>
+              <div>
+                <div class="tenant-name">{{ p.current_tenant.full_name }}</div>
+                <div class="tenant-phone">{{ p.current_tenant.phone }}</div>
+              </div>
+            </div>
+          } @else {
+            <div class="vacant-badge"><i class="pi pi-home"></i> Vacant</div>
+          }
+          @if (p.active_lease) {
+            <div class="lease-info">
+              <div class="lease-rent">{{ formatCurrency(p.active_lease.total_rent) }}<span>/mois</span></div>
+              <div class="lease-ref">{{ p.active_lease.reference }}</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

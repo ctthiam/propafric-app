@@ -1,0 +1,70 @@
+<p-toast position="top-right" />
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mes quittances</h1>
+    <p class="page-subtitle">Téléchargez vos preuves de paiement</p>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher une quittance…" (input)="onSearch($event)" />
+  </div>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3]; track i) {
+        <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
+      }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>N° Quittance</th>
+            <th>Période</th>
+            <th>Montant</th>
+            <th>Date paiement</th>
+            <th>Mode</th>
+            <th style="width:120px; text-align:center">Télécharger</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredReceipts().length === 0) {
+            <tr>
+              <td colspan="6" class="empty-row">
+                <i class="pi pi-file-pdf" style="font-size:24px; color:#4a6357; margin-bottom:8px; display:block"></i>
+                Aucune quittance disponible
+              </td>
+            </tr>
+          }
+          @for (r of filteredReceipts(); track r.id) {
+            <tr>
+              <td><span class="badge badge-ref">{{ r.receipt_number }}</span></td>
+              <td class="td-muted">{{ r.period_label ?? '—' }}</td>
+              <td class="td-amount">{{ formatCurrency(r.amount) }}</td>
+              <td class="td-muted">{{ formatDate(r.payment_date) }}</td>
+              <td><span class="badge badge-method">{{ methodLabel(r.payment_method) }}</span></td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-download" (click)="download(r)" [disabled]="isDownloading(r.id)">
+                    @if (isDownloading(r.id)) {
+                      <i class="pi pi-spin pi-spinner"></i> Téléchargement…
+                    } @else {
+                      <i class="pi pi-download"></i> PDF
+                    }
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

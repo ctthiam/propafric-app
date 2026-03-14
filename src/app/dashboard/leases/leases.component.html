@@ -1,1 +1,227 @@
-<p>leases works!</p>
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div class="confirm-msg" [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Baux</h1>
+    <p class="page-subtitle">{{ leases().length }} bail(s) enregistré(s)</p>
+  </div>
+  <button class="btn-primary" (click)="openCreate()">
+    <i class="pi pi-plus"></i> Nouveau bail
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Référence, locataire, bien…" (input)="onSearch($event)" />
+  </div>
+  <select class="filter-select" (change)="onFilterStatus($any($event.target).value)">
+    @for (opt of statusFilterOptions; track opt.value) {
+      <option [value]="opt.value">{{ opt.label }}</option>
+    }
+  </select>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3,4,5]; track i) {
+        <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
+      }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Locataire</th>
+            <th>Bien</th>
+            <th>Loyer total</th>
+            <th>Début</th>
+            <th>Fin</th>
+            <th>Statut</th>
+            <th style="width:110px; text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredLeases().length === 0) {
+            <tr>
+              <td colspan="8" class="empty-row">
+                <div class="empty-state-inline">
+                  <i class="pi pi-file"></i><span>Aucun bail trouvé</span>
+                </div>
+              </td>
+            </tr>
+          }
+          @for (lease of filteredLeases(); track lease.id) {
+            <tr>
+              <td><span class="badge badge-ref">{{ lease.reference }}</span></td>
+              <td>
+                <div class="lease-tenant">
+                  <div class="tenant-dot"></div>
+                  <div>
+                    <div class="td-name">{{ lease.tenant?.full_name ?? '—' }}</div>
+                    <div class="td-muted-sm">{{ lease.tenant?.phone }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="td-name">{{ lease.property?.name ?? '—' }}</div>
+                <div class="td-muted-sm">{{ lease.property?.address }}</div>
+              </td>
+              <td class="td-amount">{{ formatCurrency(lease.total_rent) }}</td>
+              <td class="td-muted">{{ formatDateDisplay(lease.start_date) }}</td>
+              <td class="td-muted">{{ lease.end_date ? formatDateDisplay(lease.end_date) : 'CDI' }}</td>
+              <td>
+                <span class="badge {{ statusClass(lease.status) }}">{{ statusLabel(lease.status) }}</span>
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-edit" (click)="openEdit(lease)" pTooltip="Modifier" tooltipPosition="top">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  @if (lease.status === 'active') {
+                    <button class="btn-icon btn-warn" (click)="confirmTerminate(lease)" pTooltip="Résilier" tooltipPosition="top">
+                      <i class="pi pi-times-circle"></i>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ─── DRAWER CUSTOM ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingLease() ? 'Modifier le bail' : 'Nouveau bail' }}</div>
+        @if (editingLease()) {
+          <div class="drawer-sub">{{ editingLease()!.reference }}</div>
+        }
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
+
+        <div class="form-section-title">Parties</div>
+        <div class="form-group">
+          <label>Bien <span class="req">*</span></label>
+          <p-dropdown formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" [filter]="true" styleClass="w-full" />
+          @if (form.get('property_id')?.invalid && form.get('property_id')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Locataire <span class="req">*</span></label>
+          <p-dropdown formControlName="tenant_id" [options]="tenantOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un locataire" [filter]="true" styleClass="w-full" />
+          @if (form.get('tenant_id')?.invalid && form.get('tenant_id')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <div class="form-section-title">Durée</div>
+        <div class="form-group form-group-check">
+          <p-checkbox formControlName="is_open_ended" [binary]="true" inputId="open_ended" />
+          <label for="open_ended" class="check-label">Bail à durée indéterminée (CDI)</label>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Date de début <span class="req">*</span></label>
+            <p-calendar formControlName="start_date" dateFormat="dd/mm/yy" placeholder="01/01/2025" [showIcon]="true" styleClass="w-full" />
+            @if (form.get('start_date')?.invalid && form.get('start_date')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          @if (!isOpenEnded) {
+            <div class="form-group">
+              <label>Date de fin <span class="req">*</span></label>
+              <p-calendar formControlName="end_date" dateFormat="dd/mm/yy" placeholder="31/12/2025" [showIcon]="true" styleClass="w-full" />
+            </div>
+          }
+        </div>
+        <div class="form-group">
+          <label>Jour de paiement</label>
+          <p-dropdown formControlName="payment_day" [options]="paymentDayOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+        </div>
+
+        <div class="form-section-title">Loyer & charges</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Loyer de base (F CFA) <span class="req">*</span></label>
+            <p-inputNumber formControlName="rent_amount" placeholder="150 000" [min]="0" locale="fr-SN" styleClass="w-full" />
+            @if (form.get('rent_amount')?.invalid && form.get('rent_amount')?.touched) {
+              <span class="form-error">Minimum 1</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Charges (F CFA)</label>
+            <p-inputNumber formControlName="charges" placeholder="10 000" [min]="0" locale="fr-SN" styleClass="w-full" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Dépôt de garantie (F CFA)</label>
+          <p-inputNumber formControlName="deposit" placeholder="0" [min]="0" locale="fr-SN" styleClass="w-full" />
+        </div>
+
+        <div class="form-section-title">Taux fiscaux</div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label>TOM (%)</label>
+            <p-inputNumber formControlName="tom_rate" [minFractionDigits]="1" [min]="0" [max]="100" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>TVA (%)</label>
+            <p-inputNumber formControlName="vat_rate" [min]="0" [max]="100" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>Taxe (%)</label>
+            <p-inputNumber formControlName="tax_rate" [min]="0" [max]="100" styleClass="w-full" />
+          </div>
+        </div>
+
+        <div class="calc-box">
+          <div class="calc-title">Récapitulatif mensuel</div>
+          <div class="calc-row"><span>Loyer de base</span><strong>{{ formatCurrency(calcRent()) }}</strong></div>
+          <div class="calc-row"><span>Charges</span><strong>{{ formatCurrency(calcCharges()) }}</strong></div>
+          <div class="calc-row"><span>TOM ({{ calcTomRate() }}%)</span><strong>{{ formatCurrency(calcTom()) }}</strong></div>
+          <div class="calc-row"><span>TVA sur TOM ({{ calcVatRate() }}%)</span><strong>{{ formatCurrency(calcVat()) }}</strong></div>
+          <div class="calc-row calc-row-deduct"><span>Taxe déductible ({{ calcTaxRate() }}%)</span><strong>- {{ formatCurrency(calcTax()) }}</strong></div>
+          <div class="calc-divider"></div>
+          <div class="calc-row calc-total"><span>Total dû / mois</span><strong>{{ formatCurrency(calcTotal()) }}</strong></div>
+        </div>
+
+        <div class="form-section-title">Notes</div>
+        <div class="form-group">
+          <textarea class="pa-input" formControlName="notes" rows="3" placeholder="Conditions particulières…"></textarea>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) {
+              <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+            } @else {
+              <i class="pi pi-check"></i> {{ editingLease() ? 'Mettre à jour' : 'Enregistrer' }}
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

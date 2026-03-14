@@ -1,0 +1,54 @@
+<p-toast position="top-right" />
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mes relevés</h1>
+    <p class="page-subtitle">Vos décomptes mensuels de loyers</p>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher une période…" (input)="onSearch($event)" />
+  </div>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3]; track i) { <p-skeleton height="56px" borderRadius="8px" styleClass="mb-2" /> }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr><th>Période</th><th>Du</th><th>Au</th><th>Loyers encaissés</th><th>Net à reverser</th><th>Statut</th><th>Généré le</th><th style="text-align:center">PDF</th></tr>
+        </thead>
+        <tbody>
+          @if (filteredStatements().length === 0) {
+            <tr><td colspan="8" class="empty-row"><i class="pi pi-file" style="font-size:24px;display:block;margin-bottom:8px"></i>Aucun relevé disponible</td></tr>
+          }
+          @for (s of filteredStatements(); track s.id) {
+            <tr>
+              <td class="td-name">{{ s.period_label }}</td>
+              <td class="td-muted">{{ formatDate(s.period_start) }}</td>
+              <td class="td-muted">{{ formatDate(s.period_end) }}</td>
+              <td class="td-amount">{{ formatCurrency(s.total_rent_collected) }}</td>
+              <td class="td-net">{{ formatCurrency(s.final_net_amount) }}</td>
+              <td><span class="badge {{ statusClass(s.status) }}">{{ statusLabel(s.status) }}</span></td>
+              <td class="td-muted">{{ s.generated_at ? formatDate(s.generated_at.split(' ')[0]) : '—' }}</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-download" (click)="download(s)" [disabled]="isDownloading(s.id)">
+                    @if (isDownloading(s.id)) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-download"></i> PDF }
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

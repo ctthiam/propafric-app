@@ -1,0 +1,52 @@
+<div class="portal-shell" [class.collapsed]="sidebarCollapsed()">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-logo">
+        <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+          <rect width="28" height="28" rx="8" fill="#7048e8"/>
+          <path d="M7 20L14 8L21 20H7Z" fill="white" opacity="0.9"/>
+        </svg>
+      </div>
+      @if (!sidebarCollapsed()) {
+        <div class="brand-text">
+          <span class="brand-name">PropAfric</span>
+          <span class="brand-role">Super Admin</span>
+        </div>
+      }
+      <button class="collapse-btn" (click)="toggleSidebar()">
+        <i [class]="sidebarCollapsed() ? 'pi pi-angle-right' : 'pi pi-angle-left'"></i>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.route) {
+        <a [routerLink]="item.route" routerLinkActive="active" class="nav-item" [title]="sidebarCollapsed() ? item.label : ''">
+          <i [class]="item.icon"></i>
+          @if (!sidebarCollapsed()) { <span>{{ item.label }}</span> }
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-card">
+        <div class="user-avatar">{{ userInitials }}</div>
+        @if (!sidebarCollapsed()) {
+          <div class="user-info">
+            <div class="user-name">Super Admin</div>
+            <div class="user-role">PropAfric</div>
+          </div>
+        }
+      </div>
+      <button class="logout-btn" (click)="logout()" [title]="sidebarCollapsed() ? 'Déconnexion' : ''">
+        <i class="pi pi-sign-out"></i>
+        @if (!sidebarCollapsed()) { <span>Déconnexion</span> }
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="content-wrapper">
+      <router-outlet />
+    </div>
+  </main>
+</div>

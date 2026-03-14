@@ -1,0 +1,134 @@
+@if (loading()) {
+  <div class="skeleton-grid">
+    @for (i of [1,2,3,4]; track i) { <p-skeleton height="100px" borderRadius="16px" /> }
+  </div>
+} @else {
+
+<div class="welcome-bar">
+  <div>
+    <h1 class="welcome-title">Bonjour, {{ profile()?.first_name ?? 'Propriétaire' }} 👋</h1>
+    <p class="welcome-sub">Vue d'ensemble de votre patrimoine immobilier</p>
+  </div>
+  @if (lateCount > 0) {
+    <div class="alert-banner">
+      <i class="pi pi-exclamation-triangle"></i>
+      {{ lateCount }} loyer(s) en retard — {{ formatCurrency(lateAmount) }}
+    </div>
+  }
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-icon gold"><i class="pi pi-building"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Biens occupés</div>
+      <div class="kpi-value">{{ occupiedCount }} / {{ properties().length }}</div>
+      <div class="kpi-sub">{{ availableCount }} disponible(s)</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon green"><i class="pi pi-wallet"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Loyers mensuels</div>
+      <div class="kpi-value">{{ formatCurrency(totalRent) }}</div>
+      <div class="kpi-sub">Encaissements actifs</div>
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon blue"><i class="pi pi-file"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Dernier relevé</div>
+      @if (lastStatement) {
+        <div class="kpi-value" style="font-size:16px">{{ formatCurrency(lastStatement.final_net_amount) }}</div>
+        <div class="kpi-sub">{{ lastStatement.period_label }}</div>
+      } @else {
+        <div class="kpi-value" style="font-size:16px; color:#4a6357">Aucun</div>
+      }
+    </div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon purple"><i class="pi pi-cog"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Frais de gestion</div>
+      <div class="kpi-value" style="font-size:16px">
+        @if (profile()?.management_fee_value) {
+          {{ profile()?.management_fee_type === 'fixed' ? formatCurrency(profile()!.management_fee_value) : profile()!.management_fee_value + '%' }}
+        } @else { — }
+      </div>
+      <div class="kpi-sub">{{ profile()?.management_fee_type === 'fixed' ? 'Forfait mensuel' : 'Du loyer encaissé' }}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Biens -->
+<div class="section-header">
+  <h2 class="section-title">Mes biens</h2>
+  <a routerLink="/portail-proprietaire/biens" class="link-btn">Voir tout →</a>
+</div>
+<div class="props-grid">
+  @for (p of properties(); track p.id) {
+    <div class="prop-card">
+      <div class="prop-card-top">
+        <div>
+          <div class="prop-ref">{{ p.reference }}</div>
+          <div class="prop-name">{{ p.name }}</div>
+          <div class="prop-address">{{ p.address }}, {{ p.city }}</div>
+        </div>
+        <span class="badge {{ statusClass(p.status) }}">{{ statusLabel(p.status) }}</span>
+      </div>
+      <div class="prop-card-bottom">
+        @if (p.current_tenant) {
+          <div class="prop-tenant">
+            <i class="pi pi-user"></i>
+            <span>{{ p.current_tenant.full_name }}</span>
+          </div>
+        }
+        @if (p.active_lease) {
+          <div class="prop-rent">{{ formatCurrency(p.active_lease.total_rent) }}<span>/mois</span></div>
+        } @else {
+          <div class="prop-vacant">Vacant</div>
+        }
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Dernières échéances -->
+<div class="section-header">
+  <h2 class="section-title">Dernières échéances</h2>
+  <a routerLink="/portail-proprietaire/echeances" class="link-btn">Voir tout →</a>
+</div>
+<div class="table-card">
+  <div class="data-table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Période</th>
+          <th>Bien</th>
+          <th>Locataire</th>
+          <th>Montant</th>
+          <th>Payé</th>
+          <th>Statut</th>
+        </tr>
+      </thead>
+      <tbody>
+        @if (schedules().length === 0) {
+          <tr><td colspan="6" class="empty-row">Aucune échéance</td></tr>
+        }
+        @for (s of schedules().slice(0, 5); track s.id) {
+          <tr [class.overdue-row]="s.status === 'late'">
+            <td class="td-name">{{ s.period_label }}</td>
+            <td class="td-muted">{{ s.property?.name }}</td>
+            <td class="td-muted">{{ s.tenant?.full_name }}</td>
+            <td class="td-amount">{{ formatCurrency(s.total_amount) }}</td>
+            <td class="td-paid">{{ formatCurrency(s.amount_paid) }}</td>
+            <td><span class="badge {{ scheduleStatusClass(s.status) }}">{{ scheduleStatusLabel(s.status) }}</span></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+}

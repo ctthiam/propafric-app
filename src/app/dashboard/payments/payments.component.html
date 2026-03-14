@@ -1,1 +1,253 @@
-<p>payments works!</p>
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div class="confirm-msg" [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Paiements</h1>
+    <p class="page-subtitle">Encaissements et suivi des échéances</p>
+  </div>
+  <button class="btn-primary" (click)="openCreate()">
+    <i class="pi pi-plus"></i> Enregistrer un paiement
+  </button>
+</div>
+
+<!-- Onglets -->
+<div class="tabs-bar">
+  <button class="tab-btn" [class.active]="activeTab() === 'schedules'" (click)="activeTab.set('schedules')">
+    <i class="pi pi-calendar-times"></i> Échéances
+    <span class="tab-count" [class.danger]="schedules().length > 0">{{ schedules().length }}</span>
+  </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'payments'" (click)="activeTab.set('payments')">
+    <i class="pi pi-credit-card"></i> Paiements
+    <span class="tab-count">{{ payments().length }}</span>
+  </button>
+</div>
+
+<!-- Toolbar -->
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher…" (input)="onSearch($event)" />
+  </div>
+  @if (activeTab() === 'schedules') {
+    <select class="filter-select" (change)="onFilterStatus($any($event.target).value)">
+      @for (opt of scheduleStatusOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  }
+  @if (activeTab() === 'payments') {
+    <select class="filter-select" (change)="onFilterMethod($any($event.target).value)">
+      @for (opt of methodFilterOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+  }
+</div>
+
+<!-- ─── ONGLET ÉCHÉANCES ─── -->
+@if (activeTab() === 'schedules') {
+  <div class="table-card">
+    @if (loading()) {
+      <div class="skeleton-rows">
+        @for (i of [1,2,3,4,5]; track i) {
+          <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
+        }
+      </div>
+    } @else {
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Bail</th>
+              <th>Locataire</th>
+              <th>Bien</th>
+              <th>Période</th>
+              <th>Échéance</th>
+              <th>Dû</th>
+              <th>Payé</th>
+              <th>Solde</th>
+              <th>Statut</th>
+              <th style="width:80px; text-align:center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredSchedules().length === 0) {
+              <tr>
+                <td colspan="10" class="empty-row">
+                  <div class="empty-state-inline success">
+                    <i class="pi pi-check-circle"></i>
+                    <span>Aucune échéance trouvée</span>
+                  </div>
+                </td>
+              </tr>
+            }
+            @for (sc of filteredSchedules(); track sc.id) {
+              <tr [class.overdue-row]="sc.status === 'late'">
+                <td><span class="badge badge-ref">{{ sc.lease?.reference ?? '—' }}</span></td>
+                <td class="td-name">{{ sc.tenant?.full_name ?? '—' }}</td>
+                <td class="td-muted">{{ sc.property?.name ?? '—' }}</td>
+                <td class="td-muted">{{ sc.period_label }}</td>
+                <td class="td-muted">{{ formatDateDisplay(sc.due_date) }}</td>
+                <td class="td-amount">{{ formatCurrency(sc.total_amount) }}</td>
+                <td class="td-paid">{{ formatCurrency(sc.amount_paid) }}</td>
+                <td [class.td-danger]="Number(sc.balance) > 0">{{ formatCurrency(sc.balance) }}</td>
+                <td><span class="badge {{ statusClass(sc.status) }}">{{ statusLabel(sc.status) }}</span></td>
+                <td>
+                  <div class="actions-cell">
+                    @if (sc.status !== 'paid') {
+                      <button class="btn-icon btn-pay" (click)="openCreate(sc)" pTooltip="Encaisser" tooltipPosition="top">
+                        <i class="pi pi-plus"></i>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
+
+<!-- ─── ONGLET PAIEMENTS ─── -->
+@if (activeTab() === 'payments') {
+  <div class="table-card">
+    @if (loading()) {
+      <div class="skeleton-rows">
+        @for (i of [1,2,3]; track i) {
+          <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
+        }
+      </div>
+    } @else {
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Quittance</th>
+              <th>Locataire</th>
+              <th>Bien</th>
+              <th>Montant</th>
+              <th>Date</th>
+              <th>Mode</th>
+              <th style="width:100px; text-align:center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredPayments().length === 0) {
+              <tr>
+                <td colspan="7" class="empty-row">
+                  <div class="empty-state-inline">
+                    <i class="pi pi-credit-card"></i>
+                    <span>Aucun paiement enregistré</span>
+                  </div>
+                </td>
+              </tr>
+            }
+            @for (p of filteredPayments(); track p.id) {
+              <tr>
+                <td><span class="badge badge-ref">{{ p.receipt_number }}</span></td>
+                <td class="td-name">{{ p.tenant?.full_name ?? "—" }}</td>
+                <td class="td-muted">{{ p.property?.name ?? "—" }}</td>
+                <td class="td-amount">{{ formatCurrency(p.amount) }}</td>
+                <td class="td-muted">{{ formatDateDisplay(p.payment_date) }}</td>
+                <td><span class="badge badge-method">{{ methodLabel(p.payment_method) }}</span></td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="btn-icon btn-pdf" (click)="downloadReceipt(p)" [disabled]="isDownloading(p.id)" pTooltip="Quittance PDF" tooltipPosition="top">
+                      <i [class]="isDownloading(p.id) ? 'pi pi-spin pi-spinner' : 'pi pi-file-pdf'"></i>
+                    </button>
+                    <button class="btn-icon btn-delete" (click)="confirmCancel(p)" pTooltip="Annuler" tooltipPosition="top">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
+
+<!-- ─── DRAWER CUSTOM ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">Enregistrer un paiement</div>
+        @if (selectedSchedule()) {
+          <div class="drawer-sub">{{ selectedSchedule()!.period_label }} — {{ selectedSchedule()!.tenant?.full_name }}</div>
+        } @else {
+          <div class="drawer-sub">Le numéro de quittance sera généré automatiquement</div>
+        }
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
+
+        <div class="form-section-title">Bail concerné</div>
+        <div class="form-group">
+          <label>Bail <span class="req">*</span></label>
+          <p-dropdown formControlName="lease_id" [options]="leaseOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bail" [filter]="true" styleClass="w-full" />
+          @if (form.get('lease_id')?.invalid && form.get('lease_id')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Échéance (optionnel)</label>
+          <p-dropdown formControlName="schedule_id" [options]="scheduleOptions" optionLabel="label" optionValue="value" placeholder="Lier à une échéance" [showClear]="true" styleClass="w-full" />
+          <span class="form-hint">Si vide, s'applique à l'échéance la plus ancienne.</span>
+        </div>
+
+        <div class="form-section-title">Détails du paiement</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Montant (F CFA) <span class="req">*</span></label>
+            <p-inputNumber formControlName="amount" placeholder="150 000" [min]="1" locale="fr-SN" styleClass="w-full" />
+            @if (form.get('amount')?.invalid && form.get('amount')?.touched) {
+              <span class="form-error">Minimum 1 F</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Date <span class="req">*</span></label>
+            <p-calendar formControlName="payment_date" dateFormat="dd/mm/yy" [showIcon]="true" [maxDate]="today" styleClass="w-full" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Mode de paiement <span class="req">*</span></label>
+          <p-dropdown formControlName="payment_method" [options]="paymentMethods" optionLabel="label" optionValue="value" styleClass="w-full" />
+        </div>
+        <div class="form-group">
+          <label>Référence / N° transaction</label>
+          <input class="pa-input" formControlName="reference" placeholder="Ex: TXN-123456" />
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea class="pa-input" formControlName="notes" rows="3" placeholder="Observations…"></textarea>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) {
+              <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+            } @else {
+              <i class="pi pi-check"></i> Enregistrer
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

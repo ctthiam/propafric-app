@@ -1,1 +1,281 @@
-<p>expenses works!</p>
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div class="confirm-msg" [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">{{ activeTab() === 'vendors' ? 'Prestataires' : 'Dépenses' }}</h1>
+    <p class="page-subtitle">Charges et prestataires de l'agence</p>
+  </div>
+  <div class="page-header-actions">
+    @if (activeTab() === 'expenses') {
+      <button class="btn-primary" (click)="openCreateExpense()"><i class="pi pi-plus"></i> Nouvelle dépense</button>
+    } @else {
+      <button class="btn-primary" (click)="openCreateVendor()"><i class="pi pi-plus"></i> Nouveau prestataire</button>
+    }
+  </div>
+</div>
+
+<div class="tabs-bar">
+  <button class="tab-btn" [class.active]="activeTab() === 'expenses'" (click)="activeTab.set('expenses')">
+    <i class="pi pi-wallet"></i> Dépenses <span class="tab-count">{{ expenses().length }}</span>
+  </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'vendors'" (click)="activeTab.set('vendors')">
+    <i class="pi pi-briefcase"></i> Prestataires <span class="tab-count">{{ contractors().length }}</span>
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher…" (input)="onSearch($event)" />
+  </div>
+  @if (activeTab() === 'expenses') {
+    <select class="filter-select" (change)="onFilterCat($any($event.target).value)">
+      @for (opt of categoryFilterOptions; track opt.value) {
+        <option [value]="opt.value">{{ opt.label }}</option>
+      }
+    </select>
+    <div class="total-badge">Total TTC : <strong>{{ formatCurrency(totalExpenses()) }}</strong></div>
+  }
+</div>
+
+<!-- ─── ONGLET DÉPENSES ─── -->
+@if (activeTab() === 'expenses') {
+  <div class="table-card">
+    @if (loading()) {
+      <div class="skeleton-rows">
+        @for (i of [1,2,3,4,5]; track i) {
+          <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
+        }
+      </div>
+    } @else {
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Description</th>
+              <th>Bien</th>
+              <th>Prestataire</th>
+              <th>Catégorie</th>
+              <th>HT</th>
+              <th>TTC</th>
+              <th>Statut</th>
+              <th>Date</th>
+              <th style="width:100px; text-align:center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredExpenses().length === 0) {
+              <tr>
+                <td colspan="9" class="empty-row">
+                  <div class="empty-state-inline"><i class="pi pi-wallet"></i><span>Aucune dépense enregistrée</span></div>
+                </td>
+              </tr>
+            }
+            @for (e of filteredExpenses(); track e.id) {
+              <tr>
+                <td><div class="td-name">{{ e.description }}</div></td>
+                <td class="td-muted">{{ e.property?.name ?? '—' }}</td>
+                <td class="td-muted">{{ e.contractor?.name ?? '—' }}</td>
+                <td><span class="badge {{ categoryClass(e.category) }}">{{ categoryLabel(e.category) }}</span></td>
+                <td class="td-muted">{{ formatCurrency(e.amount_ht) }}</td>
+                <td class="td-amount">{{ formatCurrency(e.amount_ttc) }}</td>
+                <td><span class="badge {{ statusClass(e.status) }}">{{ statusLabel(e.status) }}</span></td>
+                <td class="td-muted">{{ formatDateDisplay(e.expense_date) }}</td>
+                <td>
+                  <div class="actions-cell">
+                    <button class="btn-icon btn-edit" (click)="openEditExpense(e)" pTooltip="Modifier" tooltipPosition="top"><i class="pi pi-pencil"></i></button>
+                    <button class="btn-icon btn-delete" (click)="confirmDeleteExpense(e)" pTooltip="Supprimer" tooltipPosition="top"><i class="pi pi-trash"></i></button>
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
+
+<!-- ─── ONGLET PRESTATAIRES ─── -->
+@if (activeTab() === 'vendors') {
+  <div class="table-card">
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Prestataire</th>
+            <th>Spécialité</th>
+            <th>Téléphone</th>
+            <th>Email</th>
+            <th style="width:100px; text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredVendors().length === 0) {
+            <tr>
+              <td colspan="5" class="empty-row">
+                <div class="empty-state-inline"><i class="pi pi-briefcase"></i><span>Aucun prestataire enregistré</span></div>
+              </td>
+            </tr>
+          }
+          @for (v of filteredVendors(); track v.id) {
+            <tr>
+              <td>
+                <div class="vendor-cell">
+                  <div class="vendor-icon"><i class="pi pi-wrench"></i></div>
+                  <div class="td-name">{{ v.name }}</div>
+                </div>
+              </td>
+              <td class="td-muted">{{ v.specialty ?? '—' }}</td>
+              <td class="td-muted">{{ v.phone ?? '—' }}</td>
+              <td class="td-muted">{{ v.email ?? '—' }}</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-edit" (click)="openEditVendor(v)" pTooltip="Modifier" tooltipPosition="top"><i class="pi pi-pencil"></i></button>
+                  <button class="btn-icon btn-delete" (click)="confirmDeleteVendor(v)" pTooltip="Supprimer" tooltipPosition="top"><i class="pi pi-trash"></i></button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+}
+
+<!-- ─── DRAWER DÉPENSE ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeExpenseDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingExpense() ? 'Modifier la dépense' : 'Nouvelle dépense' }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeExpenseDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="expenseForm" (ngSubmit)="saveExpense()" class="drawer-form">
+
+        <div class="form-section-title">Informations</div>
+        <div class="form-group">
+          <label>Description <span class="req">*</span></label>
+          <input class="pa-input" formControlName="description" placeholder="Réparation plomberie…" />
+          @if (expenseForm.get('description')?.invalid && expenseForm.get('description')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Catégorie <span class="req">*</span></label>
+            <p-dropdown formControlName="category" [options]="categories" optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>Date <span class="req">*</span></label>
+            <p-calendar formControlName="expense_date" dateFormat="dd/mm/yy" [showIcon]="true" [maxDate]="today" styleClass="w-full" />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Montant HT (F CFA) <span class="req">*</span></label>
+            <p-inputNumber formControlName="amount_ht" [min]="1" locale="fr-SN" placeholder="50 000" styleClass="w-full" />
+            @if (expenseForm.get('amount_ht')?.invalid && expenseForm.get('amount_ht')?.touched) {
+              <span class="form-error">Minimum 1 F</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Taux TVA (%)</label>
+            <p-inputNumber formControlName="vat_rate" [min]="0" [max]="100" styleClass="w-full" />
+          </div>
+        </div>
+        <div class="form-group form-group-check">
+          <p-checkbox formControlName="charged_to_owner" [binary]="true" inputId="charged" />
+          <label for="charged" class="check-label">Imputer au propriétaire</label>
+        </div>
+
+        <div class="form-section-title">Liens</div>
+        <div class="form-group">
+          <label>Bien concerné</label>
+          <p-dropdown formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" [showClear]="true" styleClass="w-full" />
+        </div>
+        <div class="form-group">
+          <label>Prestataire</label>
+          <p-dropdown formControlName="contractor_id" [options]="contractorOptions" optionLabel="label" optionValue="value" [showClear]="true" styleClass="w-full" />
+        </div>
+
+        <div class="form-section-title">Notes</div>
+        <div class="form-group">
+          <textarea class="pa-input" formControlName="notes" rows="3" placeholder="Détails…"></textarea>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeExpenseDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> Enregistrement… }
+            @else { <i class="pi pi-check"></i> {{ editingExpense() ? 'Mettre à jour' : 'Enregistrer' }} }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ─── DRAWER PRESTATAIRE ─── -->
+@if (vendorDrawer) {
+  <div class="drawer-overlay" (click)="closeVendorDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingVendor() ? 'Modifier le prestataire' : 'Nouveau prestataire' }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeVendorDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="vendorForm" (ngSubmit)="saveVendor()" class="drawer-form">
+
+        <div class="form-section-title">Informations</div>
+        <div class="form-group">
+          <label>Nom / Société <span class="req">*</span></label>
+          <input class="pa-input" formControlName="name" placeholder="Électricité Générale Dakar" />
+          @if (vendorForm.get('name')?.invalid && vendorForm.get('name')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Spécialité</label>
+          <input class="pa-input" formControlName="specialty" placeholder="Plomberie, Électricité…" />
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input class="pa-input" formControlName="phone" placeholder="+221 77 000 00 00" />
+          </div>
+          <div class="form-group">
+            <label>Email</label>
+            <input class="pa-input" formControlName="email" type="email" placeholder="contact@prestataire.sn" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Adresse</label>
+          <input class="pa-input" formControlName="address" placeholder="Dakar" />
+        </div>
+        <div class="form-section-title">Notes</div>
+        <div class="form-group">
+          <textarea class="pa-input" formControlName="notes" rows="3" placeholder="Observations…"></textarea>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeVendorDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> Enregistrement… }
+            @else { <i class="pi pi-check"></i> {{ editingVendor() ? 'Mettre à jour' : 'Enregistrer' }} }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

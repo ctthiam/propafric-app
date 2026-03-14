@@ -1,0 +1,147 @@
+@if (loading()) {
+  <div class="skeleton-grid">
+    @for (i of [1,2,3,4]; track i) {
+      <p-skeleton height="100px" borderRadius="16px" />
+    }
+  </div>
+  <p-skeleton height="200px" borderRadius="16px" styleClass="mt-4" />
+} @else {
+
+  <!-- Bonjour -->
+  <div class="welcome-bar">
+    <div>
+      <h1 class="welcome-title">Bonjour, {{ profile()?.first_name ?? 'Locataire' }} 👋</h1>
+      <p class="welcome-sub">Voici un aperçu de votre situation locative</p>
+    </div>
+    @if (overdueCount > 0) {
+      <div class="alert-banner">
+        <i class="pi pi-exclamation-triangle"></i>
+        {{ overdueCount }} échéance(s) en retard — {{ formatCurrency(overdueAmount) }}
+      </div>
+    }
+  </div>
+
+  <!-- KPI Cards -->
+  <div class="kpi-grid">
+
+    <!-- Loyer mensuel -->
+    <div class="kpi-card">
+      <div class="kpi-icon green"><i class="pi pi-home"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-label">Loyer mensuel</div>
+        <div class="kpi-value">{{ formatCurrency(lease()?.total_rent ?? 0) }}</div>
+        <div class="kpi-sub">{{ lease()?.property?.name ?? '—' }}</div>
+      </div>
+    </div>
+
+    <!-- Prochaine échéance -->
+    <div class="kpi-card" [class.urgent]="nextSchedule?.status === 'late'">
+      <div class="kpi-icon gold"><i class="pi pi-calendar"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-label">Prochaine échéance</div>
+        @if (nextSchedule) {
+          <div class="kpi-value">{{ formatCurrency(nextSchedule.balance) }}</div>
+          <div class="kpi-sub">{{ nextSchedule.period_label }} — {{ formatDate(nextSchedule.due_date) }}</div>
+        } @else {
+          <div class="kpi-value" style="font-size:16px; color:#52b788">À jour ✓</div>
+          <div class="kpi-sub">Aucune échéance impayée</div>
+        }
+      </div>
+    </div>
+
+    <!-- Total payé -->
+    <div class="kpi-card">
+      <div class="kpi-icon blue"><i class="pi pi-check-circle"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-label">Total versé</div>
+        <div class="kpi-value">{{ formatCurrency(totalPaid) }}</div>
+        <div class="kpi-sub">{{ paidCount() }} échéance(s) soldée(s)</div>
+      </div>
+    </div>
+
+    <!-- Statut bail -->
+    <div class="kpi-card">
+      <div class="kpi-icon purple"><i class="pi pi-file"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-label">Statut du bail</div>
+        <div class="kpi-value" style="font-size:16px">
+          @if (lease()?.status === 'active') { <span style="color:#2D6A4F">Actif</span> }
+          @else { <span>{{ lease()?.status ?? '—' }}</span> }
+        </div>
+        <div class="kpi-sub">Ref. {{ lease()?.reference ?? '—' }}</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bien loué -->
+  @if (lease()) {
+    <div class="property-card">
+      <div class="property-card-header">
+        <i class="pi pi-building"></i>
+        <div>
+          <div class="property-name">{{ lease()!.property.name }}</div>
+          <div class="property-address">{{ lease()!.property.address }}</div>
+        </div>
+        <a routerLink="/portail-locataire/bail" class="link-btn">Voir mon bail →</a>
+      </div>
+      <div class="property-details">
+        <div class="detail-item">
+          <span class="detail-label">Début</span>
+          <span class="detail-value">{{ formatDate(lease()!.start_date) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Fin</span>
+          <span class="detail-value">{{ lease()!.end_date ? formatDate(lease()!.end_date!) : 'CDI' }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Loyer TTC</span>
+          <span class="detail-value green">{{ formatCurrency(lease()!.total_rent) }}</span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Référence bien</span>
+          <span class="detail-value">{{ lease()!.property.reference }}</span>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Dernières échéances -->
+  <div class="section-header">
+    <h2 class="section-title">Mes dernières échéances</h2>
+    <a routerLink="/portail-locataire/echeances" class="link-btn">Voir tout →</a>
+  </div>
+
+  <div class="table-card">
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Période</th>
+            <th>Échéance</th>
+            <th>Montant dû</th>
+            <th>Payé</th>
+            <th>Solde</th>
+            <th>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (schedules().length === 0) {
+            <tr><td colspan="6" class="empty-row">Aucune échéance</td></tr>
+          }
+          @for (s of schedules().slice(0, 5); track s.id) {
+            <tr>
+              <td class="td-name">{{ s.period_label }}</td>
+              <td class="td-muted">{{ formatDate(s.due_date) }}</td>
+              <td class="td-amount">{{ formatCurrency(s.total_amount) }}</td>
+              <td class="td-paid">{{ formatCurrency(s.amount_paid) }}</td>
+              <td [class.td-danger]="Number(s.balance) > 0">{{ formatCurrency(s.balance) }}</td>
+              <td><span class="badge {{ statusClass(s.status) }}">{{ statusLabel(s.status) }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+}

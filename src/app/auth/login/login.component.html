@@ -1,1 +1,181 @@
-<p>login works!</p>
+<div class="login-page">
+
+  <!-- Panneau gauche — visuel -->
+  <div class="login-visual">
+    <div class="login-visual-pattern"></div>
+    <div class="login-visual-blob"></div>
+
+    <div class="login-visual-content">
+      <!-- Logo -->
+      <a routerLink="/" class="login-logo">
+        <div class="login-logo-mark"></div>
+        <span class="login-logo-text">Prop<span>Afric</span></span>
+      </a>
+
+      <!-- Titre -->
+      <div class="login-visual-headline">
+        <h2>La gestion locative<br><em>réinventée</em><br>pour l'Afrique.</h2>
+        <p>Baux, loyers, quittances, relevés propriétaires — tout centralisé dans une seule plateforme.</p>
+      </div>
+
+      <!-- Stats -->
+      <div class="login-stats">
+        <div class="login-stat">
+          <div class="login-stat-value">50+</div>
+          <div class="login-stat-label">Agences actives</div>
+        </div>
+        <div class="login-stat-divider"></div>
+        <div class="login-stat">
+          <div class="login-stat-value">2K+</div>
+          <div class="login-stat-label">Baux gérés</div>
+        </div>
+        <div class="login-stat-divider"></div>
+        <div class="login-stat">
+          <div class="login-stat-value">98%</div>
+          <div class="login-stat-label">Satisfaction</div>
+        </div>
+      </div>
+
+      <!-- Mini dashboard card -->
+      <div class="login-card-preview">
+        <div class="login-card-preview-header">
+          <span class="login-card-preview-title">Collecte — Mars 2026</span>
+          <span class="login-card-preview-badge">● En direct</span>
+        </div>
+        <div class="login-card-preview-bar-label">
+          <span>Taux de collecte</span>
+          <span class="login-card-preview-pct">87%</span>
+        </div>
+        <div class="login-card-preview-bar">
+          <div class="login-card-preview-fill"></div>
+        </div>
+        <div class="login-card-preview-rows">
+          <div class="login-card-row">
+            <div class="row-left"><span class="dot green"></span>Almadies — Apt. RDC</div>
+            <span class="row-amount">215 260 F</span>
+          </div>
+          <div class="login-card-row">
+            <div class="row-left"><span class="dot gold"></span>Mermoz — Bureau S3</div>
+            <span class="row-amount">480 000 F</span>
+          </div>
+          <div class="login-card-row">
+            <div class="row-left"><span class="dot red"></span>Ouakam — Apt. F4</div>
+            <span class="row-amount red">En retard</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Panneau droit — formulaire -->
+  <div class="login-form-panel">
+    <div class="login-form-wrapper">
+
+      <!-- Header -->
+      <div class="login-form-header">
+        <h1>Connexion</h1>
+        <p>Accédez à votre espace PropAfric</p>
+      </div>
+
+      <!-- Erreur globale -->
+      @if (errorMessage()) {
+        <div class="login-error">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="10"/><path d="M12 8v4m0 4h.01"/>
+          </svg>
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <!-- Formulaire -->
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Adresse email</label>
+          <div class="input-wrapper" [class.input-error]="email.invalid && email.touched">
+            <svg class="input-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              placeholder="votre@agence.sn"
+              autocomplete="email"
+            />
+          </div>
+          @if (email.invalid && email.touched) {
+            <span class="form-error">
+              {{ email.errors?.['required'] ? 'L\'email est requis.' : 'Email invalide.' }}
+            </span>
+          }
+        </div>
+
+        <!-- Mot de passe -->
+        <div class="form-group">
+          <div class="label-row">
+            <label for="password">Mot de passe</label>
+            <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+          </div>
+          <div class="input-wrapper" [class.input-error]="password.invalid && password.touched">
+            <svg class="input-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+            </svg>
+            <input
+              id="password"
+              type="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+          </div>
+          @if (password.invalid && password.touched) {
+            <span class="form-error">Le mot de passe est requis.</span>
+          }
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit" [class.loading]="isLoading()" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="spinner"></span>
+            Connexion en cours…
+          } @else {
+            Se connecter
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path d="M5 12h14M12 5l7 7-7 7"/>
+            </svg>
+          }
+        </button>
+
+      </form>
+
+      <!-- Footer -->
+      <div class="login-form-footer">
+        <p>Vous n'avez pas encore de compte ?</p>
+        <a href="mailto:contact@propafric.com" class="contact-link">Contacter PropAfric →</a>
+      </div>
+
+      <!-- Comptes de démo (dev only) -->
+      <div class="login-demo-accounts">
+        <div class="demo-title">Comptes de test</div>
+        <div class="demo-accounts">
+          <div class="demo-account" (click)="fillDemo('admin@citronvert-immo.sn', 'CitronVert2025!')">
+            <span class="demo-role agency">Agence Admin</span>
+            <span class="demo-email">admin&#64;citronvert-immo.sn</span>
+          </div>
+          <div class="demo-account" (click)="fillDemo('ibrahima.mbodj@gmail.com', 'PropOwner2025')">
+            <span class="demo-role owner">Propriétaire</span>
+            <span class="demo-email">ibrahima.mbodj&#64;gmail.com</span>
+          </div>
+          <div class="demo-account" (click)="fillDemo('alassane.diop@gmail.com', 'Locataire2025')">
+            <span class="demo-role tenant">Locataire</span>
+            <span class="demo-email">alassane.diop&#64;gmail.com</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

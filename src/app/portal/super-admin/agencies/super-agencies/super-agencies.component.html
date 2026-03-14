@@ -1,0 +1,153 @@
+<p-toast position="top-right" />
+<p-confirmDialog />
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Agences</h1>
+    <p class="page-subtitle">{{ agencies().length }} agence(s) sur la plateforme</p>
+  </div>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Nom, email, ville…" (input)="onSearch($event)" />
+  </div>
+  <select class="filter-select" (change)="onFilterStatus($any($event.target).value)">
+    @for (opt of statusOptions; track opt.value) { <option [value]="opt.value">{{ opt.label }}</option> }
+  </select>
+  <select class="filter-select" (change)="onFilterPlan($any($event.target).value)">
+    @for (opt of planOptions; track opt.value) { <option [value]="opt.value">{{ opt.label }}</option> }
+  </select>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3,4]; track i) { <p-skeleton height="60px" borderRadius="8px" styleClass="mb-2" /> }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Agence</th>
+            <th>Plan</th>
+            <th>Statut</th>
+            <th>Biens</th>
+            <th>Utilisateurs</th>
+            <th>Fin abonnement</th>
+            <th>Inscription</th>
+            <th style="width:100px; text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredAgencies().length === 0) {
+            <tr><td colspan="8" class="empty-row">Aucune agence trouvée</td></tr>
+          }
+          @for (a of filteredAgencies(); track a.id) {
+            <tr>
+              <td>
+                <div class="agency-cell">
+                  <div class="agency-avatar">{{ a.name[0] }}</div>
+                  <div>
+                    <div class="td-name">{{ a.name }}</div>
+                    <div class="td-muted-sm">{{ a.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge {{ planClass(a.plan) }}">{{ planLabel(a.plan) }}</span></td>
+              <td><span class="badge {{ statusClass(a.status) }}">{{ statusLabel(a.status) }}</span></td>
+              <td class="td-center">{{ a.properties_count }}</td>
+              <td class="td-center">{{ a.users_count }}</td>
+              <td class="td-muted">
+                @if (a.subscription_ends_at) { {{ formatDate(a.subscription_ends_at) }} }
+                @else if (a.trial_ends_at) { <span class="trial-date">Essai → {{ formatDate(a.trial_ends_at) }}</span> }
+                @else { — }
+              </td>
+              <td class="td-muted">{{ formatDate(a.created_at) }}</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-detail" (click)="openDetail(a)" pTooltip="Gérer" tooltipPosition="top">
+                    <i class="pi pi-cog"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ─── DRAWER GESTION AGENCE ─── -->
+@if (drawerOpen && selectedAgency()) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ selectedAgency()!.name }}</div>
+        <div class="drawer-sub">{{ selectedAgency()!.email }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="drawer-body">
+
+      <!-- Infos -->
+      <div class="info-section">
+        <div class="info-row"><span>Plan</span><span class="badge {{ planClass(selectedAgency()!.plan) }}">{{ planLabel(selectedAgency()!.plan) }}</span></div>
+        <div class="info-row"><span>Statut</span><span class="badge {{ statusClass(selectedAgency()!.status) }}">{{ statusLabel(selectedAgency()!.status) }}</span></div>
+        <div class="info-row"><span>Biens</span><strong>{{ selectedAgency()!.properties_count }}</strong></div>
+        <div class="info-row"><span>Utilisateurs</span><strong>{{ selectedAgency()!.users_count }}</strong></div>
+        <div class="info-row"><span>Inscrit le</span><strong>{{ formatDate(selectedAgency()!.created_at) }}</strong></div>
+        @if (selectedAgency()!.trial_ends_at) {
+          <div class="info-row"><span>Fin essai</span><strong>{{ formatDate(selectedAgency()!.trial_ends_at!) }}</strong></div>
+        }
+        @if (selectedAgency()!.subscription_ends_at) {
+          <div class="info-row"><span>Fin abonnement</span><strong>{{ formatDate(selectedAgency()!.subscription_ends_at!) }}</strong></div>
+        }
+      </div>
+
+      <!-- Changer statut -->
+      <div class="action-section">
+        <div class="action-title">Changer le statut</div>
+        <div class="status-buttons">
+          @if (selectedAgency()!.status !== 'active') {
+            <button class="btn-status btn-activate" (click)="updateStatus(selectedAgency()!, 'active')" [disabled]="isLoading(selectedAgency()!.id)">
+              <i class="pi pi-check-circle"></i> Activer
+            </button>
+          }
+          @if (selectedAgency()!.status !== 'suspended') {
+            <button class="btn-status btn-suspend" (click)="updateStatus(selectedAgency()!, 'suspended')" [disabled]="isLoading(selectedAgency()!.id)">
+              <i class="pi pi-ban"></i> Suspendre
+            </button>
+          }
+          @if (selectedAgency()!.status !== 'cancelled') {
+            <button class="btn-status btn-cancel" (click)="updateStatus(selectedAgency()!, 'cancelled')" [disabled]="isLoading(selectedAgency()!.id)">
+              <i class="pi pi-times-circle"></i> Annuler
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Prolonger abonnement -->
+      <div class="action-section">
+        <div class="action-title">Prolonger l'abonnement</div>
+        <div class="extend-row">
+          <select class="filter-select" [(ngModel)]="extendDays">
+            @for (opt of extendOptions; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+          <button class="btn-extend" (click)="extendSubscription(selectedAgency()!)" [disabled]="isLoading(selectedAgency()!.id)">
+            @if (isLoading(selectedAgency()!.id)) { <i class="pi pi-spin pi-spinner"></i> }
+            @else { <i class="pi pi-calendar-plus"></i> Prolonger }
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}

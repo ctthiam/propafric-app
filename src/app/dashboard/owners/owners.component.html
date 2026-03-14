@@ -1,1 +1,213 @@
-<p>owners works!</p>
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div class="confirm-msg" [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Propriétaires</h1>
+    <p class="page-subtitle">{{ owners().length }} propriétaire(s) enregistré(s)</p>
+  </div>
+  <button class="btn-primary" (click)="openCreate()">
+    <i class="pi pi-plus"></i> Nouveau propriétaire
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher un propriétaire…" (input)="onSearch($event)" />
+  </div>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3,4,5]; track i) {
+        <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
+      }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Propriétaire</th>
+            <th>Contact</th>
+            <th>Biens</th>
+            <th>Frais gestion</th>
+            <th style="width:120px; text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredOwners().length === 0) {
+            <tr>
+              <td colspan="5" class="empty-row">
+                <div class="empty-state-inline">
+                  <i class="pi pi-users"></i>
+                  <span>Aucun propriétaire trouvé</span>
+                </div>
+              </td>
+            </tr>
+          }
+          @for (owner of filteredOwners(); track owner.id) {
+            <tr>
+              <td>
+                <div class="owner-cell">
+                  <div class="owner-avatar">{{ initials(owner) }}</div>
+                  <div>
+                    <div class="owner-name">{{ fullName(owner) }}</div>
+                    <div class="owner-email">{{ owner.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="td-phones">
+                  <span>{{ owner.phone }}</span>
+                  @if (owner.phone_2) {
+                    <span class="td-muted">{{ owner.phone_2 }}</span>
+                  }
+                </div>
+              </td>
+              <td class="td-muted">{{ owner.properties_count ?? 0 }} bien(s)</td>
+              <td class="td-muted">
+                @if (owner.management_fee_value) {
+                  {{ owner.management_fee_type === 'percent' ? owner.management_fee_value + '%' : owner.management_fee_value + ' F' }}
+                } @else { — }
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-edit" (click)="openEdit(owner)" pTooltip="Modifier" tooltipPosition="top">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn-icon btn-delete" (click)="confirmDelete(owner)" pTooltip="Supprimer" tooltipPosition="top">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ─── DRAWER CUSTOM (sans p-sidebar) ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">
+          {{ editingOwner() ? 'Modifier le propriétaire' : 'Nouveau propriétaire' }}
+        </div>
+        @if (editingOwner()) {
+          <div class="drawer-sub">{{ fullName(editingOwner()!) }}</div>
+        }
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
+
+        <div class="form-section-title">Identité</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Prénom <span class="req">*</span></label>
+            <input class="pa-input" formControlName="first_name" placeholder="Ibrahima" />
+            @if (form.get('first_name')?.invalid && form.get('first_name')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Nom <span class="req">*</span></label>
+            <input class="pa-input" formControlName="last_name" placeholder="Mbodj" />
+            @if (form.get('last_name')?.invalid && form.get('last_name')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-section-title">Contact</div>
+        <div class="form-group">
+          <label>Email <span class="req">*</span></label>
+          <input class="pa-input" formControlName="email" type="email" placeholder="ibrahima@gmail.com" />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <span class="form-error">Email invalide</span>
+          }
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Téléphone <span class="req">*</span></label>
+            <input class="pa-input" formControlName="phone" placeholder="+221 77 000 00 00" />
+            @if (form.get('phone')?.invalid && form.get('phone')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Téléphone 2</label>
+            <input class="pa-input" formControlName="phone_2" placeholder="+221 78 000 00 00" />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Adresse</label>
+            <input class="pa-input" formControlName="address" placeholder="Rue 10, Almadies" />
+          </div>
+          <div class="form-group">
+            <label>Ville</label>
+            <input class="pa-input" formControlName="city" placeholder="Dakar" />
+          </div>
+        </div>
+
+        <div class="form-section-title">Pièce d'identité</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Type</label>
+            <p-dropdown formControlName="id_type" [options]="idTypes" optionLabel="label" optionValue="value" placeholder="Sélectionner" />
+          </div>
+          <div class="form-group">
+            <label>Numéro</label>
+            <input class="pa-input" formControlName="id_number" placeholder="1234567890" />
+          </div>
+        </div>
+
+        <div class="form-section-title">Informations bancaires</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Banque</label>
+            <input class="pa-input" formControlName="bank_name" placeholder="CBAO, BIS, Ecobank…" />
+          </div>
+          <div class="form-group">
+            <label>N° de compte</label>
+            <input class="pa-input" formControlName="bank_account" placeholder="SN08…" />
+          </div>
+        </div>
+
+        <div class="form-section-title">Notes</div>
+        <div class="form-group">
+          <textarea class="pa-input" formControlName="notes" rows="3" placeholder="Informations complémentaires…"></textarea>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) {
+              <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+            } @else {
+              <i class="pi pi-check"></i>
+              {{ editingOwner() ? 'Mettre à jour' : 'Enregistrer' }}
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

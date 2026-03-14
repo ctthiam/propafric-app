@@ -1,0 +1,131 @@
+@if (loading()) {
+  <div class="skeleton-grid">
+    @for (i of [1,2,3,4,5,6]; track i) { <p-skeleton height="100px" borderRadius="16px" /> }
+  </div>
+} @else if (data()) {
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Vue d'ensemble</h1>
+    <p class="page-subtitle">Tableau de bord global PropAfric</p>
+  </div>
+  <div class="period-badge"><i class="pi pi-calendar"></i> Ce mois-ci</div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-grid">
+  <div class="kpi-card">
+    <div class="kpi-icon purple"><i class="pi pi-building"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Agences totales</div>
+      <div class="kpi-value">{{ data().agencies.total }}</div>
+      <div class="kpi-sub">
+        <span class="dot green"></span>{{ data().agencies.active }} actives
+        &nbsp;·&nbsp;
+        <span class="dot orange"></span>{{ data().agencies.trial }} en essai
+      </div>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon green"><i class="pi pi-wallet"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Revenus plateforme</div>
+      <div class="kpi-value">{{ formatCurrency(data().revenue.total) }}</div>
+      <div class="kpi-sub">{{ formatCurrency(data().revenue.period) }} ce mois</div>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon blue"><i class="pi pi-home"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Biens gérés</div>
+      <div class="kpi-value">{{ data().properties.total }}</div>
+      <div class="kpi-sub">{{ data().properties.occupied }} occupés · {{ data().properties.available }} disponibles</div>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon gold"><i class="pi pi-file"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Baux actifs</div>
+      <div class="kpi-value">{{ data().leases.active }}</div>
+      <div class="kpi-sub">{{ data().leases.terminated }} résiliés</div>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon teal"><i class="pi pi-users"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Utilisateurs</div>
+      <div class="kpi-value">{{ data().users.total }}</div>
+      <div class="kpi-sub">{{ data().users.new }} nouveaux ce mois</div>
+    </div>
+  </div>
+
+  <div class="kpi-card">
+    <div class="kpi-icon red"><i class="pi pi-plus-circle"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Nouvelles agences</div>
+      <div class="kpi-value">{{ data().agencies.new }}</div>
+      <div class="kpi-sub">Ce mois-ci</div>
+    </div>
+  </div>
+</div>
+
+<!-- Agences récentes -->
+<div class="section-header">
+  <h2 class="section-title">Agences récentes</h2>
+  <a routerLink="/super-admin/agences" class="link-btn">Voir toutes →</a>
+</div>
+
+<div class="table-card">
+  <div class="data-table-wrapper">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Agence</th>
+          <th>Plan</th>
+          <th>Statut</th>
+          <th>Inscription</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (a of data().recent_agencies; track a.id) {
+          <tr>
+            <td>
+              <div class="agency-cell">
+                <div class="agency-avatar">{{ a.name[0] }}</div>
+                <div>
+                  <div class="td-name">{{ a.name }}</div>
+                  <div class="td-muted-sm">{{ a.email }}</div>
+                </div>
+              </div>
+            </td>
+            <td><span class="badge {{ planClass(a.plan) }}">{{ planLabel(a.plan) }}</span></td>
+            <td><span class="badge {{ statusClass(a.status) }}">{{ statusLabel(a.status) }}</span></td>
+            <td class="td-muted">{{ formatDate(a.created_at) }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Inscriptions mensuelles -->
+@if (data().monthly_signups.length > 0) {
+  <div class="section-header" style="margin-top:24px">
+    <h2 class="section-title">Inscriptions mensuelles</h2>
+  </div>
+  <div class="signups-grid">
+    @for (m of data().monthly_signups; track m.month) {
+      <div class="signup-card">
+        <div class="signup-month">{{ m.month }}</div>
+        <div class="signup-count">{{ m.count }}</div>
+        <div class="signup-label">agence(s)</div>
+      </div>
+    }
+  </div>
+}
+
+}

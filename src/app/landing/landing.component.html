@@ -1,1 +1,325 @@
-<p>landing works!</p>
+<!-- Custom Cursor -->
+<div class="cursor" id="pa-cursor"></div>
+<div class="cursor-ring" id="pa-cursor-ring"></div>
+
+<!-- ─── NAVBAR ─── -->
+<nav [ngClass]="{ scrolled: isScrolled }">
+  <a routerLink="/" class="nav-logo">
+    <div class="nav-logo-mark"></div>
+    <span class="nav-logo-text">Prop<span>Afric</span></span>
+  </a>
+  <ul class="nav-links">
+    <li><a (click)="scrollTo('fonctionnalites')">Fonctionnalités</a></li>
+    <li><a (click)="scrollTo('temoignages')">Témoignages</a></li>
+    <li><a (click)="scrollTo('tarifs')">Tarifs</a></li>
+    <li><a (click)="scrollTo('contact')">Contact</a></li>
+  </ul>
+  <div class="nav-cta">
+    <a routerLink="/auth/login" class="btn-outline">Se connecter</a>
+    <a (click)="scrollTo('contact')" class="btn-primary">Demander une démo</a>
+  </div>
+</nav>
+
+<!-- ─── HERO ─── -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-pattern"></div>
+  <div class="hero-blob-1"></div>
+  <div class="hero-blob-2"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Nouveau — Gestion Locative SaaS
+    </div>
+    <h1>
+      Gérez vos biens<br>
+      locatifs avec <em>élégance</em><br>
+      <span class="gold">en Afrique.</span>
+    </h1>
+    <p class="hero-sub">
+      PropAfric centralise la gestion locative de votre agence — baux, loyers, quittances, relevés propriétaires et bien plus. Conçu pour l'Afrique de l'Ouest, pensé pour vos clients.
+    </p>
+    <div class="hero-actions">
+      <a (click)="scrollTo('contact')" class="btn-hero-primary">
+        Démarrer gratuitement
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a (click)="scrollTo('fonctionnalites')" class="btn-hero-secondary">
+        <svg width="15" height="15" fill="currentColor" viewBox="0 0 24 24"><path d="M10 8l6 4-6 4V8z"/></svg>
+        Voir la démo
+      </a>
+    </div>
+    <div class="hero-trust">
+      <div class="hero-trust-avatars">
+        <div class="hero-trust-avatar av1">AK</div>
+        <div class="hero-trust-avatar av2">MD</div>
+        <div class="hero-trust-avatar av3">IF</div>
+        <div class="hero-trust-avatar av4">SO</div>
+      </div>
+      <div class="hero-trust-text">
+        <strong>+50 agences</strong> font confiance à PropAfric<br>
+        au Sénégal et en Afrique de l'Ouest
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard preview card -->
+  <div class="hero-visual">
+    <div class="hero-visual-inner">
+      <div class="hero-card">
+        <div class="hero-card-header">
+          <span class="hero-card-title">Tableau de bord — Mars 2026</span>
+          <span class="hero-card-badge">● En direct</span>
+        </div>
+        <div class="hero-card-stat">
+          <div class="hero-card-stat-item">
+            <div class="hero-card-stat-label">Loyers collectés</div>
+            <div class="hero-card-stat-value">5,2M</div>
+          </div>
+          <div class="hero-card-stat-item">
+            <div class="hero-card-stat-label">Taux de collecte</div>
+            <div class="hero-card-stat-value gold">87%</div>
+          </div>
+          <div class="hero-card-stat-item">
+            <div class="hero-card-stat-label">Biens actifs</div>
+            <div class="hero-card-stat-value">124</div>
+          </div>
+        </div>
+        <div class="hero-card-bar"><div class="hero-card-bar-fill"></div></div>
+        <div class="hero-card-row" *ngFor="let r of dashboardRows">
+          <div class="hero-card-row-left">
+            <div class="hero-card-dot" [ngClass]="r.dot"></div>
+            <div class="hero-card-row-name">{{ r.name }}</div>
+          </div>
+          <div class="hero-card-row-amount" [ngClass]="{ 'text-red': r.late }">{{ r.amount }}</div>
+        </div>
+      </div>
+      <div class="hero-card-float float-1">
+        <div class="float-icon green">📄</div>
+        <div>
+          <div class="float-text-label">Quittance générée</div>
+          <div class="float-text-value">QUIT-2026-087</div>
+        </div>
+      </div>
+      <div class="hero-card-float float-2">
+        <div class="float-icon gold">💰</div>
+        <div>
+          <div class="float-text-label">Net propriétaire</div>
+          <div class="float-text-value">183 000 F</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── LOGOS ─── -->
+<div class="logos-section">
+  <div class="logos-label">Ils nous font confiance</div>
+  <div class="logos-row">
+    <span class="logo-item">Citron Vert Immo</span>
+    <span class="logo-item">Zénith Immobilier</span>
+    <span class="logo-item">Dakar Habitat</span>
+    <span class="logo-item">Prestige Realty</span>
+    <span class="logo-item">West Africa Properties</span>
+  </div>
+</div>
+
+<!-- ─── PROBLÈME / SOLUTION ─── -->
+<section class="problem-section">
+  <div class="problem-pattern"></div>
+  <div class="problem-grid">
+    <div>
+      <div class="problem-eyebrow">Le constat</div>
+      <h2 class="problem-title">La gestion locative<br><em>manuelle, c'est fini.</em></h2>
+      <p class="problem-text">
+        Les agences immobilières africaines perdent des heures chaque semaine sur des tâches qui pourraient être automatisées. Erreurs de calcul, quittances perdues, propriétaires insatisfaits.
+      </p>
+      <ul class="pain-list">
+        <li class="pain-item reveal" *ngFor="let p of painPoints; let i = index" [ngClass]="'reveal-delay-' + i">
+          <div class="pain-icon">{{ p.icon }}</div>
+          <div class="pain-text">
+            <strong>{{ p.title }}</strong>
+            {{ p.text }}
+          </div>
+        </li>
+      </ul>
+    </div>
+    <div class="solution-cards">
+      <div class="solution-card reveal" *ngFor="let s of solutionCards; let i = index" [ngClass]="'reveal-delay-' + i">
+        <div class="solution-card-icon">{{ s.icon }}</div>
+        <div class="solution-card-title">{{ s.title }}</div>
+        <div class="solution-card-text">{{ s.text }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FONCTIONNALITÉS ─── -->
+<section class="features-section" id="fonctionnalites">
+  <div class="features-header reveal">
+    <div class="section-eyebrow">Fonctionnalités</div>
+    <h2 class="section-title">Tout ce dont votre<br>agence a <em>besoin</em></h2>
+    <p class="section-desc">Une plateforme pensée pour les réalités du marché immobilier africain.</p>
+  </div>
+  <div class="features-grid">
+    <div
+      class="feature-card reveal"
+      *ngFor="let f of features; let i = index"
+      [ngClass]="{ featured: f.featured, 'reveal-delay-1': i % 3 === 1, 'reveal-delay-2': i % 3 === 2 }"
+    >
+      <div class="feature-icon">{{ f.icon }}</div>
+      <div class="feature-number">{{ f.num }}</div>
+      <div class="feature-title">{{ f.title }}</div>
+      <p class="feature-text">{{ f.text }}</p>
+      <span class="feature-tag" *ngIf="f.tag">{{ f.tag }}</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── STATS ─── -->
+<section class="stats-section">
+  <div class="stats-grid">
+    <div class="stat-item reveal" *ngFor="let s of stats; let i = index" [ngClass]="'reveal-delay-' + i">
+      <div class="stat-number">{{ s.value }}</div>
+      <div class="stat-label">{{ s.label }}</div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── TÉMOIGNAGES ─── -->
+<section class="testimonials-section" id="temoignages">
+  <div class="testimonials-header reveal">
+    <div class="section-eyebrow">Témoignages</div>
+    <h2 class="section-title">Ce que disent nos <em>clients</em></h2>
+  </div>
+  <div class="testimonials-grid">
+    <div
+      class="testimonial-card reveal"
+      *ngFor="let t of testimonials; let i = index"
+      [ngClass]="{ 'featured-t': t.featured, 'reveal-delay-1': i === 1, 'reveal-delay-2': i === 2 }"
+    >
+      <div class="testimonial-quote">"</div>
+      <div class="testimonial-stars">★★★★★</div>
+      <p class="testimonial-text">{{ t.quote }}</p>
+      <div class="testimonial-author">
+        <div class="testimonial-avatar">{{ t.initials }}</div>
+        <div>
+          <div class="testimonial-name">{{ t.name }}</div>
+          <div class="testimonial-role">{{ t.role }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ─── PRICING ─── -->
+<section class="pricing-section" id="tarifs">
+  <div class="pricing-header reveal">
+    <div class="section-eyebrow">Tarifs</div>
+    <h2 class="section-title">Simple, <em>transparent</em>,<br>sans surprise</h2>
+    <p class="section-desc">Tous les plans incluent les mises à jour, le support et la migration de vos données.</p>
+    <div class="pricing-toggle">
+      <button class="toggle-btn" [ngClass]="{ active: pricingMode === 'mensuel' }" (click)="setPricingMode('mensuel')">Mensuel</button>
+      <button class="toggle-btn" [ngClass]="{ active: pricingMode === 'annuel' }" (click)="setPricingMode('annuel')">Annuel <span class="discount">-20%</span></button>
+    </div>
+  </div>
+  <div class="pricing-grid">
+    <div
+      class="pricing-card reveal"
+      *ngFor="let plan of plans; let i = index"
+      [ngClass]="{ popular: plan.popular, 'reveal-delay-1': i === 1, 'reveal-delay-2': i === 2 }"
+    >
+      <div class="pricing-badge" *ngIf="plan.popular">Le plus populaire</div>
+      <div class="pricing-plan">{{ plan.name }}</div>
+      <div class="pricing-price">
+        <span *ngIf="plan.priceMonthly" class="pricing-currency">F</span>
+        <span class="price-val">{{ getPlanPrice(plan) }}</span>
+      </div>
+      <div class="pricing-period">{{ plan.period }}</div>
+      <div class="pricing-desc">{{ plan.desc }}</div>
+      <ul class="pricing-features">
+        <li class="pricing-feature" *ngFor="let feat of plan.features">
+          <span class="pricing-check"></span>{{ feat }}
+        </li>
+      </ul>
+      <a
+        (click)="scrollTo('contact')"
+        class="btn-pricing"
+        [ngClass]="plan.popular ? 'btn-pricing-white' : 'btn-pricing-outline'"
+      >{{ plan.cta }}</a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── CTA FINAL ─── -->
+<section class="cta-section" id="contact">
+  <div class="cta-content">
+    <div class="section-eyebrow gold-eyebrow">Prêt à démarrer ?</div>
+    <h2 class="cta-title">Votre agence mérite<br>le <em>meilleur</em> outil.</h2>
+    <p class="cta-sub">Rejoignez les agences immobilières d'Afrique de l'Ouest qui ont déjà digitalisé leur gestion locative avec PropAfric. Démo gratuite, migration offerte.</p>
+    <div class="cta-actions">
+      <a href="mailto:contact@propafric.com" class="btn-cta-primary">
+        Demander une démo gratuite
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </a>
+      <a href="tel:+221000000000" class="btn-cta-secondary">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 12 19.79 19.79 0 011.64 3.42 2 2 0 013.6 1.26h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L7.91 8.96a16 16 0 006.08 6.08l.96-.96a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        Appeler l'équipe
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ─── FOOTER ─── -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-brand-name">PropAfric</div>
+      <div class="footer-brand-desc">
+        La plateforme de gestion locative conçue pour les agences immobilières d'Afrique de l'Ouest. Simple, puissant, conforme aux réalités du marché.
+      </div>
+      <div class="footer-social">
+        <a href="#" class="footer-social-btn">in</a>
+        <a href="#" class="footer-social-btn">𝕏</a>
+        <a href="#" class="footer-social-btn">fb</a>
+        <a href="#" class="footer-social-btn">▶</a>
+      </div>
+    </div>
+    <div>
+      <div class="footer-col-title">Produit</div>
+      <ul class="footer-links">
+        <li><a href="#">Fonctionnalités</a></li>
+        <li><a href="#">Tarifs</a></li>
+        <li><a href="#">Nouveautés</a></li>
+        <li><a href="#">API</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Agences</div>
+      <ul class="footer-links">
+        <li><a href="#">Démo gratuite</a></li>
+        <li><a href="#">Migration données</a></li>
+        <li><a href="#">Formation</a></li>
+        <li><a href="#">Partenaires</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Entreprise</div>
+      <ul class="footer-links">
+        <li><a href="#">À propos</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Contact</a></li>
+        <li><a href="#">Presse</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2026 PropAfric — Gestion Locative Intelligente pour l'Afrique 🇸🇳</div>
+    <div class="footer-legal">
+      <a href="#">Confidentialité</a>
+      <a href="#">CGU</a>
+      <a href="#">Mentions légales</a>
+    </div>
+  </div>
+</footer>

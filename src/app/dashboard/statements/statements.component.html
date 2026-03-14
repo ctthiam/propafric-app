@@ -1,1 +1,164 @@
-<p>statements works!</p>
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div class="confirm-msg" [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Relevés propriétaires</h1>
+    <p class="page-subtitle">{{ statements().length }} relevé(s) généré(s)</p>
+  </div>
+  <button class="btn-primary" (click)="openGenerate()">
+    <i class="pi pi-file-plus"></i> Générer un relevé
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Période, propriétaire…" (input)="onSearch($event)" />
+  </div>
+  <select class="filter-select" (change)="onFilterStatus($any($event.target).value)">
+    @for (opt of statusOptions; track opt.value) {
+      <option [value]="opt.value">{{ opt.label }}</option>
+    }
+  </select>
+  <select class="filter-select" (change)="onFilterOwner($any($event.target).value ? +$any($event.target).value : null)">
+    <option value="">Tous les propriétaires</option>
+    @for (o of owners(); track o.id) {
+      <option [value]="o.id">{{ o.full_name }}</option>
+    }
+  </select>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3,4]; track i) {
+        <p-skeleton height="56px" borderRadius="8px" styleClass="mb-2" />
+      }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Propriétaire</th>
+            <th>Période</th>
+            <th>Loyers encaissés</th>
+            <th>Net propriétaire</th>
+            <th>Statut</th>
+            <th>Généré le</th>
+            <th style="width:110px; text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredStatements().length === 0) {
+            <tr>
+              <td colspan="7" class="empty-row">
+                <div class="empty-state-inline">
+                  <i class="pi pi-chart-bar"></i>
+                  <span>Aucun relevé — cliquez sur "Générer un relevé" pour commencer</span>
+                </div>
+              </td>
+            </tr>
+          }
+          @for (stmt of filteredStatements(); track stmt.id) {
+            <tr>
+              <td>
+                <div class="owner-cell">
+                  <div class="owner-avatar">{{ ownerInitials(stmt) }}</div>
+                  <div class="td-name">{{ stmt.owner?.full_name ?? '—' }}</div>
+                </div>
+              </td>
+              <td>
+                <div class="period-cell">
+                  <span class="period-label">{{ stmt.period_label }}</span>
+                  <span class="period-dates">{{ formatDateDisplay(stmt.period_start) }} → {{ formatDateDisplay(stmt.period_end) }}</span>
+                </div>
+              </td>
+              <td class="td-amount-green">{{ formatCurrency(stmt.total_rent_collected) }}</td>
+              <td>
+                <span class="net-amount">{{ formatCurrency(stmt.final_net_amount) }}</span>
+              </td>
+              <td><span class="badge {{ statusClass(stmt.status) }}">{{ statusLabel(stmt.status) }}</span></td>
+              <td class="td-muted">{{ stmt.generated_at ? formatDateDisplay(stmt.generated_at.split(' ')[0]) : '—' }}</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-pdf" (click)="downloadPdf(stmt)" [disabled]="isDownloading(stmt.id)" pTooltip="Télécharger PDF" tooltipPosition="top">
+                    <i [class]="isDownloading(stmt.id) ? 'pi pi-spin pi-spinner' : 'pi pi-file-pdf'"></i>
+                  </button>
+                  <button class="btn-icon btn-delete" (click)="confirmDelete(stmt)" pTooltip="Supprimer" tooltipPosition="top">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ─── DRAWER GÉNÉRATION ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">Générer un relevé</div>
+        <div class="drawer-sub">Sélectionnez le propriétaire et la période</div>
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="drawer-body">
+      <form [formGroup]="generateForm" class="drawer-form">
+
+        <div class="form-section-title">Paramètres</div>
+        <div class="form-group">
+          <label>Propriétaire <span class="req">*</span></label>
+          <p-dropdown formControlName="owner_id" [options]="ownerOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un propriétaire" [filter]="true" styleClass="w-full" />
+          @if (generateForm.get('owner_id')?.invalid && generateForm.get('owner_id')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Début de période <span class="req">*</span></label>
+            <p-calendar formControlName="period_start" dateFormat="dd/mm/yy" [showIcon]="true" placeholder="01/01/2026" styleClass="w-full" />
+            @if (generateForm.get('period_start')?.invalid && generateForm.get('period_start')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Fin de période <span class="req">*</span></label>
+            <p-calendar formControlName="period_end" dateFormat="dd/mm/yy" [showIcon]="true" placeholder="31/01/2026" styleClass="w-full" />
+            @if (generateForm.get('period_end')?.invalid && generateForm.get('period_end')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+        </div>
+
+        <div class="info-box">
+          <i class="pi pi-info-circle"></i>
+          Le relevé inclura tous les loyers encaissés et dépenses imputées au propriétaire pour la période sélectionnée.
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+          <button type="button" class="btn-primary" (click)="generate()" [disabled]="saving() || generateForm.invalid">
+            @if (saving()) {
+              <i class="pi pi-spin pi-spinner"></i> Génération…
+            } @else {
+              <i class="pi pi-file-export"></i> Générer & Enregistrer
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

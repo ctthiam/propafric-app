@@ -1,0 +1,56 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Échéances</h1>
+    <p class="page-subtitle">Suivi des loyers de vos biens</p>
+  </div>
+</div>
+
+@if (!loading()) {
+  <div class="summary-grid">
+    <div class="summary-card green"><div class="summary-label">Total encaissé</div><div class="summary-value">{{ formatCurrency(totalCollected) }}</div></div>
+    <div class="summary-card" [class.red]="totalPending > 0"><div class="summary-label">Solde restant</div><div class="summary-value">{{ formatCurrency(totalPending) }}</div></div>
+  </div>
+}
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Période, bien, locataire…" (input)="onSearch($event)" />
+  </div>
+  <select class="filter-select" (change)="onFilter($any($event.target).value)">
+    @for (opt of statusOptions; track opt.value) { <option [value]="opt.value">{{ opt.label }}</option> }
+  </select>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3,4,5]; track i) { <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" /> }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr><th>Période</th><th>Bien</th><th>Locataire</th><th>Échéance</th><th>Dû</th><th>Payé</th><th>Solde</th><th>Statut</th></tr>
+        </thead>
+        <tbody>
+          @if (filteredSchedules().length === 0) {
+            <tr><td colspan="8" class="empty-row">Aucune échéance trouvée</td></tr>
+          }
+          @for (s of filteredSchedules(); track s.id) {
+            <tr [class.overdue-row]="s.status === 'late'">
+              <td class="td-name">{{ s.period_label }}</td>
+              <td class="td-muted">{{ s.property?.name }}</td>
+              <td class="td-muted">{{ s.tenant?.full_name }}</td>
+              <td class="td-muted">{{ formatDate(s.due_date) }}</td>
+              <td class="td-amount">{{ formatCurrency(s.total_amount) }}</td>
+              <td class="td-paid">{{ formatCurrency(s.amount_paid) }}</td>
+              <td [class.td-danger]="Number(s.balance) > 0">{{ formatCurrency(s.balance) }}</td>
+              <td><span class="badge {{ statusClass(s.status) }}">{{ statusLabel(s.status) }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>

@@ -1,1 +1,103 @@
-<p>layout works!</p>
+<div class="dashboard-shell" [class.sidebar-collapsed]="collapsed()" [class.mobile-open]="mobileOpen()">
+
+  <!-- ─── SIDEBAR ─── -->
+  <aside class="sidebar">
+
+    <!-- Logo -->
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark"></div>
+      <span class="sidebar-logo-text" *ngIf="!collapsed()">
+        Prop<span>Afric</span>
+      </span>
+    </div>
+
+    <!-- Toggle collapse (desktop) -->
+    <button class="sidebar-toggle" (click)="toggleSidebar()" title="Réduire le menu">
+      <i [class]="collapsed() ? 'pi pi-angle-right' : 'pi pi-angle-left'"></i>
+    </button>
+
+    <!-- Navigation -->
+    <nav class="sidebar-nav">
+      <a
+        *ngFor="let item of navItems"
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+        class="nav-item"
+        [title]="collapsed() ? item.label : ''"
+        (click)="closeMobile()"
+      >
+        <i [class]="item.icon"></i>
+        <span class="nav-label" *ngIf="!collapsed()">{{ item.label }}</span>
+        <span class="nav-badge" *ngIf="item.badge && !collapsed()">{{ item.badge }}</span>
+      </a>
+    </nav>
+
+    <!-- User + logout -->
+    <div class="sidebar-footer">
+      <div class="sidebar-user" *ngIf="!collapsed()">
+        <div class="sidebar-avatar">{{ userInitials }}</div>
+        <div class="sidebar-user-info">
+          <div class="sidebar-user-name">{{ user()?.name }}</div>
+          <div class="sidebar-user-role">{{ user()?.role === 'agency_admin' ? 'Admin Agence' : user()?.role }}</div>
+        </div>
+      </div>
+      <div class="sidebar-avatar sidebar-avatar-solo" *ngIf="collapsed()">{{ userInitials }}</div>
+      <button class="sidebar-logout" (click)="logout()" [title]="collapsed() ? 'Déconnexion' : ''">
+        <i class="pi pi-sign-out"></i>
+        <span *ngIf="!collapsed()">Déconnexion</span>
+      </button>
+    </div>
+
+  </aside>
+
+  <!-- Overlay mobile -->
+  <div class="sidebar-overlay" *ngIf="mobileOpen()" (click)="closeMobile()"></div>
+
+  <!-- ─── MAIN ─── -->
+  <div class="dashboard-main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <!-- Burger mobile -->
+      <button class="topbar-burger" (click)="toggleMobile()">
+        <i class="pi pi-bars"></i>
+      </button>
+
+      <!-- Fil d'Ariane / Titre -->
+      <div class="topbar-left">
+        <div class="topbar-brand">PropAfric</div>
+      </div>
+
+      <!-- Actions droite -->
+      <div class="topbar-right">
+        <!-- Notifications -->
+        <a routerLink="/dashboard/notifications" class="topbar-icon-btn" title="Notifications">
+          <i class="pi pi-bell"></i>
+          <span class="notif-dot"></span>
+        </a>
+
+        <!-- Séparateur -->
+        <div class="topbar-sep"></div>
+
+        <!-- User -->
+        <div class="topbar-user">
+          <div class="topbar-avatar">{{ userInitials }}</div>
+          <div class="topbar-user-info">
+            <div class="topbar-user-name">{{ user()?.name }}</div>
+            <div class="topbar-user-role">
+              {{ user()?.role === 'agency_admin' ? 'Admin Agence' : user()?.role }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page content -->
+    <main class="dashboard-content">
+      <router-outlet></router-outlet>
+    </main>
+
+  </div>
+
+</div>

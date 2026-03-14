@@ -1,1 +1,226 @@
-<p>home works!</p>
+<!-- ─── PAGE HEADER ─── -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Tableau de bord</h1>
+    <p class="page-subtitle">Vue d'ensemble de votre agence</p>
+  </div>
+  <div class="page-header-right">
+    <div class="period-toggle">
+      <button [class.active]="period() === 'month'"   (click)="setPeriod('month')">Mois</button>
+      <button [class.active]="period() === 'quarter'" (click)="setPeriod('quarter')">Trimestre</button>
+      <button [class.active]="period() === 'year'"    (click)="setPeriod('year')">Année</button>
+    </div>
+  </div>
+</div>
+
+<!-- ─── SKELETON ─── -->
+@if (loading()) {
+  <div class="stats-grid">
+    @for (i of [1,2,3,4]; track i) {
+      <div class="stat-card skeleton-card"><p-skeleton height="80px" borderRadius="12px" /></div>
+    }
+  </div>
+  <div class="charts-grid">
+    <p-skeleton height="300px" borderRadius="16px" />
+    <p-skeleton height="300px" borderRadius="16px" />
+  </div>
+}
+
+<!-- ─── CONTENU ─── -->
+@if (!loading() && data(); as d) {
+
+  <!-- Stats -->
+  <div class="stats-grid">
+
+    <!-- Biens occupés -->
+    <div class="stat-card">
+      <div class="stat-icon green"><i class="pi pi-building"></i></div>
+      <div class="stat-body">
+        <div class="stat-label">Biens occupés</div>
+        <div class="stat-value">
+          {{ d.occupancy.occupied }}<span class="stat-total"> / {{ d.occupancy.total }}</span>
+        </div>
+        <div class="stat-sub">
+          <div class="stat-bar">
+            <div class="stat-bar-fill" [style.width.%]="occupancyRate()"></div>
+          </div>
+          <span>{{ occupancyRate() }}% d'occupation</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loyers collectés -->
+    <div class="stat-card">
+      <div class="stat-icon gold"><i class="pi pi-credit-card"></i></div>
+      <div class="stat-body">
+        <div class="stat-label">Loyers collectés</div>
+        <div class="stat-value">{{ formatAmount(d.financials.total_collected) }}</div>
+        <div class="stat-sub green-text">
+          <i class="pi pi-chart-line"></i>
+          Taux de collecte : {{ d.financials.collection_rate }}%
+        </div>
+      </div>
+    </div>
+
+    <!-- Locataires -->
+    <div class="stat-card">
+      <div class="stat-icon blue"><i class="pi pi-users"></i></div>
+      <div class="stat-body">
+        <div class="stat-label">Locataires actifs</div>
+        <div class="stat-value">{{ d.kpis.total_tenants }}</div>
+        <div class="stat-sub">
+          <span>{{ d.kpis.active_leases }} bail(s) actif(s)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Retards -->
+    <div class="stat-card" [class.danger]="d.alerts.counts.late > 0">
+      <div class="stat-icon red"><i class="pi pi-exclamation-triangle"></i></div>
+      <div class="stat-body">
+        <div class="stat-label">Loyers en retard</div>
+        <div class="stat-value">{{ d.alerts.counts.late }}</div>
+        @if (d.alerts.counts.late > 0) {
+          <div class="stat-sub red-text">
+            <i class="pi pi-info-circle"></i>
+            {{ formatAmount(d.financials.total_late) }} à recouvrer
+          </div>
+        } @else {
+          <div class="stat-sub green-text">
+            <i class="pi pi-check-circle"></i>
+            Aucun retard
+          </div>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Charts -->
+  <div class="charts-grid">
+
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">Collections mensuelles</div>
+          <div class="chart-card-sub">Loyers encaissés en F CFA</div>
+        </div>
+      </div>
+      @if (collectionsChart(); as cc) {
+        <apx-chart
+          [series]="cc.series" [chart]="cc.chart" [xaxis]="cc.xaxis"
+          [yaxis]="cc.yaxis" [stroke]="cc.stroke" [fill]="cc.fill"
+          [tooltip]="cc.tooltip" [grid]="cc.grid" [colors]="cc.colors"
+          [dataLabels]="cc.dataLabels"
+        />
+      }
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-card-header">
+        <div>
+          <div class="chart-card-title">Occupation des biens</div>
+          <div class="chart-card-sub">Répartition par statut</div>
+        </div>
+      </div>
+      @if (leasesChart(); as lc) {
+        <apx-chart
+          [series]="lc.series" [chart]="lc.chart" [labels]="lc.labels"
+          [colors]="lc.colors" [legend]="lc.legend" [dataLabels]="lc.dataLabels"
+          [plotOptions]="lc.plotOptions" [responsive]="lc.responsive"
+          [tooltip]="lc.tooltip"
+        />
+      }
+    </div>
+
+  </div>
+
+  <!-- Tables -->
+  <div class="tables-grid">
+
+    <!-- Paiements récents → on utilise les late_schedules -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <div class="table-card-title">Loyers en retard</div>
+        <a routerLink="/dashboard/paiements" class="table-card-link">Voir tout →</a>
+      </div>
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Locataire</th>
+              <th>Bien</th>
+              <th>Échéance</th>
+              <th>Solde dû</th>
+              <th>Retard</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (d.alerts.late_schedules.length === 0) {
+              <tr>
+                <td colspan="5" class="empty-row">
+                  <i class="pi pi-check-circle" style="color:#52b788;margin-right:6px"></i>
+                  Aucun retard — tout est à jour !
+                </td>
+              </tr>
+            }
+            @for (s of d.alerts.late_schedules; track s.id) {
+              <tr class="overdue-row">
+                <td class="td-name">{{ s.tenant }}</td>
+                <td class="td-muted">{{ s.property }}</td>
+                <td class="td-muted">{{ formatDate(s.due_date) }}</td>
+                <td class="td-overdue">{{ formatAmount(s.balance) }}</td>
+                <td><span class="badge badge-danger">{{ s.days_overdue }}j</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Collections du mois -->
+    <div class="table-card">
+      <div class="table-card-header">
+        <div class="table-card-title">Collections — {{ d.period.label }}</div>
+        <a routerLink="/dashboard/paiements" class="table-card-link">Paiements →</a>
+      </div>
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mois</th>
+              <th>Attendu</th>
+              <th>Collecté</th>
+              <th>Taux</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of d.collections; track c.month) {
+              <tr>
+                <td class="td-name">{{ c.month }}</td>
+                <td class="td-muted">{{ formatAmount(c.due) }}</td>
+                <td class="td-amount">{{ formatAmount(c.collected) }}</td>
+                <td>
+                  <span class="badge" [class.badge-success]="c.rate === 100" [class.badge-warning]="c.rate > 0 && c.rate < 100" [class.badge-danger]="c.rate === 0 && c.due > 0">
+                    {{ c.rate }}%
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+}
+
+<!-- ─── EMPTY STATE ─── -->
+@if (!loading() && !data()) {
+  <div class="empty-state">
+    <i class="pi pi-exclamation-circle"></i>
+    <p>Impossible de charger les données du tableau de bord.</p>
+    <button (click)="loadDashboard()" class="btn-retry">Réessayer</button>
+  </div>
+}

@@ -1,0 +1,60 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mon bail</h1>
+    <p class="page-subtitle">Détails de votre contrat de location</p>
+  </div>
+</div>
+
+@if (loading()) {
+  <p-skeleton height="400px" borderRadius="16px" />
+} @else if (lease()) {
+  <div class="lease-card">
+
+    <!-- En-tête -->
+    <div class="lease-header">
+      <div class="lease-ref">
+        <span class="badge badge-ref">{{ lease().reference }}</span>
+        <span class="badge {{ statusClass(lease().status) }}">{{ statusLabel(lease().status) }}</span>
+      </div>
+      <div class="lease-property">
+        <i class="pi pi-building"></i>
+        <div>
+          <div class="prop-name">{{ lease().property?.name }}</div>
+          <div class="prop-address">{{ lease().property?.address }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Détails -->
+    <div class="lease-grid">
+
+      <div class="lease-section">
+        <div class="section-title">Durée du bail</div>
+        <div class="detail-row"><span>Date de début</span><strong>{{ formatDate(lease().start_date) }}</strong></div>
+        <div class="detail-row"><span>Date de fin</span><strong>{{ lease().end_date ? formatDate(lease().end_date) : 'CDI (durée indéterminée)' }}</strong></div>
+        <div class="detail-row"><span>Type de contrat</span><strong>{{ lease().contract_type ?? '—' }}</strong></div>
+        <div class="detail-row"><span>Fréquence</span><strong>{{ lease().payment_frequency === 'monthly' ? 'Mensuel' : lease().payment_frequency }}</strong></div>
+      </div>
+
+      <div class="lease-section">
+        <div class="section-title">Financier</div>
+        <div class="detail-row"><span>Loyer total TTC</span><strong class="green">{{ formatCurrency(lease().total_rent) }}</strong></div>
+        <div class="detail-row"><span>Prochain réajustement</span><strong>{{ lease().next_revision_date ? formatDate(lease().next_revision_date) : '—' }}</strong></div>
+      </div>
+
+      @if (lease().tenant) {
+        <div class="lease-section">
+          <div class="section-title">Locataire</div>
+          <div class="detail-row"><span>Nom</span><strong>{{ lease().tenant.full_name }}</strong></div>
+          <div class="detail-row"><span>Téléphone</span><strong>{{ lease().tenant.phone }}</strong></div>
+        </div>
+      }
+
+    </div>
+  </div>
+} @else {
+  <div class="empty-state">
+    <i class="pi pi-file"></i>
+    <p>Aucun bail actif trouvé.</p>
+  </div>
+}

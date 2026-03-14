@@ -1,0 +1,63 @@
+$green-main:  #2D6A4F;
+$green-light: #52b788;
+$gold-main:   #C9A84C;
+$cream:       #faf8f3;
+$ink:         #0d1f17;
+$ink-light:   #4a6357;
+$white:       #ffffff;
+$red:         #e57373;
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+:host { display: block; animation: fadeUp 0.35s ease both; }
+
+.page-header { margin-bottom: 24px; }
+.page-title { font-family: "Cormorant Garamond", serif; font-size: 28px; font-weight: 700; color: $ink; margin: 0 0 4px; }
+.page-subtitle { font-size: 14px; color: $ink-light; margin: 0; }
+
+.summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 20px; }
+.summary-card { background: $white; border-radius: 12px; border: 1px solid rgba($ink, 0.06); padding: 16px 20px; &.green .summary-value { color: $green-main; } &.red .summary-value { color: $red; } }
+.summary-label { font-size: 11px; font-weight: 700; color: $ink-light; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+.summary-value { font-size: 20px; font-weight: 700; color: $ink; font-family: "DM Sans", sans-serif; }
+
+.toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.search-box { position: relative; flex: 1; min-width: 240px; max-width: 400px; i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: rgba($ink, 0.35); font-size: 14px; pointer-events: none; } input { width: 100%; padding: 10px 14px 10px 38px; background: $white; border: 1.5px solid rgba($ink, 0.1); border-radius: 10px; font-size: 14px; color: $ink; font-family: "DM Sans", sans-serif; outline: none; &::placeholder { color: rgba($ink, 0.3); } &:focus { border-color: $green-main; } } }
+.filter-select { padding: 10px 14px; background: $white; border: 1.5px solid rgba($ink, 0.1); border-radius: 10px; font-size: 14px; color: $ink; font-family: "DM Sans", sans-serif; outline: none; cursor: pointer; min-width: 160px; }
+
+.table-card { background: $white; border-radius: 16px; border: 1px solid rgba($ink, 0.06); overflow: hidden; }
+.skeleton-rows { padding: 20px; }
+.data-table-wrapper { overflow-x: auto; }
+.data-table { width: 100%; border-collapse: collapse; th { background: $cream; color: $ink-light; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 12px 16px; border-bottom: 1px solid rgba($ink, 0.07); text-align: left; } td { padding: 13px 16px; border-bottom: 1px solid rgba($ink, 0.04); font-size: 13px; color: $ink; vertical-align: middle; } tr:last-child td { border-bottom: none; } tbody tr:hover td { background: rgba($green-main, 0.025); } .overdue-row td { background: rgba($red, 0.03); } }
+
+.badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+.badge-ref     { background: rgba($gold-main, 0.12); color: darken($gold-main, 15%); font-family: monospace; }
+.badge-method  { background: rgba($green-main, 0.08); color: $green-main; }
+.badge-success { background: rgba($green-light, 0.15); color: darken($green-light, 20%); }
+.badge-warning { background: rgba($gold-main, 0.15); color: darken($gold-main, 15%); }
+.badge-neutral { background: rgba($ink, 0.07); color: $ink-light; }
+.badge-danger  { background: rgba($red, 0.12); color: darken($red, 15%); }
+
+.td-name   { font-size: 13px; font-weight: 600; color: $ink; }
+.td-muted  { color: $ink-light; font-size: 13px; }
+.td-amount { font-size: 13px; font-weight: 600; color: $ink; }
+.td-paid   { font-size: 13px; color: $green-main; font-weight: 500; }
+.td-danger { color: $red; font-weight: 600; }
+.overdue-days { color: $red; font-weight: 700; font-size: 12px; }
+.empty-row { text-align: center; padding: 40px; color: $ink-light; }
+.actions-cell { display: flex; justify-content: center; }
+
+.btn-download { display: inline-flex; align-items: center; gap: 6px; padding: 7px 14px; background: rgba($gold-main, 0.1); color: darken($gold-main, 10%); border: 1px solid rgba($gold-main, 0.25); border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: "DM Sans", sans-serif; &:hover:not(:disabled) { background: rgba($gold-main, 0.2); } &:disabled { opacity: 0.5; cursor: not-allowed; } }
+
+// Lease card
+.lease-card { background: $white; border-radius: 16px; border: 1px solid rgba($ink, 0.06); overflow: hidden; }
+.lease-header { padding: 24px; border-bottom: 1px solid rgba($ink, 0.06); display: flex; flex-direction: column; gap: 16px; }
+.lease-ref { display: flex; align-items: center; gap: 10px; }
+.lease-property { display: flex; align-items: center; gap: 12px; i { font-size: 20px; color: $green-main; } }
+.prop-name    { font-size: 18px; font-weight: 700; color: $ink; }
+.prop-address { font-size: 13px; color: $ink-light; margin-top: 2px; }
+.lease-grid { padding: 24px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 32px; }
+.lease-section { display: flex; flex-direction: column; gap: 12px; }
+.section-title { font-size: 11px; font-weight: 700; color: $ink-light; text-transform: uppercase; letter-spacing: 1px; padding-bottom: 8px; border-bottom: 1px solid rgba($ink, 0.07); }
+.detail-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; span { color: $ink-light; } strong { color: $ink; font-weight: 600; &.green { color: $green-main; } } }
+.empty-state { text-align: center; padding: 60px; color: $ink-light; i { font-size: 40px; display: block; margin-bottom: 12px; } }
+
+:host ::ng-deep .p-toast { top: 80px !important; }
