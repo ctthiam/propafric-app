@@ -16,6 +16,7 @@ export class SuperLayoutComponent {
   navItems = [
     { label: 'Dashboard',  icon: 'pi pi-home',       route: '/super-admin/dashboard' },
     { label: 'Agences',    icon: 'pi pi-building',    route: '/super-admin/agences' },
+    { label: 'Revenus',    icon: 'pi pi-chart-bar',   route: '/super-admin/revenus' },
   ];
 
   constructor(public auth: AuthService) {}

@@ -10,9 +10,15 @@
     <h1 class="page-title">Paiements</h1>
     <p class="page-subtitle">Encaissements et suivi des échéances</p>
   </div>
-  <button class="btn-primary" (click)="openCreate()">
-    <i class="pi pi-plus"></i> Enregistrer un paiement
-  </button>
+  <div class="page-header-actions">
+    <button class="btn-secondary btn-export" (click)="exportExcel()" [disabled]="exporting()">
+      @if (exporting()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-file-excel"></i> }
+      Exporter
+    </button>
+    <button class="btn-primary" (click)="openCreate()">
+      <i class="pi pi-plus"></i> Enregistrer un paiement
+    </button>
+  </div>
 </div>
 
 <!-- Onglets -->

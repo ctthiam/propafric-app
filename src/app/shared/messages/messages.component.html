@@ -1,0 +1,210 @@
+<p-toast position="top-right" />
+
+<div class="messages-shell">
+
+  <!-- ─── COLONNE GAUCHE : Liste conversations ─── -->
+  <div class="conv-panel">
+    <div class="conv-panel-header">
+      <div class="conv-panel-title">
+        Messages
+        @if (totalUnread > 0) {
+          <span class="unread-badge">{{ totalUnread }}</span>
+        }
+      </div>
+      <button class="btn-new-conv" (click)="openNewConv()" title="Nouvelle conversation">
+        <i class="pi pi-plus"></i>
+      </button>
+    </div>
+
+    <div class="conv-search">
+      <i class="pi pi-search"></i>
+      <input type="text" placeholder="Rechercher…" (input)="onSearch($event)" />
+    </div>
+
+    <div class="conv-list">
+      @if (loadingConvs()) {
+        @for (i of [1,2,3]; track i) {
+          <div class="conv-skeleton">
+            <p-skeleton shape="circle" size="40px" />
+            <div style="flex:1">
+              <p-skeleton height="14px" width="60%" styleClass="mb-1" />
+              <p-skeleton height="12px" width="80%" />
+            </div>
+          </div>
+        }
+      } @else if (filteredConvs().length === 0) {
+        <div class="conv-empty">
+          <i class="pi pi-comments"></i>
+          <span>Aucune conversation</span>
+        </div>
+      } @else {
+        @for (conv of filteredConvs(); track conv.id) {
+          <div
+            class="conv-item"
+            [class.active]="activeConv()?.id === conv.id"
+            [class.has-unread]="conv.unread_count > 0"
+            (click)="selectConversation(conv)"
+          >
+            <div class="conv-avatar">
+              {{ conv.subject[0]?.toUpperCase() ?? 'M' }}
+            </div>
+            <div class="conv-item-body">
+              <div class="conv-item-top">
+                <span class="conv-subject">{{ conv.subject }}</span>
+                <span class="conv-time">{{ timeAgo(conv.last_message_at ?? '') }}</span>
+              </div>
+              <div class="conv-preview">
+                @if (conv.last_message) {
+                  @if (conv.last_message.is_mine) { <span class="preview-me">Vous : </span> }
+                  {{ conv.last_message.body | slice:0:50 }}{{ conv.last_message.body.length > 50 ? '…' : '' }}
+                } @else {
+                  <em>Aucun message</em>
+                }
+              </div>
+            </div>
+            @if (conv.unread_count > 0) {
+              <div class="conv-unread-dot">{{ conv.unread_count }}</div>
+            }
+          </div>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- ─── COLONNE DROITE : Fil de messages ─── -->
+  <div class="chat-panel">
+    @if (!activeConv()) {
+      <div class="chat-placeholder">
+        <i class="pi pi-comments"></i>
+        <p>Sélectionnez une conversation</p>
+        <button class="btn-start" (click)="openNewConv()">
+          <i class="pi pi-plus"></i> Nouvelle conversation
+        </button>
+      </div>
+    } @else {
+      <!-- Header -->
+      <div class="chat-header">
+        <div class="chat-header-info">
+          <div class="chat-subject">{{ activeConv()!.subject }}</div>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="chat-body">
+        @if (loadingMessages()) {
+          <div class="messages-loading">
+            <i class="pi pi-spin pi-spinner"></i>
+          </div>
+        } @else if (messages().length === 0) {
+          <div class="messages-empty">
+            <p>Aucun message. Commencez la conversation !</p>
+          </div>
+        } @else {
+          @for (msg of messages(); track msg.id) {
+            <div class="message-row" [class.mine]="msg.is_mine">
+              @if (!msg.is_mine) {
+                <div class="msg-avatar">
+                  {{ msg.sender?.name?.[0]?.toUpperCase() ?? '?' }}
+                </div>
+              }
+              <div class="message-bubble" [class.bubble-mine]="msg.is_mine" [class.bubble-theirs]="!msg.is_mine">
+                @if (!msg.is_mine && msg.sender) {
+                  <div class="msg-sender-name">{{ msg.sender.name }}</div>
+                }
+                <div class="msg-body">{{ msg.body }}</div>
+                <div class="msg-time">
+                  {{ formatTime(msg.created_at) }}
+                  @if (msg.is_mine) {
+                    <i class="pi" [class.pi-check]="!msg.is_read" [class.pi-check-circle]="msg.is_read"></i>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+          <div #messagesEnd></div>
+        }
+      </div>
+
+      <!-- Input -->
+      <div class="chat-input-zone">
+        <form [formGroup]="messageForm" (ngSubmit)="sendMessage()" class="chat-input-form">
+          <textarea
+            class="chat-textarea"
+            formControlName="body"
+            placeholder="Écrire un message… (Entrée pour envoyer)"
+            rows="1"
+            (keydown)="onEnterKey($event)"
+          ></textarea>
+          <button type="submit" class="btn-send" [disabled]="messageForm.invalid || sending()">
+            @if (sending()) {
+              <i class="pi pi-spin pi-spinner"></i>
+            } @else {
+              <i class="pi pi-send"></i>
+            }
+          </button>
+        </form>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- ─── DRAWER NOUVELLE CONVERSATION ─── -->
+@if (newConvOpen) {
+  <div class="drawer-overlay" (click)="closeNewConv()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-title">Nouvelle conversation</div>
+      <button class="drawer-close" (click)="closeNewConv()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="newConvForm" (ngSubmit)="submitNewConv()" class="drawer-form">
+
+        @if (context === 'agency') {
+          <div class="form-group">
+            <label>Destinataire <span class="req">*</span></label>
+            <select class="pa-input" (change)="onContactTypeChange($event)">
+              <option value="tenant">Locataire</option>
+              <option value="owner">Propriétaire</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Contact <span class="req">*</span></label>
+            <select class="pa-input" formControlName="id_b">
+              <option value="">Sélectionner…</option>
+              @for (c of contacts(); track c.id) {
+                <option [value]="c.id">{{ c.name }}</option>
+              }
+            </select>
+            @if (newConvForm.get('id_b')?.invalid && newConvForm.get('id_b')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+        }
+
+        <div class="form-group">
+          <label>Sujet <span class="req">*</span></label>
+          <input class="pa-input" formControlName="subject" placeholder="Ex: Question sur votre loyer" />
+          @if (newConvForm.get('subject')?.invalid && newConvForm.get('subject')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Message <span class="req">*</span></label>
+          <textarea class="pa-input pa-textarea" formControlName="message" placeholder="Votre message…" rows="4"></textarea>
+          @if (newConvForm.get('message')?.invalid && newConvForm.get('message')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeNewConv()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="sending()">
+            @if (sending()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-send"></i> }
+            Envoyer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

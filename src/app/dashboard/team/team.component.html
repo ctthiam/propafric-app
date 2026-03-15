@@ -1,0 +1,197 @@
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div class="confirm-msg" [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Équipe</h1>
+    <p class="page-subtitle">{{ members().length }} membre(s) dans votre agence</p>
+  </div>
+  <button class="btn-primary" (click)="openCreate()">
+    <i class="pi pi-plus"></i> Ajouter un membre
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher un membre…" (input)="onSearch($event)" />
+  </div>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3]; track i) {
+        <p-skeleton height="60px" borderRadius="8px" styleClass="mb-2" />
+      }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Membre</th>
+            <th>Rôle</th>
+            <th>Téléphone</th>
+            <th>Dernière connexion</th>
+            <th>Statut</th>
+            <th style="width:130px; text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredMembers().length === 0) {
+            <tr>
+              <td colspan="6" class="empty-row">
+                <div class="empty-state-inline">
+                  <i class="pi pi-users"></i>
+                  <span>Aucun membre trouvé</span>
+                </div>
+              </td>
+            </tr>
+          }
+          @for (m of filteredMembers(); track m.id) {
+            <tr [class.inactive-row]="!m.is_active">
+              <td>
+                <div class="member-cell">
+                  <div class="member-avatar" [class.inactive]="!m.is_active">{{ initials(m) }}</div>
+                  <div>
+                    <div class="td-name">{{ m.first_name }} {{ m.last_name }}</div>
+                    <div class="td-muted-sm">{{ m.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge {{ roleClass(m.role) }}">{{ roleLabel(m.role) }}</span></td>
+              <td class="td-muted">{{ m.phone ?? '—' }}</td>
+              <td class="td-muted">{{ m.last_login_at ? formatDate(m.last_login_at) : 'Jamais' }}</td>
+              <td>
+                @if (m.is_active) {
+                  <span class="badge badge-success">Actif</span>
+                } @else {
+                  <span class="badge badge-neutral">Inactif</span>
+                }
+              </td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-edit" (click)="openEdit(m)" pTooltip="Modifier" tooltipPosition="top">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button
+                    class="btn-icon"
+                    [class.btn-warn]="m.is_active"
+                    [class.btn-success]="!m.is_active"
+                    (click)="toggleActive(m)"
+                    [pTooltip]="m.is_active ? 'Désactiver' : 'Activer'"
+                    tooltipPosition="top"
+                  >
+                    <i [class]="m.is_active ? 'pi pi-ban' : 'pi pi-check-circle'"></i>
+                  </button>
+                  <button class="btn-icon btn-delete" (click)="confirmDelete(m)" pTooltip="Supprimer" tooltipPosition="top">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ─── DRAWER ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingMember() ? 'Modifier le membre' : 'Ajouter un membre' }}</div>
+        @if (editingMember()) {
+          <div class="drawer-sub">{{ editingMember()!.first_name }} {{ editingMember()!.last_name }}</div>
+        }
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
+
+        <div class="form-section-title">Identité</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Prénom <span class="req">*</span></label>
+            <input class="pa-input" formControlName="first_name" placeholder="Prénom" />
+            @if (form.get('first_name')?.invalid && form.get('first_name')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Nom <span class="req">*</span></label>
+            <input class="pa-input" formControlName="last_name" placeholder="Nom" />
+            @if (form.get('last_name')?.invalid && form.get('last_name')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-section-title">Contact & Accès</div>
+        <div class="form-group">
+          <label>Email <span class="req">*</span></label>
+          <input class="pa-input" formControlName="email" type="email" placeholder="email@agence.sn" />
+          @if (form.get('email')?.invalid && form.get('email')?.touched) {
+            <span class="form-error">Email invalide</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input class="pa-input" formControlName="phone" placeholder="+221 77 000 00 00" />
+        </div>
+        <div class="form-group">
+          <label>Rôle <span class="req">*</span></label>
+          <p-dropdown formControlName="role" [options]="roleOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+        </div>
+        <div class="form-group">
+          <label>
+            Mot de passe
+            @if (!editingMember()) { <span class="req">*</span> }
+            @else { <span class="form-hint">(laisser vide pour ne pas modifier)</span> }
+          </label>
+          <input class="pa-input" formControlName="password" type="password" placeholder="Minimum 8 caractères" />
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <span class="form-error">Minimum 8 caractères</span>
+          }
+        </div>
+
+        <!-- Rôle info -->
+        @if (form.get('role')?.value) {
+          <div class="role-info-box">
+            @if (form.get('role')?.value === 'agency_secretary') {
+              <i class="pi pi-info-circle"></i>
+              <span>Le secrétaire a accès à : Dashboard, Biens, Propriétaires, Locataires, Baux, Prestataires</span>
+            }
+            @if (form.get('role')?.value === 'agency_accountant') {
+              <i class="pi pi-info-circle"></i>
+              <span>Le comptable a accès à : Dashboard, Paiements, Dépenses, Prestataires, Relevés</span>
+            }
+            @if (form.get('role')?.value === 'agency_admin') {
+              <i class="pi pi-info-circle"></i>
+              <span>L'administrateur a accès à toutes les fonctionnalités de l'agence</span>
+            }
+          </div>
+        }
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> Enregistrement… }
+            @else { <i class="pi pi-check"></i> {{ editingMember() ? 'Mettre à jour' : 'Ajouter' }} }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

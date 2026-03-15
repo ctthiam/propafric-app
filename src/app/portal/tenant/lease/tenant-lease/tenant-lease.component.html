@@ -1,8 +1,24 @@
+<p-toast position="top-right" />
+
 <div class="page-header">
   <div>
     <h1 class="page-title">Mon bail</h1>
     <p class="page-subtitle">Détails de votre contrat de location</p>
   </div>
+  @if (lease()) {
+    <div class="page-header-actions">
+      <button class="btn-report" (click)="openReport()">
+        <i class="pi pi-wrench"></i> Signaler un problème
+      </button>
+      <button class="btn-download" (click)="downloadContract()" [disabled]="downloading()">
+        @if (downloading()) {
+          <i class="pi pi-spin pi-spinner"></i> Téléchargement…
+        } @else {
+          <i class="pi pi-file-pdf"></i> Télécharger le contrat
+        }
+      </button>
+    </div>
+  }
 </div>
 
 @if (loading()) {
@@ -56,5 +72,72 @@
   <div class="empty-state">
     <i class="pi pi-file"></i>
     <p>Aucun bail actif trouvé.</p>
+  </div>
+}
+
+<!-- ─── DRAWER SIGNALEMENT ─── -->
+@if (reportOpen) {
+  <div class="drawer-overlay" (click)="closeReport()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">Signaler un problème</div>
+        <div class="drawer-sub">Votre demande sera transmise à l'agence</div>
+      </div>
+      <button class="drawer-close" (click)="closeReport()">
+        <i class="pi pi-times"></i>
+      </button>
+    </div>
+
+    <div class="drawer-body">
+      <form [formGroup]="reportForm" (ngSubmit)="submitReport()" class="drawer-form">
+
+        <div class="form-group">
+          <label>Titre du problème <span class="req">*</span></label>
+          <input class="pa-input" formControlName="title" placeholder="Ex: Fuite d'eau dans la salle de bain" />
+          @if (reportForm.get('title')?.invalid && reportForm.get('title')?.touched) {
+            <span class="form-error">Ce champ est requis</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="pa-input pa-textarea" formControlName="description"
+            placeholder="Décrivez le problème en détail pour aider l'agence à intervenir rapidement…"
+            rows="4"></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Catégorie <span class="req">*</span></label>
+            <p-dropdown formControlName="category" [options]="categoryOptions"
+              optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>Urgence <span class="req">*</span></label>
+            <p-dropdown formControlName="priority" [options]="priorityOptions"
+              optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
+        </div>
+
+        <!-- Info box -->
+        <div class="info-box">
+          <i class="pi pi-info-circle"></i>
+          <span>Votre signalement sera transmis directement à l'agence qui interviendra dans les meilleurs délais.</span>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeReport()">Annuler</button>
+          <button type="submit" class="btn-report-submit" [disabled]="saving()">
+            @if (saving()) {
+              <i class="pi pi-spin pi-spinner"></i> Envoi…
+            } @else {
+              <i class="pi pi-send"></i> Envoyer le signalement
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
   </div>
 }

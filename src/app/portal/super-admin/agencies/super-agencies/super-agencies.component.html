@@ -2,10 +2,13 @@
 <p-confirmDialog />
 
 <div class="page-header">
-  <div>
+  <div class="page-header-left">
     <h1 class="page-title">Agences</h1>
-    <p class="page-subtitle">{{ agencies().length }} agence(s) sur la plateforme</p>
+    <p class="page-subtitle">{{ agencies().length }} agence(s) enregistrée(s)</p>
   </div>
+  <button class="btn-primary" (click)="openCreate()">
+    <i class="pi pi-plus"></i> Nouvelle agence
+  </button>
 </div>
 
 <div class="toolbar">
@@ -92,7 +95,7 @@
       </div>
       <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
     </div>
-
+  
     <div class="drawer-body">
 
       <!-- Infos -->
@@ -148,6 +151,119 @@
         </div>
       </div>
 
+    </div>
+  </div>}
+  <!-- ─── DRAWER CRÉER AGENCE ─── -->
+@if (createOpen) {
+  <div class="drawer-overlay" (click)="closeCreate()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-title">Nouvelle agence</div>
+      <button class="drawer-close" (click)="closeCreate()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()" class="drawer-form">
+
+        <div class="form-section-title">Informations agence</div>
+
+        <div class="form-group">
+          <label>Nom de l'agence <span class="req">*</span></label>
+          <input class="pa-input" formControlName="name" placeholder="Ex: Immobilier Dakar" />
+          @if (createForm.get('name')?.invalid && createForm.get('name')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Email agence <span class="req">*</span></label>
+            <input class="pa-input" formControlName="email" type="email" placeholder="contact@agence.sn" />
+            @if (createForm.get('email')?.invalid && createForm.get('email')?.touched) {
+              <span class="form-error">Email invalide</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Téléphone</label>
+            <input class="pa-input" formControlName="phone" placeholder="+221 77 000 00 00" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Plan <span class="req">*</span></label>
+            <select class="pa-input" formControlName="plan">
+              <option value="starter">Starter</option>
+              <option value="pro">Pro</option>
+              <option value="premium">Premium</option>
+              <option value="partner">Partenaire</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Période d'essai (jours)</label>
+            <input class="pa-input" formControlName="trial_days" type="number" placeholder="30" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Ville</label>
+            <input class="pa-input" formControlName="city" placeholder="Dakar" />
+          </div>
+          <div class="form-group">
+            <label>Adresse</label>
+            <input class="pa-input" formControlName="address" placeholder="Adresse du siège" />
+          </div>
+        </div>
+
+        <div class="form-section-title">Compte administrateur</div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Prénom admin <span class="req">*</span></label>
+            <input class="pa-input" formControlName="admin_first_name" placeholder="Prénom" />
+            @if (createForm.get('admin_first_name')?.invalid && createForm.get('admin_first_name')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Nom admin <span class="req">*</span></label>
+            <input class="pa-input" formControlName="admin_last_name" placeholder="Nom" />
+            @if (createForm.get('admin_last_name')?.invalid && createForm.get('admin_last_name')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Email admin <span class="req">*</span></label>
+          <input class="pa-input" formControlName="admin_email" type="email" placeholder="admin@agence.sn" />
+          @if (createForm.get('admin_email')?.invalid && createForm.get('admin_email')?.touched) {
+            <span class="form-error">Email invalide</span>
+          }
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Mot de passe admin <span class="req">*</span></label>
+            <input class="pa-input" formControlName="admin_password" type="password" placeholder="Min. 8 caractères" />
+            @if (createForm.get('admin_password')?.invalid && createForm.get('admin_password')?.touched) {
+              <span class="form-error">Min. 8 caractères</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Téléphone admin</label>
+            <input class="pa-input" formControlName="admin_phone" placeholder="+221 77 000 00 00" />
+          </div>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeCreate()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="createSaving()">
+            @if (createSaving()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-check"></i> }
+            Créer l'agence
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 }

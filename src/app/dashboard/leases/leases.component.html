@@ -10,9 +10,15 @@
     <h1 class="page-title">Baux</h1>
     <p class="page-subtitle">{{ leases().length }} bail(s) enregistré(s)</p>
   </div>
-  <button class="btn-primary" (click)="openCreate()">
-    <i class="pi pi-plus"></i> Nouveau bail
-  </button>
+  <div class="page-header-actions">
+    <button class="btn-secondary btn-export" (click)="exportExcel()" [disabled]="exporting()">
+      @if (exporting()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-file-excel"></i> }
+      Exporter
+    </button>
+    <button class="btn-primary" (click)="openCreate()">
+      <i class="pi pi-plus"></i> Nouveau bail
+    </button>
+  </div>
 </div>
 
 <div class="toolbar">
@@ -26,6 +32,16 @@
     }
   </select>
 </div>
+
+@if (leasesNeedingRevision().length > 0) {
+  <div class="revision-alert">
+    <i class="pi pi-refresh"></i>
+    <span>
+      <strong>{{ leasesNeedingRevision().length }} bail(s)</strong>
+      arrivent à révision dans les 60 prochains jours.
+    </span>
+  </div>
+}
 
 <div class="table-card">
   @if (loading()) {
@@ -83,9 +99,19 @@
               </td>
               <td>
                 <div class="actions-cell">
+                  <button class="btn-icon btn-pdf" (click)="downloadContract(lease)" 
+                          pTooltip="Contrat PDF" tooltipPosition="top">
+                    <i class="pi pi-file-pdf"></i>
+                  </button>
                   <button class="btn-icon btn-edit" (click)="openEdit(lease)" pTooltip="Modifier" tooltipPosition="top">
                     <i class="pi pi-pencil"></i>
                   </button>
+                  @if (lease.status === 'active' && isDueForRevision(lease)) {
+                    <button class="btn-icon btn-revision" (click)="openRevision(lease)"
+                            pTooltip="Révision triennale" tooltipPosition="top">
+                      <i class="pi pi-refresh"></i>
+                    </button>
+                  }
                   @if (lease.status === 'active') {
                     <button class="btn-icon btn-warn" (click)="confirmTerminate(lease)" pTooltip="Résilier" tooltipPosition="top">
                       <i class="pi pi-times-circle"></i>
@@ -224,4 +250,78 @@
       </form>
     </div>
   </div>
+  <!-- ─── DRAWER RÉVISION TRIENNALE ─── -->
+  @if (revisionOpen && revisionLease()) {
+  <div class="drawer-overlay" (click)="closeRevision()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">Révision triennale</div>
+        <div class="drawer-sub">{{ revisionLease()!.reference }} — {{ revisionLease()!.tenant?.full_name }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeRevision()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="revisionForm" (ngSubmit)="applyRevision()" class="drawer-form">
+
+        <!-- Loyer actuel -->
+        <div class="revision-info-box">
+          <div class="revision-info-row">
+            <span>Loyer actuel TTC</span>
+            <strong>{{ formatCurrency(revisionLease()!.total_rent) }}</strong>
+          </div>
+          <div class="revision-info-row">
+            <span>Prochaine révision prévue</span>
+            <strong>{{ formatDate(revisionLease()!.next_revision_date) }}</strong>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top:16px">
+          <label>Taux de révision (%) <span class="req">*</span></label>
+          <input class="pa-input" formControlName="revision_rate" type="number"
+                 step="0.1" min="0" max="50" placeholder="Ex: 5" />
+          <span class="form-hint">Basé sur l'indice de construction pondéré de Dakar</span>
+          @if (revisionForm.get('revision_rate')?.invalid && revisionForm.get('revision_rate')?.touched) {
+            <span class="form-error">Taux entre 0 et 50%</span>
+          }
+        </div>
+
+        <!-- Aperçu calculé -->
+        @if (revisionPreview()) {
+          <div class="revision-preview-box">
+            <div class="preview-title">Aperçu de la révision</div>
+            <div class="preview-row">
+              <span>Ancien loyer TTC</span>
+              <span class="old-value">{{ formatCurrency(revisionPreview()!.old_total_rent) }}</span>
+            </div>
+            <div class="preview-row">
+              <span>Nouveau loyer TTC</span>
+              <strong class="new-value">{{ formatCurrency(revisionPreview()!.new_total_rent) }}</strong>
+            </div>
+            <div class="preview-row">
+              <span>Augmentation</span>
+              <span class="diff-value">+ {{ formatCurrency(revisionPreview()!.new_total_rent - revisionPreview()!.old_total_rent) }}</span>
+            </div>
+            <div class="preview-row">
+              <span>Prochaine révision</span>
+              <span>{{ formatDate(revisionPreview()!.next_revision_date) }}</span>
+            </div>
+          </div>
+        }
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="previewRevision()" [disabled]="revisionForm.invalid || loadingPreview()">
+            @if (loadingPreview()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-eye"></i> }
+            Aperçu
+          </button>
+          <button type="button" class="btn-secondary" (click)="closeRevision()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="!revisionPreview() || saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-check"></i> }
+            Appliquer la révision
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
 }

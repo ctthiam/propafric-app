@@ -5,19 +5,17 @@
   </ng-template>
 </p-confirmDialog>
 
-<div class="page-header">
-  <div class="page-header-left">
-    <h1 class="page-title">{{ activeTab() === 'vendors' ? 'Prestataires' : 'Dépenses' }}</h1>
-    <p class="page-subtitle">Charges et prestataires de l'agence</p>
-  </div>
-  <div class="page-header-actions">
+<div class="page-header-actions">
     @if (activeTab() === 'expenses') {
+      <button class="btn-secondary btn-export" (click)="exportExcel()" [disabled]="exporting()">
+        @if (exporting()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-file-excel"></i> }
+        Exporter
+      </button>
       <button class="btn-primary" (click)="openCreateExpense()"><i class="pi pi-plus"></i> Nouvelle dépense</button>
     } @else {
       <button class="btn-primary" (click)="openCreateVendor()"><i class="pi pi-plus"></i> Nouveau prestataire</button>
     }
   </div>
-</div>
 
 <div class="tabs-bar">
   <button class="tab-btn" [class.active]="activeTab() === 'expenses'" (click)="activeTab.set('expenses')">

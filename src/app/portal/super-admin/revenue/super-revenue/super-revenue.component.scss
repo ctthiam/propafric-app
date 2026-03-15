@@ -1,0 +1,75 @@
+$purple: #7048e8;
+$green:  #2D6A4F;
+$gold:   #C9A84C;
+$blue:   #1971c2;
+$cream:  #faf8f3;
+$ink:    #0d1f17;
+$ink-l:  #4a6357;
+$white:  #ffffff;
+$red:    #e57373;
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+:host { display:block; animation: fadeUp 0.4s ease both; }
+
+.page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+.page-title { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:700; color:$ink; margin:0 0 4px; }
+.page-subtitle { font-size:14px; color:$ink-l; margin:0; }
+.year-select { padding:10px 14px; background:$white; border:1.5px solid rgba($ink,.1); border-radius:10px; font-size:13px; color:$ink; font-family:'DM Sans',sans-serif; outline:none; cursor:pointer; &:focus { border-color:$purple; } }
+
+.tabs-bar { display:flex; gap:4px; margin-bottom:20px; background:rgba($ink,.04); padding:4px; border-radius:12px; width:fit-content; }
+.tab-btn { display:flex; align-items:center; gap:8px; padding:8px 18px; border:none; background:transparent; border-radius:9px; font-size:13px; font-weight:500; color:$ink-l; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s;
+  &.active { background:$white; color:$purple; font-weight:600; box-shadow:0 1px 4px rgba(0,0,0,.08); }
+}
+
+.skeleton-block { margin-top:8px; }
+
+/* KPIs */
+.kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
+.kpi-card { border-radius:14px; padding:18px 20px;
+  .kpi-label { font-size:12px; font-weight:500; margin-bottom:8px; opacity:.7; }
+  .kpi-value { font-size:26px; font-weight:700; font-family:'Cormorant Garamond',serif; }
+  &.kpi-purple { background:rgba($purple,.08); color:$purple; }
+  &.kpi-green  { background:rgba($green,.08);  color:$green; }
+  &.kpi-gold   { background:rgba($gold,.12);   color:darken($gold,15%); }
+  &.kpi-blue   { background:rgba($blue,.08);   color:$blue; }
+}
+
+/* Bar chart */
+.chart-card { background:$white; border-radius:16px; border:1px solid rgba($ink,.06); padding:20px 24px; }
+.chart-title { font-size:14px; font-weight:700; color:$ink; margin-bottom:20px; }
+.bar-chart { display:flex; align-items:flex-end; gap:8px; height:200px; padding-top:24px; }
+.bar-col { display:flex; flex-direction:column; align-items:center; flex:1; height:100%; }
+.bar-label-top { font-size:9px; color:$ink-l; margin-bottom:4px; white-space:nowrap; min-height:14px; }
+.bar-wrap { flex:1; width:100%; display:flex; align-items:flex-end; }
+.bar-fill { width:100%; min-height:3px; background:rgba($purple,.25); border-radius:4px 4px 0 0; transition:height .4s ease;
+  &.bar-active { background:$purple; }
+}
+.bar-label-bottom { font-size:10px; color:$ink-l; margin-top:6px; }
+
+/* Tables */
+.table-card { background:$white; border-radius:16px; border:1px solid rgba($ink,.06); overflow:hidden; }
+.table-header-title { padding:14px 20px 10px; font-size:14px; font-weight:700; color:$ink; border-bottom:1px solid rgba($ink,.06); }
+.data-table-wrapper { overflow-x:auto; }
+.data-table { width:100%; border-collapse:collapse;
+  th { background:$cream; color:$ink-l; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; padding:10px 14px; border-bottom:1px solid rgba($ink,.07); text-align:left; &.right { text-align:right; } }
+  td { padding:12px 14px; border-bottom:1px solid rgba($ink,.04); font-size:13px; color:$ink; &.right { text-align:right; } }
+  tr:last-child td { border-bottom:none; }
+  tbody tr:hover td { background:rgba($purple,.025); }
+}
+.td-name  { font-weight:600; }
+.td-muted { color:$ink-l; }
+.empty-row { text-align:center; padding:40px !important; }
+.empty-state-inline { display:inline-flex; align-items:center; gap:10px; color:$ink-l; font-size:14px; i { font-size:20px; } }
+
+/* Plan badges */
+.plan-badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:700; }
+.plan-starter { background:rgba($blue,.1);   color:$blue; }
+.plan-pro      { background:rgba($green,.1);  color:$green; }
+.plan-premium  { background:rgba($purple,.1); color:$purple; }
+.plan-partner  { background:rgba($gold,.15);  color:darken($gold,15%); }
+
+.badge { display:inline-flex; align-items:center; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:700; }
+.badge-success { background:rgba($green,.1);  color:$green; }
+.badge-neutral { background:rgba($ink,.07);   color:$ink-l; }
+.badge-danger  { background:rgba($red,.1);    color:darken($red,15%); }
+.badge-gold    { background:rgba($gold,.15);  color:darken($gold,15%); }

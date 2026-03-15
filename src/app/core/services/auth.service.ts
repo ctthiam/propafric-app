@@ -5,12 +5,15 @@ import { Observable, tap, catchError, throwError } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { StorageService } from './storage.service';
 
+// Et mettre à jour l'interface User pour inclure les nouveaux rôles :
 export interface User {
   id: number;
   name: string;
+  first_name?: string;
+  last_name?: string;
   email: string;
   phone: string | null;
-  role: 'super_admin' | 'agency_admin' | 'owner' | 'tenant';
+  role: 'super_admin' | 'agency_admin' | 'agency_secretary' | 'agency_accountant' | 'owner' | 'tenant';
   agency_id: number | null;
 }
 
@@ -109,12 +112,16 @@ export class AuthService {
 
 // Dans auth.service.ts, remplacer redirectAfterLogin() par :
 
+// Dans auth.service.ts, remplacer redirectAfterLogin() par :
+
 private redirectAfterLogin(user: User): void {
   switch (user.role) {
     case 'super_admin':
       this.router.navigate(['/super-admin/dashboard']);
       break;
     case 'agency_admin':
+    case 'agency_secretary':
+    case 'agency_accountant':
       this.router.navigate(['/dashboard']);
       break;
     case 'owner':
@@ -127,4 +134,5 @@ private redirectAfterLogin(user: User): void {
       this.router.navigate(['/dashboard']);
   }
 }
+
 }

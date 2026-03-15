@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { HttpResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 
 import { DropdownModule }      from 'primeng/dropdown';
@@ -50,6 +51,7 @@ export interface DropdownProperty { id: number; name: string; reference: string;
 })
 export class LeasesComponent implements OnInit {
   private api = `${environment.apiUrl}/agency`;
+  exporting = signal(false);
 
   leases       = signal<Lease[]>([]);
   properties   = signal<DropdownProperty[]>([]);
@@ -94,6 +96,26 @@ export class LeasesComponent implements OnInit {
     { label: 'Résilié',    value: 'terminated' },
   ];
 
+  // ── Révision triennale ──────────────────────────────────
+  revisionOpen    = false;
+  revisionLease   = signal<any>(null);
+  revisionPreview = signal<any>(null);
+  loadingPreview  = signal(false);
+  revisionForm:   FormGroup;
+
+ leasesNeedingRevision = computed(() => {
+    const in60days = new Date();
+    in60days.setDate(in60days.getDate() + 60);
+    return this.leases().filter(l => {
+      if (l.status !== 'active' || !l.next_revision_date) return false;
+      try {
+        return new Date(l.next_revision_date + 'T00:00:00') <= in60days;
+      } catch {
+        return false;
+      }
+    });
+  });
+
   paymentDayOptions = Array.from({ length: 28 }, (_, i) => ({ label: `Le ${i + 1} du mois`, value: i + 1 }));
 
   constructor(
@@ -120,6 +142,10 @@ export class LeasesComponent implements OnInit {
       notes:           [''],
     });
 
+    this.revisionForm = this.fb.group({
+      revision_rate: ['', [Validators.required, Validators.min(0), Validators.max(50)]],
+    });
+
     this.form.get('rent_amount')?.valueChanges.subscribe(v => this.calcRent.set(v ?? 0));
     this.form.get('charges')?.valueChanges.subscribe(v => this.calcCharges.set(v ?? 0));
     this.form.get('tom_rate')?.valueChanges.subscribe(v => this.calcTomRate.set(v ?? 3.6));
@@ -130,6 +156,69 @@ export class LeasesComponent implements OnInit {
   ngOnInit(): void {
     this.loadDropdowns();
     this.load();
+  }
+
+  // ── Révision ────────────────────────────────────────────
+isDueForRevision(lease: any): boolean {
+    if (!lease.next_revision_date) return false;
+    try {
+      const revDate = new Date(lease.next_revision_date + 'T00:00:00');
+      const in60days = new Date();
+      in60days.setDate(in60days.getDate() + 60);
+      return revDate <= in60days;
+    } catch {
+      return false;
+    }
+  }
+
+  openRevision(lease: any): void {
+    this.revisionLease.set(lease);
+    this.revisionPreview.set(null);
+    this.revisionForm.reset();
+    this.revisionOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeRevision(): void {
+    this.revisionOpen = false;
+    this.revisionLease.set(null);
+    this.revisionPreview.set(null);
+    this.cdr.detectChanges();
+  }
+
+  previewRevision(): void {
+    if (this.revisionForm.invalid) return;
+    this.loadingPreview.set(true);
+    const id = this.revisionLease()!.id;
+    this.http.post<any>(`${this.api}/leases/${id}/revise/preview`, this.revisionForm.value).subscribe({
+      next: (res: any) => {
+        this.revisionPreview.set(res?.data ?? null);
+        this.loadingPreview.set(false);
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Aperçu impossible.' });
+        this.loadingPreview.set(false);
+      }
+    });
+  }
+
+  applyRevision(): void {
+    if (!this.revisionPreview()) return;
+    this.saving.set(true);
+    const id = this.revisionLease()!.id;
+    this.http.post<any>(`${this.api}/leases/${id}/revise`, this.revisionForm.value).subscribe({
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Révision appliquée', detail: res.message });
+        this.saving.set(false);
+        this.closeRevision();
+        this.load();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+        this.saving.set(false);
+      }
+    });
   }
 
   load(): void {
@@ -243,6 +332,22 @@ export class LeasesComponent implements OnInit {
     });
   }
 
+  downloadContract(lease: Lease): void {
+  this.http.get(`${this.api}/leases/${lease.id}/contract`,
+    { responseType: 'blob', observe: 'response' }
+  ).subscribe({
+    next: (res: HttpResponse<Blob>) => {
+      const url = URL.createObjectURL(res.body!);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `contrat-${lease.reference}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
+    },
+    error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Téléchargement impossible.' })
+  });
+}
+
   private terminate(id: number): void {
     this.http.post<any>(`${this.api}/leases/${id}/terminate`, {}).subscribe({
       next: (res: any) => {
@@ -278,4 +383,33 @@ export class LeasesComponent implements OnInit {
   statusClass(s: string): string {
     return ({ active: 'badge-success', pending: 'badge-warning', expired: 'badge-neutral', terminated: 'badge-danger' } as any)[s] ?? 'badge-neutral';
   }
+  // ── 4. Méthode utilitaire à ajouter dans CHAQUE composant ──
+private triggerDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+ 
+private today(): string {
+  return new Date().toISOString().split('T')[0];
+}
+  exportExcel(): void {
+  this.exporting.set(true);
+  this.http.get(`${this.api}/exports/leases`, {
+    responseType: 'blob',
+    observe: 'response',
+  }).subscribe({
+    next: (res: HttpResponse<Blob>) => {
+      this.triggerDownload(res.body!, `baux_${this.today()}.xlsx`);
+      this.exporting.set(false);
+    },
+    error: () => {
+      this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Export impossible.' });
+      this.exporting.set(false);
+    }
+  });
+}
 }

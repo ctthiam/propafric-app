@@ -1,0 +1,133 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Revenus & Abonnements</h1>
+    <p class="page-subtitle">Suivi financier de la plateforme PropAfric</p>
+  </div>
+  <select class="year-select" (change)="onYearChange($event)">
+    @for (y of years; track y) {
+      <option [value]="y" [selected]="y === selectedYear">{{ y }}</option>
+    }
+  </select>
+</div>
+
+<!-- Onglets -->
+<div class="tabs-bar">
+  <button class="tab-btn" [class.active]="activeTab() === 'revenue'" (click)="activeTab.set('revenue')">
+    <i class="pi pi-chart-bar"></i> Revenus
+  </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'subscriptions'" (click)="activeTab.set('subscriptions')">
+    <i class="pi pi-credit-card"></i> Abonnements
+  </button>
+</div>
+
+@if (loading()) {
+  <div class="skeleton-block">
+    <p-skeleton height="120px" borderRadius="14px" styleClass="mb-3" />
+    <p-skeleton height="280px" borderRadius="14px" />
+  </div>
+} @else {
+
+  @if (activeTab() === 'revenue') {
+    <!-- KPIs -->
+    <div class="kpi-row">
+      <div class="kpi-card kpi-purple">
+        <div class="kpi-label">Revenus {{ selectedYear }}</div>
+        <div class="kpi-value">{{ formatCurrency(summary().total_year) }}</div>
+      </div>
+      <div class="kpi-card kpi-green">
+        <div class="kpi-label">Ce mois</div>
+        <div class="kpi-value">{{ formatCurrency(summary().total_month) }}</div>
+      </div>
+      <div class="kpi-card kpi-gold">
+        <div class="kpi-label">Total plateforme</div>
+        <div class="kpi-value">{{ formatCurrency(summary().total_all_time) }}</div>
+      </div>
+      <div class="kpi-card kpi-blue">
+        <div class="kpi-label">Agences payantes</div>
+        <div class="kpi-value">{{ summary().paying_agencies ?? 0 }}</div>
+      </div>
+    </div>
+
+    <!-- Graphique mensuel -->
+    <div class="chart-card">
+      <div class="chart-title">Revenus mensuels {{ selectedYear }}</div>
+      <div class="bar-chart">
+        @for (m of monthly(); track m.month) {
+          <div class="bar-col">
+            <div class="bar-label-top">
+              @if (m.total > 0) { {{ formatCurrency(m.total) }} }
+            </div>
+            <div class="bar-wrap">
+              <div class="bar-fill" [style.height.%]="barHeight(m.total)"
+                   [class.bar-active]="m.month === summary().current_month"></div>
+            </div>
+            <div class="bar-label-bottom">{{ m.label }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Revenus par plan -->
+    @if (byPlan().length > 0) {
+      <div class="table-card" style="margin-top:20px">
+        <div class="table-header-title">Répartition par plan</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Abonnements</th>
+              <th class="right">Revenus</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (p of byPlan(); track p.plan) {
+              <tr>
+                <td><span class="plan-badge plan-{{ p.plan }}">{{ planLabel(p.plan) }}</span></td>
+                <td>{{ p.count }}</td>
+                <td class="right"><strong>{{ formatCurrency(p.total) }}</strong></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (activeTab() === 'subscriptions') {
+    <div class="table-card">
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Agence</th>
+              <th>Plan</th>
+              <th>Montant</th>
+              <th>Début</th>
+              <th>Fin</th>
+              <th>Payé le</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (subs().length === 0) {
+              <tr><td colspan="7" class="empty-row">
+                <div class="empty-state-inline"><i class="pi pi-credit-card"></i><span>Aucun abonnement</span></div>
+              </td></tr>
+            }
+            @for (s of subs(); track s.id) {
+              <tr>
+                <td class="td-name">{{ s.agency_name }}</td>
+                <td><span class="plan-badge plan-{{ s.plan }}">{{ planLabel(s.plan) }}</span></td>
+                <td><strong>{{ formatCurrency(s.amount) }}</strong></td>
+                <td class="td-muted">{{ formatDate(s.started_at) }}</td>
+                <td class="td-muted">{{ formatDate(s.ends_at) }}</td>
+                <td class="td-muted">{{ formatDate(s.paid_at) }}</td>
+                <td><span class="badge {{ statusClass(s.status) }}">{{ statusLabel(s.status) }}</span></td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+}

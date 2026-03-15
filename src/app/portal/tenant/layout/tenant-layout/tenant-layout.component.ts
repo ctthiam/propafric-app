@@ -18,6 +18,7 @@ export class TenantLayoutComponent implements OnInit {
     { label: 'Mon bail',        icon: 'pi pi-file',         route: '/portail-locataire/bail' },
     { label: 'Mes échéances',   icon: 'pi pi-calendar',     route: '/portail-locataire/echeances' },
     { label: 'Mes quittances',  icon: 'pi pi-file-pdf',     route: '/portail-locataire/quittances' },
+    { label: 'Messages',        icon: 'pi pi-comments',     route: '/portail-locataire/messages' },
   ];
 
   constructor(

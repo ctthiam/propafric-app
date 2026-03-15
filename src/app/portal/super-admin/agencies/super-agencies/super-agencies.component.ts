@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { ToastModule } from 'primeng/toast';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { MessageService, ConfirmationService } from 'primeng/api';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 
 export interface Agency {
   id: number;
@@ -27,7 +28,7 @@ export interface Agency {
 @Component({
   selector: 'app-super-agencies',
   standalone: true,
-  imports: [CommonModule, FormsModule, SkeletonModule, ToastModule, ConfirmDialogModule],
+  imports: [CommonModule, FormsModule, SkeletonModule, ToastModule, ReactiveFormsModule, ConfirmDialogModule],
   providers: [MessageService, ConfirmationService],
   templateUrl: './super-agencies.component.html',
   styleUrls: ['./super-agencies.component.scss'],
@@ -35,15 +36,19 @@ export interface Agency {
 export class SuperAgenciesComponent implements OnInit {
   private apiUrl = `${environment.apiUrl}/agency/super-admin`;
 
-  agencies     = signal<Agency[]>([]);
-  loading      = signal(true);
-  search       = signal('');
-  filterStatus = signal('');
-  filterPlan   = signal('');
+  agencies      = signal<Agency[]>([]);
+  loading       = signal(true);
+  search        = signal('');
+  filterStatus  = signal('');
+  filterPlan    = signal('');
   actionLoading = signal<number | null>(null);
-  drawerOpen   = false;
+  drawerOpen    = false;
   selectedAgency = signal<Agency | null>(null);
-  extendDays = 30;
+  extendDays    = 30;
+  createOpen    = false;
+  createSaving  = signal(false);
+  createForm:   FormGroup;
+
   extendOptions = [
     { label: '30 jours (1 mois)',  value: 30  },
     { label: '60 jours (2 mois)',  value: 60  },
@@ -84,7 +89,23 @@ export class SuperAgenciesComponent implements OnInit {
     private toast: MessageService,
     private confirm: ConfirmationService,
     private cdr: ChangeDetectorRef,
-  ) {}
+    private fb: FormBuilder,          // ✅ FIX 1 — injecter FormBuilder
+  ) {
+    this.createForm = this.fb.group({
+      name:             ['', Validators.required],
+      email:            ['', [Validators.required, Validators.email]],
+      phone:            [''],
+      address:          [''],
+      city:             ['Dakar'],
+      plan:             ['pro', Validators.required],
+      trial_days:       [30],
+      admin_first_name: ['', Validators.required],
+      admin_last_name:  ['', Validators.required],
+      admin_email:      ['', [Validators.required, Validators.email]],
+      admin_password:   ['', [Validators.required, Validators.minLength(8)]],
+      admin_phone:      [''],
+    });
+  }
 
   ngOnInit(): void { this.load(); }
 
@@ -141,6 +162,34 @@ export class SuperAgenciesComponent implements OnInit {
       error: (err: any) => {
         this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
         this.actionLoading.set(null);
+      }
+    });
+  }
+
+  openCreate(): void {
+    this.createForm.reset({ plan: 'pro', trial_days: 30, city: 'Dakar' });
+    this.createOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeCreate(): void {
+    this.createOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  submitCreate(): void {
+    if (this.createForm.invalid) { this.createForm.markAllAsTouched(); return; }
+    this.createSaving.set(true);
+    this.http.post<any>(`${this.apiUrl}/agencies`, this.createForm.value).subscribe({  // ✅ FIX 2 — apiUrl
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Agence créée', detail: res.message });
+        this.createSaving.set(false);
+        this.closeCreate();
+        this.load();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+        this.createSaving.set(false);
       }
     });
   }

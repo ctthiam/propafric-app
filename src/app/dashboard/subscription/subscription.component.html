@@ -1,0 +1,136 @@
+<p-toast position="top-right" />
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Abonnement</h1>
+    <p class="page-subtitle">Gérez votre plan PropAfric</p>
+  </div>
+</div>
+
+@if (loading()) {
+  <p-skeleton height="120px" borderRadius="14px" styleClass="mb-4" />
+  <p-skeleton height="320px" borderRadius="14px" />
+} @else if (data()) {
+
+  <!-- Statut actuel -->
+  <div class="current-plan-card" [class.expired]="isExpired">
+    <div class="current-plan-left">
+      <div class="current-label">Plan actuel</div>
+      <div class="current-plan-name">{{ data().agency.plan | titlecase }}</div>
+      @if (data().agency.plan !== 'partner') {
+        <div class="current-expiry">
+          @if (isExpired) {
+            <span class="expiry-danger">⚠ Abonnement expiré</span>
+          } @else {
+            <span class="expiry-ok">
+              Expire le {{ formatDate(data().agency.subscription_ends_at) }}
+              — <strong>{{ daysLeft }} jour(s) restant(s)</strong>
+            </span>
+          }
+        </div>
+      } @else {
+        <div class="current-expiry expiry-ok">Partenaire fondateur — Accès à vie gratuit ✓</div>
+      }
+    </div>
+    <div class="current-plan-right">
+      <div class="plan-stat">
+        <span class="stat-value">{{ data().agency.max_properties ?? '∞' }}</span>
+        <span class="stat-label">Biens max</span>
+      </div>
+    </div>
+  </div>
+
+  @if (data().agency.plan !== 'partner') {
+    <!-- Toggle mensuel / annuel -->
+    <div class="period-toggle">
+      <button class="period-btn" [class.active]="period() === 'monthly'" (click)="period.set('monthly')">
+        Mensuel
+      </button>
+      <button class="period-btn" [class.active]="period() === 'yearly'" (click)="period.set('yearly')">
+        Annuel <span class="saving-tag">économisez 2 mois</span>
+      </button>
+    </div>
+
+    <!-- Plans -->
+    <div class="plans-grid">
+      @for (plan of plans; track plan.key) {
+        <div class="plan-card" [class.popular]="plan.popular" [class.current]="plan.key === currentPlan">
+          @if (plan.popular) {
+            <div class="popular-badge">Le plus populaire</div>
+          }
+          @if (plan.key === currentPlan) {
+            <div class="current-badge">Plan actuel</div>
+          }
+          <div class="plan-name">{{ plan.label }}</div>
+          <div class="plan-price">
+            <span class="plan-currency">F</span>
+            <span class="plan-amount">{{ formatCurrency(price(plan)) }}</span>
+          </div>
+          <div class="plan-period">FCFA / {{ period() === 'monthly' ? 'mois' : 'an' }}</div>
+          <div class="plan-limit">📦 {{ plan.max_properties }}</div>
+
+          <ul class="plan-features">
+            @for (feat of plan.features; track feat) {
+              <li><span class="feat-check">✓</span> {{ feat }}</li>
+            }
+          </ul>
+
+          <button
+            class="btn-subscribe"
+            [class.btn-current]="plan.key === currentPlan"
+            [disabled]="paying() || plan.key === currentPlan"
+            (click)="subscribe(plan.key)"
+          >
+            @if (paying() && selectedPlan() === plan.key) {
+              <i class="pi pi-spin pi-spinner"></i> Redirection…
+            } @else if (plan.key === currentPlan) {
+              Plan actuel
+            } @else {
+              Choisir ce plan
+            }
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- Historique -->
+    @if (data().history?.length > 0) {
+      <div class="history-card">
+        <div class="history-title">Historique des abonnements</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Plan</th>
+              <th>Montant</th>
+              <th>Début</th>
+              <th>Fin</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (h of data().history; track h.id) {
+              <tr>
+                <td>{{ h.plan | titlecase }}</td>
+                <td>{{ formatCurrency(h.amount) }}</td>
+                <td class="td-muted">{{ formatDate(h.started_at) }}</td>
+                <td class="td-muted">{{ formatDate(h.ends_at) }}</td>
+                <td>
+                  <span class="badge" [class.badge-success]="h.status === 'active'"
+                        [class.badge-neutral]="h.status !== 'active'">
+                    {{ h.status === 'active' ? 'Actif' : h.status === 'pending' ? 'En attente' : 'Expiré' }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <!-- Info NabooPay -->
+    <div class="payment-info">
+      <i class="pi pi-shield"></i>
+      <span>Paiement sécurisé via <strong>NabooPay</strong> — Wave · Orange Money · Free Money acceptés</span>
+    </div>
+  }
+}

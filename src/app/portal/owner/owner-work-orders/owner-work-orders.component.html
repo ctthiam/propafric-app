@@ -1,0 +1,172 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Travaux</h1>
+    <p class="page-subtitle">Interventions sur vos biens</p>
+  </div>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-blue"><i class="pi pi-list"></i></div>
+    <div><div class="kpi-value">{{ stats().total ?? 0 }}</div><div class="kpi-label">Total</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-orange"><i class="pi pi-wrench"></i></div>
+    <div><div class="kpi-value">{{ stats().in_progress ?? 0 }}</div><div class="kpi-label">En cours</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-green"><i class="pi pi-check-circle"></i></div>
+    <div><div class="kpi-value">{{ stats().completed ?? 0 }}</div><div class="kpi-label">Terminés</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-gold"><i class="pi pi-wallet"></i></div>
+    <div>
+      <div class="kpi-value">{{ formatCurrency(stats().total_cost ?? 0) }}</div>
+      <div class="kpi-label">Coût total</div>
+    </div>
+  </div>
+</div>
+
+<!-- Filtre -->
+<div class="toolbar">
+  <select class="filter-select" (change)="onFilter($event)">
+    <option value="">Tous les statuts</option>
+    <option value="active">En cours</option>
+    <option value="completed">Terminés</option>
+    <option value="cancelled">Annulés</option>
+  </select>
+</div>
+
+<!-- Table -->
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3]; track i) {
+        <p-skeleton height="64px" borderRadius="8px" styleClass="mb-2" />
+      }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Titre / Bien</th>
+            <th>Catégorie</th>
+            <th>Priorité</th>
+            <th>Prestataire</th>
+            <th>Date prévue</th>
+            <th>Coût réel</th>
+            <th>Statut</th>
+            <th style="width:80px; text-align:center">Détail</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredOrders().length === 0) {
+            <tr><td colspan="8" class="empty-row">
+              <div class="empty-state-inline">
+                <i class="pi pi-wrench"></i>
+                <span>Aucun travail enregistré</span>
+              </div>
+            </td></tr>
+          }
+          @for (o of filteredOrders(); track o.id) {
+            <tr>
+              <td>
+                <div class="td-name">{{ o.title }}</div>
+                @if (o.property) {
+                  <div class="td-muted-sm">{{ o.property.name }}</div>
+                }
+                @if (o.tenant) {
+                  <div class="td-muted-sm">Signalé par : {{ o.tenant.full_name }}</div>
+                }
+              </td>
+              <td><span class="category-tag">{{ categoryLabel(o.category) }}</span></td>
+              <td class="td-muted">{{ priorityLabel(o.priority) }}</td>
+              <td class="td-muted">{{ o.contractor?.name ?? '—' }}</td>
+              <td class="td-muted">{{ formatDate(o.scheduled_at) }}</td>
+              <td class="td-muted">{{ formatCurrency(o.actual_cost) }}</td>
+              <td><span class="badge {{ statusClass(o.status) }}">{{ statusLabel(o.status) }}</span></td>
+              <td style="text-align:center">
+                <button class="btn-icon btn-view" (click)="openDetail(o)" pTooltip="Voir le détail" tooltipPosition="top">
+                  <i class="pi pi-eye"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- Drawer détail -->
+@if (detailOpen && selectedOrder()) {
+  <div class="drawer-overlay" (click)="closeDetail()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ selectedOrder()!.title }}</div>
+        <div class="drawer-sub">{{ selectedOrder()!.property?.name }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeDetail()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="detail-grid">
+        <div class="detail-row">
+          <span class="detail-label">Statut</span>
+          <span class="badge {{ statusClass(selectedOrder()!.status) }}">{{ statusLabel(selectedOrder()!.status) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Priorité</span>
+          <span>{{ priorityLabel(selectedOrder()!.priority) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Catégorie</span>
+          <span>{{ categoryLabel(selectedOrder()!.category) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Bien</span>
+          <span>{{ selectedOrder()!.property?.name ?? '—' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Signalé par</span>
+          <span>{{ selectedOrder()!.tenant?.full_name ?? 'Agence' }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Prestataire</span>
+          <span>
+            {{ selectedOrder()!.contractor?.name ?? 'Non assigné' }}
+            @if (selectedOrder()!.contractor?.phone) {
+              — {{ selectedOrder()!.contractor!.phone }}
+            }
+          </span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date signalée</span>
+          <span>{{ formatDate(selectedOrder()!.requested_at) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date prévue</span>
+          <span>{{ formatDate(selectedOrder()!.scheduled_at) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Date terminée</span>
+          <span>{{ formatDate(selectedOrder()!.completed_at) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Coût estimé</span>
+          <span>{{ formatCurrency(selectedOrder()!.estimated_cost) }}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Coût réel</span>
+          <span>{{ formatCurrency(selectedOrder()!.actual_cost) }}</span>
+        </div>
+      </div>
+      @if (selectedOrder()!.description) {
+        <div class="detail-section-title">Description</div>
+        <div class="detail-desc">{{ selectedOrder()!.description }}</div>
+      }
+    </div>
+  </div>
+}

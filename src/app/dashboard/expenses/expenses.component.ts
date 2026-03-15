@@ -1,10 +1,9 @@
 import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { ActivatedRoute } from '@angular/router';
 import { environment } from '../../../environments/environment';
-
 import { DropdownModule }      from 'primeng/dropdown';
 import { InputNumberModule }   from 'primeng/inputnumber';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
@@ -53,6 +52,8 @@ export interface Expense {
 })
 export class ExpensesComponent implements OnInit {
   private api = `${environment.apiUrl}/agency`;
+  exporting = signal(false);
+  today = new Date();
 
   expenses       = signal<Expense[]>([]);
   contractors    = signal<Contractor[]>([]);
@@ -66,7 +67,6 @@ export class ExpensesComponent implements OnInit {
   filterCat      = signal('');
   drawerOpen     = false;
   vendorDrawer   = false;
-  today = new Date();
 
   filteredExpenses = computed(() => {
     let list = this.expenses();
@@ -371,4 +371,33 @@ export class ExpensesComponent implements OnInit {
   statusClass(s: string): string {
     return ({ approved: 'badge-success', pending: 'badge-warning', rejected: 'badge-danger', paid: 'badge-success' } as any)[s] ?? 'badge-neutral';
   }
+  // ── 4. Méthode utilitaire à ajouter dans CHAQUE composant ──
+private triggerDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+ 
+private todayString(): string {
+  return new Date().toISOString().split('T')[0];
+}
+  exportExcel(): void {
+  this.exporting.set(true);
+  this.http.get(`${this.api}/exports/expenses`, {
+    responseType: 'blob',
+    observe: 'response',
+  }).subscribe({
+    next: (res: HttpResponse<Blob>) => {
+      this.triggerDownload(res.body!, `depenses_${this.todayString()}.xlsx`);
+      this.exporting.set(false);
+    },
+    error: () => {
+      this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Export impossible.' });
+      this.exporting.set(false);
+    }
+  });
+}
 }

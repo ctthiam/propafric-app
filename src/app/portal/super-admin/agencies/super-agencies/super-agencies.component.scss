@@ -74,3 +74,13 @@ $red:         #e57373;
 .btn-extend { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: $purple; color: $white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; &:hover:not(:disabled) { background: darken($purple, 8%); } &:disabled { opacity: 0.5; cursor: not-allowed; } }
 
 :host ::ng-deep .p-toast { top: 80px !important; }
+/* ── Drawer création agence ── */
+.drawer-form { display:flex; flex-direction:column; gap:0; padding-bottom:80px; }
+.drawer-actions { position:sticky; bottom:0; display:flex; align-items:center; justify-content:flex-end; gap:10px; padding:16px 0; background:#fff; border-top:1px solid rgba(0,0,0,.08); margin-top:16px; }
+.form-section-title { font-size:11px; font-weight:700; color:#4a6357; text-transform:uppercase; letter-spacing:1px; margin:20px 0 12px; padding-bottom:8px; border-bottom:1px solid rgba(0,0,0,.07); &:first-child { margin-top:4px; } }
+.form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; label { font-size:13px; font-weight:600; color:#0d1f17; } .req { color:#e57373; } }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.pa-input { width:100%; padding:10px 12px; font-size:14px; border:1.5px solid rgba(0,0,0,.12); border-radius:8px; font-family:'DM Sans',sans-serif; color:#0d1f17; background:#fff; outline:none; box-sizing:border-box; transition:border-color .2s; &:focus { border-color:#2D6A4F; } &::placeholder { color:rgba(0,0,0,.3); } }
+.form-error { font-size:12px; color:#e57373; }
+.btn-primary { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:#2D6A4F; color:#fff; border:none; border-radius:10px; font-size:14px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .25s; &:hover:not(:disabled) { background:#1f5038; } &:disabled { opacity:.7; cursor:not-allowed; } }
+.btn-secondary { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:transparent; color:#0d1f17; border:1.5px solid rgba(0,0,0,.15); border-radius:10px; font-size:14px; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif; &:hover { border-color:#2D6A4F; color:#2D6A4F; } }

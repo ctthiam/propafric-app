@@ -1,0 +1,311 @@
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<!-- ─── HEADER ─── -->
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Travaux</h1>
+    <p class="page-subtitle">Gestion des ordres de travaux et interventions</p>
+  </div>
+  <button class="btn-primary" (click)="openCreate()">
+    <i class="pi pi-plus"></i> Nouveau travail
+  </button>
+</div>
+
+<!-- ─── KPIs ─── -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-blue"><i class="pi pi-flag"></i></div>
+    <div><div class="kpi-value">{{ statsReported }}</div><div class="kpi-label">Signalés</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-purple"><i class="pi pi-wrench"></i></div>
+    <div><div class="kpi-value">{{ statsInProgress }}</div><div class="kpi-label">En cours</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-green"><i class="pi pi-check-circle"></i></div>
+    <div><div class="kpi-value">{{ statsCompleted }}</div><div class="kpi-label">Terminés</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-red"><i class="pi pi-exclamation-triangle"></i></div>
+    <div><div class="kpi-value">{{ statsUrgent }}</div><div class="kpi-label">Urgents</div></div>
+  </div>
+</div>
+
+<!-- ─── FILTRES ─── -->
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher…" (input)="onSearch($event)" />
+  </div>
+  <select class="filter-select" (change)="onFilterStatus($event)">
+    <option value="">Tous les statuts</option>
+    <option value="reported">Signalé</option>
+    <option value="assigned">Assigné</option>
+    <option value="in_progress">En cours</option>
+    <option value="completed">Terminé</option>
+    <option value="cancelled">Annulé</option>
+  </select>
+  <select class="filter-select" (change)="onFilterPriority($event)">
+    <option value="">Toutes priorités</option>
+    <option value="urgent">Urgente</option>
+    <option value="high">Haute</option>
+    <option value="medium">Moyenne</option>
+    <option value="low">Basse</option>
+  </select>
+</div>
+
+<!-- ─── TABLE ─── -->
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3,4]; track i) {
+        <p-skeleton height="64px" borderRadius="8px" styleClass="mb-2" />
+      }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Titre / Bien</th>
+            <th>Catégorie</th>
+            <th>Priorité</th>
+            <th>Prestataire</th>
+            <th>Date prévue</th>
+            <th>Coût estimé</th>
+            <th>Statut</th>
+            <th style="width:140px; text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredOrders().length === 0) {
+            <tr><td colspan="8" class="empty-row">
+              <div class="empty-state-inline"><i class="pi pi-wrench"></i><span>Aucun ordre de travaux</span></div>
+            </td></tr>
+          }
+          @for (o of filteredOrders(); track o.id) {
+            <tr>
+              <td>
+                <div class="td-name">{{ o.title }}</div>
+                @if (o.property) {
+                  <div class="td-muted-sm">{{ o.property.name }}</div>
+                }
+                @if (o.tenant) {
+                  <div class="td-muted-sm">{{ o.tenant.full_name }}</div>
+                }
+              </td>
+              <td><span class="category-tag">{{ categoryLabel(o.category) }}</span></td>
+              <td><span class="priority-dot {{ priorityClass(o.priority) }}"></span> {{ priorityLabel(o.priority) }}</td>
+              <td class="td-muted">{{ o.contractor?.name ?? '—' }}</td>
+              <td class="td-muted">{{ formatDate(o.scheduled_at) }}</td>
+              <td class="td-muted">{{ o.estimated_cost > 0 ? formatCurrency(o.estimated_cost) : '—' }}</td>
+              <td><span class="badge {{ statusClass(o.status) }}">{{ statusLabel(o.status) }}</span></td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-view"   (click)="openDetail(o)"  pTooltip="Détails"   tooltipPosition="top"><i class="pi pi-eye"></i></button>
+                  <button class="btn-icon btn-edit"   (click)="openEdit(o)"    pTooltip="Modifier"  tooltipPosition="top"><i class="pi pi-pencil"></i></button>
+                  @if (o.status === 'reported' || o.status === 'assigned') {
+                    <button class="btn-icon btn-assign"  (click)="openAssign(o)"  pTooltip="Assigner"  tooltipPosition="top"><i class="pi pi-user-plus"></i></button>
+                  }
+                  @if (o.status === 'in_progress' || o.status === 'assigned') {
+                    <button class="btn-icon btn-complete" (click)="openComplete(o)" pTooltip="Terminer" tooltipPosition="top"><i class="pi pi-check"></i></button>
+                  }
+                  @if (o.status !== 'in_progress' && o.status !== 'completed') {
+                    <button class="btn-icon btn-delete" (click)="confirmDelete(o)" pTooltip="Supprimer" tooltipPosition="top"><i class="pi pi-trash"></i></button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ─── DRAWER CRÉER / MODIFIER ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeAll()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingOrder() ? 'Modifier le travail' : 'Nouveau travail' }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeAll()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
+
+        <div class="form-group">
+          <label>Bien concerné <span class="req">*</span></label>
+          <p-dropdown formControlName="property_id" [options]="propertyOptions()" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" styleClass="w-full" />
+          @if (form.get('property_id')?.invalid && form.get('property_id')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Titre <span class="req">*</span></label>
+          <input class="pa-input" formControlName="title" placeholder="Ex: Fuite robinet salle de bain" />
+          @if (form.get('title')?.invalid && form.get('title')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="pa-input pa-textarea" formControlName="description" placeholder="Décrire le problème en détail…" rows="3"></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Catégorie <span class="req">*</span></label>
+            <p-dropdown formControlName="category" [options]="categoryOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>Priorité <span class="req">*</span></label>
+            <p-dropdown formControlName="priority" [options]="priorityOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Coût estimé (FCFA)</label>
+            <input class="pa-input" formControlName="estimated_cost" type="number" placeholder="0" />
+          </div>
+          <div class="form-group">
+            <label>Date prévue</label>
+            <input class="pa-input" formControlName="scheduled_at" type="date" />
+          </div>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeAll()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-check"></i> }
+            {{ editingOrder() ? 'Mettre à jour' : 'Créer' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ─── DRAWER DÉTAIL ─── -->
+@if (detailOpen && editingOrder()) {
+  <div class="drawer-overlay" (click)="closeAll()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingOrder()!.title }}</div>
+        <div class="drawer-sub">{{ editingOrder()!.property?.name }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeAll()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="detail-grid">
+        <div class="detail-row"><span class="detail-label">Statut</span><span class="badge {{ statusClass(editingOrder()!.status) }}">{{ statusLabel(editingOrder()!.status) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Priorité</span><span>{{ priorityLabel(editingOrder()!.priority) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Catégorie</span><span>{{ categoryLabel(editingOrder()!.category) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Bien</span><span>{{ editingOrder()!.property?.name ?? '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Locataire</span><span>{{ editingOrder()!.tenant?.full_name ?? '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Prestataire</span><span>{{ editingOrder()!.contractor?.name ?? 'Non assigné' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Date signalée</span><span>{{ formatDate(editingOrder()!.requested_at) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Date prévue</span><span>{{ formatDate(editingOrder()!.scheduled_at) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Date terminée</span><span>{{ formatDate(editingOrder()!.completed_at) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Coût estimé</span><span>{{ editingOrder()!.estimated_cost > 0 ? formatCurrency(editingOrder()!.estimated_cost) : '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Coût réel</span><span>{{ editingOrder()!.actual_cost > 0 ? formatCurrency(editingOrder()!.actual_cost) : '—' }}</span></div>
+      </div>
+      @if (editingOrder()!.description) {
+        <div class="detail-section-title">Description</div>
+        <div class="detail-desc">{{ editingOrder()!.description }}</div>
+      }
+      @if (editingOrder()!.notes) {
+        <div class="detail-section-title">Notes</div>
+        <div class="detail-desc">{{ editingOrder()!.notes }}</div>
+      }
+      <div class="drawer-actions">
+        @if (editingOrder()!.status === 'reported' || editingOrder()!.status === 'assigned') {
+          <button class="btn-secondary" (click)="openAssign(editingOrder()!)">
+            <i class="pi pi-user-plus"></i> Assigner
+          </button>
+        }
+        @if (editingOrder()!.status === 'in_progress' || editingOrder()!.status === 'assigned') {
+          <button class="btn-primary" (click)="openComplete(editingOrder()!)">
+            <i class="pi pi-check"></i> Marquer terminé
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ─── DRAWER ASSIGNER ─── -->
+@if (assignOpen && editingOrder()) {
+  <div class="drawer-overlay" (click)="closeAll()"></div>
+  <div class="drawer-panel drawer-panel-sm">
+    <div class="drawer-header">
+      <div class="drawer-title">Assigner un prestataire</div>
+      <button class="drawer-close" (click)="closeAll()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="assignForm" (ngSubmit)="saveAssign()" class="drawer-form">
+        <div class="form-group">
+          <label>Prestataire <span class="req">*</span></label>
+          <p-dropdown formControlName="contractor_id" [options]="contractorOptions()" optionLabel="label" optionValue="value" placeholder="Sélectionner" styleClass="w-full" />
+          @if (assignForm.get('contractor_id')?.invalid && assignForm.get('contractor_id')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Date d'intervention prévue</label>
+          <input class="pa-input" formControlName="scheduled_at" type="date" />
+        </div>
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeAll()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> } Assigner
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ─── DRAWER TERMINER ─── -->
+@if (completeOpen && editingOrder()) {
+  <div class="drawer-overlay" (click)="closeAll()"></div>
+  <div class="drawer-panel drawer-panel-sm">
+    <div class="drawer-header">
+      <div class="drawer-title">Marquer comme terminé</div>
+      <button class="drawer-close" (click)="closeAll()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="completeForm" (ngSubmit)="saveComplete()" class="drawer-form">
+        <div class="form-group">
+          <label>Coût réel (FCFA)</label>
+          <input class="pa-input" formControlName="actual_cost" type="number" placeholder="0" />
+        </div>
+        <div class="form-group">
+          <label>Date de fin</label>
+          <input class="pa-input" formControlName="completed_at" type="date" />
+        </div>
+        <div class="form-group">
+          <label>Notes de clôture</label>
+          <textarea class="pa-input pa-textarea" formControlName="notes" placeholder="Résumé des travaux effectués…" rows="3"></textarea>
+        </div>
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeAll()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> } Confirmer
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

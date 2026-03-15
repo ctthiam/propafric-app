@@ -68,6 +68,7 @@ export interface LeaseOption {
 })
 export class PaymentsComponent implements OnInit {
   private api = `${environment.apiUrl}/agency`;
+  exporting = signal(false);
   today = new Date();
 
   schedules    = signal<PaymentSchedule[]>([]);
@@ -333,6 +334,39 @@ export class PaymentsComponent implements OnInit {
   statusClass(s: string): string {
     return ({ paid: 'badge-success', partial: 'badge-warning', pending: 'badge-neutral', late: 'badge-danger' } as any)[s] ?? 'badge-neutral';
   }
+  // ── 4. Méthode utilitaire à ajouter dans CHAQUE composant ──
+private triggerDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a   = document.createElement('a');
+  a.href     = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+ 
+private todayString(): string {
+  return new Date().toISOString().split('T')[0];
+}
+  exportExcel(): void {
+  this.exporting.set(true);
+  const endpoint = this.activeTab() === 'schedules'
+    ? `${this.api}/exports/schedules`
+    : `${this.api}/exports/payments`;
+  const filename = this.activeTab() === 'schedules'
+    ? `echeances_${this.todayString()}.xlsx`
+    : `paiements_${this.todayString()}.xlsx`;
+ 
+  this.http.get(endpoint, { responseType: 'blob', observe: 'response' }).subscribe({
+    next: (res: HttpResponse<Blob>) => {
+      this.triggerDownload(res.body!, filename);
+      this.exporting.set(false);
+    },
+    error: () => {
+      this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Export impossible.' });
+      this.exporting.set(false);
+    }
+  });
+}
 
   isDownloading(id: number): boolean { return this.downloading() === id; }
   Number = Number;
