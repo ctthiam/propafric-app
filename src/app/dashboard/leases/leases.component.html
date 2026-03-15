@@ -250,6 +250,7 @@
       </form>
     </div>
   </div>
+}
   <!-- ─── DRAWER RÉVISION TRIENNALE ─── -->
   @if (revisionOpen && revisionLease()) {
   <div class="drawer-overlay" (click)="closeRevision()"></div>
@@ -268,7 +269,7 @@
         <div class="revision-info-box">
           <div class="revision-info-row">
             <span>Loyer actuel TTC</span>
-            <strong>{{ formatCurrency(revisionLease()!.total_rent) }}</strong>
+            <strong>{{ formatCurrency(+revisionLease()!.total_rent) }}</strong>
           </div>
           <div class="revision-info-row">
             <span>Prochaine révision prévue</span>
@@ -286,25 +287,28 @@
           }
         </div>
 
-        <!-- Aperçu calculé -->
-        @if (revisionPreview()) {
+      @if (revisionPreview()) {
           <div class="revision-preview-box">
             <div class="preview-title">Aperçu de la révision</div>
             <div class="preview-row">
               <span>Ancien loyer TTC</span>
-              <span class="old-value">{{ formatCurrency(revisionPreview()!.old_total_rent) }}</span>
+              <span class="old-value">{{ formatCurrency(revisionPreview()!.before?.total_rent) }}</span>
             </div>
             <div class="preview-row">
               <span>Nouveau loyer TTC</span>
-              <strong class="new-value">{{ formatCurrency(revisionPreview()!.new_total_rent) }}</strong>
+              <strong class="new-value">{{ formatCurrency(revisionPreview()!.after?.total_rent) }}</strong>
             </div>
             <div class="preview-row">
               <span>Augmentation</span>
-              <span class="diff-value">+ {{ formatCurrency(revisionPreview()!.new_total_rent - revisionPreview()!.old_total_rent) }}</span>
+              <span class="diff-value">+ {{ formatCurrency(revisionPreview()!.delta?.total_rent) }}</span>
+            </div>
+            <div class="preview-row">
+              <span>Date d'effet</span>
+              <span>{{ formatDateDisplay(revisionPreview()!.effective_date) }}</span>
             </div>
             <div class="preview-row">
               <span>Prochaine révision</span>
-              <span>{{ formatDate(revisionPreview()!.next_revision_date) }}</span>
+              <span>{{ formatDateDisplay(revisionPreview()!.next_revision_date) }}</span>
             </div>
           </div>
         }
@@ -323,5 +327,4 @@
       </form>
     </div>
   </div>
-}
 }

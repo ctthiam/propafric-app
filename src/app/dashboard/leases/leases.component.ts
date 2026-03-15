@@ -159,7 +159,7 @@ export class LeasesComponent implements OnInit {
   }
 
   // ── Révision ────────────────────────────────────────────
-isDueForRevision(lease: any): boolean {
+  isDueForRevision(lease: any): boolean {
     if (!lease.next_revision_date) return false;
     try {
       const revDate = new Date(lease.next_revision_date + 'T00:00:00');

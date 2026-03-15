@@ -89,7 +89,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   loadUnreadCount(): void {
     this.http.get<any>(`${this.api}/agency/notifications/unread-count`).subscribe({
       next: (res: any) => {
-        this.unreadCount.set(Number(res?.data?.count ?? res?.count ?? 0));
+        this.unreadCount.set(Number(res?.data?.unread_count ?? res?.data?.count ?? 0));
         this.cdr.detectChanges();
       },
       error: () => {} // silencieux
