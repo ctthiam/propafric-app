@@ -176,6 +176,51 @@
           </label>
         </div>
 
+        <!-- Composition interne -->
+        <div class="form-section-title">Composition interne</div>
+        <div class="checkbox-grid">
+          @for (opt of roomOptions; track opt.value) {
+            <label class="check-item" [class.selected]="isSelected(selectedRooms, opt.value)" (click)="toggleRoom(opt.value)">
+              <span class="check-box">
+                @if (isSelected(selectedRooms, opt.value)) {
+                  <i class="pi pi-check"></i>
+                }
+              </span>
+              <span>{{ opt.label }}</span>
+            </label>
+          }
+        </div>
+
+        <!-- Commodités -->
+        <div class="form-section-title">Commodités</div>
+        <div class="checkbox-grid">
+          @for (opt of amenityOptions; track opt.value) {
+            <label class="check-item" [class.selected]="isSelected(selectedAmenities, opt.value)" (click)="toggleAmenity(opt.value)">
+              <span class="check-box">
+                @if (isSelected(selectedAmenities, opt.value)) {
+                  <i class="pi pi-check"></i>
+                }
+              </span>
+              <span>{{ opt.label }}</span>
+            </label>
+          }
+        </div>
+
+        <!-- Équipements -->
+        <div class="form-section-title">Équipements</div>
+        <div class="checkbox-grid">
+          @for (opt of equipmentOptions; track opt.value) {
+            <label class="check-item" [class.selected]="isSelected(selectedEquipment, opt.value)" (click)="toggleEquipment(opt.value)">
+              <span class="check-box">
+                @if (isSelected(selectedEquipment, opt.value)) {
+                  <i class="pi pi-check"></i>
+                }
+              </span>
+              <span>{{ opt.label }}</span>
+            </label>
+          }
+        </div>
+
         <div class="form-section-title">Description</div>
         <div class="form-group">
           <textarea class="pa-input" formControlName="description" rows="3" placeholder="Description du bien…"></textarea>

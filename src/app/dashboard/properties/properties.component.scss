@@ -159,3 +159,54 @@ textarea.pa-input { resize: vertical; }
   .p-button-danger { background: $red; border-color: $red; }
 }
 :host ::ng-deep .p-toast { top: 80px !important; }
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1.5px solid rgba($ink, 0.1);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  color: $ink-mid;
+  transition: all 0.2s;
+  user-select: none;
+
+  &:hover {
+    border-color: $green-main;
+    background: rgba($green-main, 0.03);
+  }
+
+  &.selected {
+    border-color: $green-main;
+    background: rgba($green-main, 0.08);
+    color: $green-main;
+    font-weight: 600;
+  }
+}
+
+.check-box {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba($ink, 0.2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 10px;
+  transition: all 0.2s;
+
+  .selected & {
+    border-color: $green-main;
+    background: $green-main;
+    color: $white;
+  }
+}
