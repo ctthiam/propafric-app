@@ -121,3 +121,98 @@ $orange:      #e65100;
 :host ::ng-deep .p-dropdown { width:100%; }
 :host ::ng-deep .w-full { width:100% !important; }
 :host ::ng-deep .p-toast { top:80px !important; }
+/* ── Coller ces styles à la FIN de work-orders.component.scss ── */
+
+/* Badge photo dans le tableau */
+.badge-photo { background: rgba(#2D6A4F, 0.1); color: #2D6A4F; gap: 4px; i { font-size: 11px; } }
+.btn-photo   { background: rgba(#C9A84C, 0.1); color: darken(#C9A84C, 10%); &:hover { background: rgba(#C9A84C, 0.2); } }
+
+/* Onglets drawer */
+.drawer-tabs {
+  display: flex; gap: 0; border-bottom: 1px solid rgba(#0d1f17, .08); flex-shrink: 0; padding: 0 24px;
+}
+.drawer-tab {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 16px; background: transparent; border: none;
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  font-size: 13px; font-weight: 500; color: #4a6357; cursor: pointer;
+  font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  i { font-size: 13px; }
+  &:hover { color: #2D6A4F; }
+  &.active { color: #2D6A4F; border-bottom-color: #2D6A4F; font-weight: 600; }
+}
+.tab-badge {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 18px; height: 18px; padding: 0 5px;
+  background: #2D6A4F; color: #ffffff; border-radius: 100px; font-size: 10px; font-weight: 700;
+}
+
+/* Onglet Photos */
+.photos-tab { padding: 20px 0 80px; display: flex; flex-direction: column; gap: 0; }
+.photos-section { display: flex; flex-direction: column; gap: 12px; padding: 16px 0; }
+.photos-divider { height: 1px; background: rgba(#0d1f17, .06); margin: 4px 0; }
+
+.photos-section-header {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.photos-section-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; font-weight: 700; color: #4a6357; text-transform: uppercase; letter-spacing: 0.8px;
+}
+.photos-count { font-weight: 400; color: rgba(#4a6357, .6); text-transform: none; letter-spacing: 0; font-size: 12px; }
+
+.section-dot {
+  width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  &.dot-before { background: #e65100; }
+  &.dot-after  { background: #2E7D32; }
+}
+
+.btn-upload-small {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 12px; background: rgba(#2D6A4F, .08); color: #2D6A4F;
+  border: none; border-radius: 8px; font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s;
+  &:hover { background: rgba(#2D6A4F, .15); }
+  i { font-size: 11px; }
+}
+
+.preview-bar {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 10px; background: rgba(#0d1f17, .02); border-radius: 10px;
+  border: 1px dashed rgba(#0d1f17, .1);
+}
+.preview-thumbs { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+.preview-thumb {
+  width: 48px; height: 48px; border-radius: 6px; overflow: hidden; flex-shrink: 0;
+  img { width: 100%; height: 100%; object-fit: cover; }
+}
+.btn-upload-confirm {
+  padding: 8px 14px; font-size: 12px; flex-shrink: 0; gap: 6px;
+}
+
+.photos-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.photo-item {
+  position: relative; border-radius: 8px; overflow: hidden;
+  border: 1px solid rgba(#0d1f17, .08);
+  img { width: 100%; height: 90px; object-fit: cover; display: block; }
+  &:hover .photo-overlay { opacity: 1; }
+}
+.photo-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,.45);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; transition: opacity 0.2s;
+}
+.photo-delete {
+  width: 32px; height: 32px; border-radius: 50%; border: none;
+  background: #e57373; color: #fff; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 13px;
+  &:hover { background: darken(#e57373, 10%); }
+}
+.no-photos-sm {
+  display: flex; align-items: center; gap: 8px; padding: 16px;
+  color: rgba(#4a6357, .5); font-size: 13px; border-radius: 8px;
+  background: rgba(#0d1f17, .02); border: 1px dashed rgba(#0d1f17, .08);
+  i { font-size: 16px; }
+}

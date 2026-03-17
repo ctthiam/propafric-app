@@ -5,6 +5,10 @@ import { SkeletonModule } from 'primeng/skeleton';
 import { TooltipModule }  from 'primeng/tooltip';
 import { environment } from '../../.../../../../environments/environment';
 
+export interface WorkPhoto {
+  id: string; url: string; name: string; size: number;
+}
+
 interface WorkOrder {
   id: number;
   title: string;
@@ -17,8 +21,10 @@ interface WorkOrder {
   requested_at: string | null;
   scheduled_at: string | null;
   completed_at: string | null;
-  property: { name: string; address: string } | null;
-  tenant:   { full_name: string } | null;
+  photos_before: WorkPhoto[];
+  photos_after:  WorkPhoto[];
+  property:   { name: string; address: string } | null;
+  tenant:     { full_name: string } | null;
   contractor: { name: string; specialty: string; phone: string } | null;
 }
 
@@ -35,9 +41,9 @@ export class OwnerWorkOrdersComponent implements OnInit {
   orders  = signal<WorkOrder[]>([]);
   stats   = signal<any>({});
   loading = signal(true);
-  filterStatus = signal('');
+  filterStatus  = signal('');
   selectedOrder = signal<WorkOrder | null>(null);
-  detailOpen = false;
+  detailOpen    = false;
 
   filteredOrders = computed(() => {
     const s = this.filterStatus();
@@ -64,41 +70,18 @@ export class OwnerWorkOrdersComponent implements OnInit {
     });
   }
 
-  openDetail(o: WorkOrder): void {
-    this.selectedOrder.set(o);
-    this.detailOpen = true;
+  openDetail(o: WorkOrder): void { this.selectedOrder.set(o); this.detailOpen = true; }
+  closeDetail(): void { this.detailOpen = false; this.selectedOrder.set(null); }
+  onFilter(e: Event): void { this.filterStatus.set((e.target as HTMLSelectElement).value); }
+
+  photoCount(o: WorkOrder): number {
+    return (o.photos_before?.length ?? 0) + (o.photos_after?.length ?? 0);
   }
 
-  closeDetail(): void {
-    this.detailOpen = false;
-    this.selectedOrder.set(null);
-  }
-
-  onFilter(e: Event): void {
-    this.filterStatus.set((e.target as HTMLSelectElement).value);
-  }
-
-  statusLabel(s: string): string {
-    return ({ reported: 'Signalé', assigned: 'Assigné', in_progress: 'En cours',
-              completed: 'Terminé', cancelled: 'Annulé' } as any)[s] ?? s;
-  }
-  statusClass(s: string): string {
-    return ({ reported: 'badge-blue', assigned: 'badge-gold',
-              in_progress: 'badge-purple', completed: 'badge-success',
-              cancelled: 'badge-neutral' } as any)[s] ?? '';
-  }
-  priorityLabel(p: string): string {
-    return ({ low: 'Basse', medium: 'Moyenne', high: 'Haute', urgent: 'Urgente' } as any)[p] ?? p;
-  }
-  categoryLabel(c: string): string {
-    return ({ urgence: 'Urgence', entretien: 'Entretien', renovation: 'Rénovation',
-              sinistre: 'Sinistre', autre: 'Autre' } as any)[c] ?? c;
-  }
-  formatDate(d: string | null): string {
-    if (!d) return '—';
-    return new Date(d).toLocaleDateString('fr-SN', { day: '2-digit', month: 'short', year: 'numeric' });
-  }
-  formatCurrency(n: number): string {
-    return n > 0 ? new Intl.NumberFormat('fr-SN').format(n) + ' F' : '—';
-  }
+  statusLabel(s: string): string { return ({ reported: 'Signalé', assigned: 'Assigné', in_progress: 'En cours', completed: 'Terminé', cancelled: 'Annulé' } as any)[s] ?? s; }
+  statusClass(s: string): string { return ({ reported: 'badge-blue', assigned: 'badge-gold', in_progress: 'badge-purple', completed: 'badge-success', cancelled: 'badge-neutral' } as any)[s] ?? ''; }
+  priorityLabel(p: string): string { return ({ low: 'Basse', medium: 'Moyenne', high: 'Haute', urgent: 'Urgente' } as any)[p] ?? p; }
+  categoryLabel(c: string): string { return ({ urgence: 'Urgence', entretien: 'Entretien', renovation: 'Rénovation', sinistre: 'Sinistre', autre: 'Autre' } as any)[c] ?? c; }
+  formatDate(d: string | null): string { if (!d) return '—'; return new Date(d).toLocaleDateString('fr-SN', { day: '2-digit', month: 'short', year: 'numeric' }); }
+  formatCurrency(n: number): string { return n > 0 ? new Intl.NumberFormat('fr-SN').format(n) + ' F' : '—'; }
 }

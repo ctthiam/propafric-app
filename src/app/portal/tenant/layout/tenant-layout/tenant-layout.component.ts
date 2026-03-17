@@ -14,12 +14,13 @@ export class TenantLayoutComponent implements OnInit {
   sidebarCollapsed = signal(false);
 
   navItems = [
-    { label: 'Tableau de bord', icon: 'pi pi-home',        route: '/portail-locataire/dashboard' },
-    { label: 'Mon bail',        icon: 'pi pi-file',         route: '/portail-locataire/bail' },
-    { label: 'Mes échéances',   icon: 'pi pi-calendar',     route: '/portail-locataire/echeances' },
-    { label: 'Mes quittances',  icon: 'pi pi-file-pdf',     route: '/portail-locataire/quittances' },
-    { label: 'Messages',        icon: 'pi pi-comments',     route: '/portail-locataire/messages' },
-  ];
+  { label: 'Tableau de bord', icon: 'pi pi-home',        route: '/portail-locataire/dashboard' },
+  { label: 'Mon bail',        icon: 'pi pi-file',         route: '/portail-locataire/bail' },
+  { label: 'Mes échéances',   icon: 'pi pi-calendar',     route: '/portail-locataire/echeances' },
+  { label: 'Mes quittances',  icon: 'pi pi-file-pdf',     route: '/portail-locataire/quittances' },
+  { label: 'Signalements',    icon: 'pi pi-wrench',       route: '/portail-locataire/signalements' },
+  { label: 'Messages',        icon: 'pi pi-comments',     route: '/portail-locataire/messages' },
+];
 
   constructor(
     public auth: AuthService,

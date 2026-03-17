@@ -76,6 +76,8 @@
 }
 
 <!-- ─── DRAWER SIGNALEMENT ─── -->
+<!-- Remplacer le bloc @if (reportOpen) { ... } existant par celui-ci -->
+
 @if (reportOpen) {
   <div class="drawer-overlay" (click)="closeReport()"></div>
   <div class="drawer-panel">
@@ -119,6 +121,29 @@
               optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
         </div>
+
+        <!-- ── Upload photos ── -->
+        <div class="form-section-label">Photos (optionnel — max 5)</div>
+        <div class="upload-zone" (click)="photoInput.click()">
+          <input #photoInput type="file" multiple accept="image/jpeg,image/png,image/webp"
+            style="display:none" (change)="onPhotosSelected($event)" />
+          <i class="pi pi-camera upload-icon"></i>
+          <div class="upload-label">Ajouter des photos du problème</div>
+          <div class="upload-hint">JPEG, PNG, WebP — max 5MB — max 5 photos</div>
+        </div>
+
+        @if (previewUrls.length > 0) {
+          <div class="preview-grid">
+            @for (url of previewUrls; track url; let i = $index) {
+              <div class="preview-item">
+                <img [src]="url" alt="photo" />
+                <button type="button" class="preview-remove" (click)="removePhoto(i)">
+                  <i class="pi pi-times"></i>
+                </button>
+              </div>
+            }
+          </div>
+        }
 
         <!-- Info box -->
         <div class="info-box">

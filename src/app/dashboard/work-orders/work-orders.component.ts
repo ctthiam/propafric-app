@@ -10,6 +10,15 @@ import { TooltipModule }       from 'primeng/tooltip';
 import { DropdownModule }      from 'primeng/dropdown';
 import { environment } from '../../../environments/environment';
 
+export interface WorkPhoto {
+  id: string;
+  path: string;
+  url: string;
+  name: string;
+  size: number;
+  disk: string;
+}
+
 interface WorkOrder {
   id: number;
   title: string;
@@ -23,8 +32,10 @@ interface WorkOrder {
   scheduled_at: string | null;
   completed_at: string | null;
   notes: string | null;
-  property: { id: number; name: string; reference: string; address: string } | null;
-  tenant:   { id: number; full_name: string; phone: string } | null;
+  photos_before: WorkPhoto[];
+  photos_after:  WorkPhoto[];
+  property:   { id: number; name: string; reference: string; address: string } | null;
+  tenant:     { id: number; full_name: string; phone: string } | null;
   contractor: { id: number; name: string; specialty: string; phone: string } | null;
 }
 
@@ -48,11 +59,22 @@ export class WorkOrdersComponent implements OnInit {
   loading     = signal(true);
   saving      = signal(false);
 
-  drawerOpen    = false;
-  detailOpen    = false;
-  assignOpen    = false;
-  completeOpen  = false;
-  editingOrder  = signal<WorkOrder | null>(null);
+  drawerOpen   = false;
+  detailOpen   = false;
+  assignOpen   = false;
+  completeOpen = false;
+  editingOrder = signal<WorkOrder | null>(null);
+
+  // ── Onglet détail ──────────────────────────────────────────
+  detailTab: 'info' | 'photos' = 'info';
+
+  // ── Photos ────────────────────────────────────────────────
+  uploadingBefore = signal(false);
+  uploadingAfter  = signal(false);
+  selectedBefore: File[] = [];
+  selectedAfter:  File[] = [];
+  previewBefore:  string[] = [];
+  previewAfter:   string[] = [];
 
   filterStatus   = signal('');
   filterPriority = signal('');
@@ -77,11 +99,11 @@ export class WorkOrdersComponent implements OnInit {
   completeForm: FormGroup;
 
   categoryOptions = [
-    { label: 'Urgence',     value: 'urgence'    },
-    { label: 'Entretien',   value: 'entretien'  },
-    { label: 'Rénovation',  value: 'renovation' },
-    { label: 'Sinistre',    value: 'sinistre'   },
-    { label: 'Autre',       value: 'autre'      },
+    { label: 'Urgence',    value: 'urgence'    },
+    { label: 'Entretien',  value: 'entretien'  },
+    { label: 'Rénovation', value: 'renovation' },
+    { label: 'Sinistre',   value: 'sinistre'   },
+    { label: 'Autre',      value: 'autre'      },
   ];
 
   priorityOptions = [
@@ -92,11 +114,11 @@ export class WorkOrdersComponent implements OnInit {
   ];
 
   statusOptions = [
-    { label: 'Signalé',     value: 'reported'    },
-    { label: 'Assigné',     value: 'assigned'    },
-    { label: 'En cours',    value: 'in_progress' },
-    { label: 'Terminé',     value: 'completed'   },
-    { label: 'Annulé',      value: 'cancelled'   },
+    { label: 'Signalé',    value: 'reported'    },
+    { label: 'Assigné',    value: 'assigned'    },
+    { label: 'En cours',   value: 'in_progress' },
+    { label: 'Terminé',    value: 'completed'   },
+    { label: 'Annulé',     value: 'cancelled'   },
   ];
 
   constructor(
@@ -128,9 +150,7 @@ export class WorkOrdersComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.loadAll();
-  }
+  ngOnInit(): void { this.loadAll(); }
 
   loadAll(): void {
     this.loading.set(true);
@@ -150,7 +170,7 @@ export class WorkOrdersComponent implements OnInit {
     });
   }
 
-  // ── CRUD ───────────────────────────────────────────────────
+  // ── CRUD ──────────────────────────────────────────────────
 
   openCreate(): void {
     this.editingOrder.set(null);
@@ -176,6 +196,8 @@ export class WorkOrdersComponent implements OnInit {
 
   openDetail(o: WorkOrder): void {
     this.editingOrder.set(o);
+    this.detailTab = 'info';
+    this.clearAllPreviews();
     this.detailOpen = true;
     this.cdr.detectChanges();
   }
@@ -195,11 +217,12 @@ export class WorkOrdersComponent implements OnInit {
   }
 
   closeAll(): void {
-    this.drawerOpen = false;
-    this.detailOpen = false;
-    this.assignOpen = false;
+    this.drawerOpen   = false;
+    this.detailOpen   = false;
+    this.assignOpen   = false;
     this.completeOpen = false;
     this.editingOrder.set(null);
+    this.clearAllPreviews();
     this.cdr.detectChanges();
   }
 
@@ -279,18 +302,143 @@ export class WorkOrdersComponent implements OnInit {
       acceptLabel: 'Supprimer', rejectLabel: 'Annuler',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => this.http.delete<any>(`${this.api}/work-orders/${o.id}`).subscribe({
-        next: (res: any) => { this.toast.add({ severity: 'success', summary: 'Supprimé', detail: res.message }); this.loadAll(); },
+        next: (res: any) => {
+          this.toast.add({ severity: 'success', summary: 'Supprimé', detail: res.message });
+          this.loadAll();
+        },
         error: (err: any) => this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Impossible.' })
       })
     });
   }
 
-  // ── Filtres ────────────────────────────────────────────────
+  // ── PHOTOS ────────────────────────────────────────────────
+
+  onFilesSelected(event: Event, type: 'before' | 'after'): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const files   = Array.from(input.files);
+    const maxSize = 5 * 1024 * 1024;
+    const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+
+    const valid = files.filter(f => {
+      if (!allowed.includes(f.type)) {
+        this.toast.add({ severity: 'warn', summary: 'Format invalide', detail: `${f.name} non supporté` });
+        return false;
+      }
+      if (f.size > maxSize) {
+        this.toast.add({ severity: 'warn', summary: 'Trop lourd', detail: `${f.name} : max 5MB` });
+        return false;
+      }
+      return true;
+    });
+
+    if (!valid.length) return;
+
+    const order    = this.editingOrder();
+    const existing = type === 'before'
+      ? (order?.photos_before ?? []).length
+      : (order?.photos_after  ?? []).length;
+    const remaining = 10 - existing;
+    const toAdd = valid.slice(0, remaining);
+
+    if (type === 'before') {
+      this.selectedBefore = toAdd;
+      this.previewBefore  = [];
+      toAdd.forEach(f => { const r = new FileReader(); r.onload = e => { this.previewBefore.push(e.target?.result as string); this.cdr.detectChanges(); }; r.readAsDataURL(f); });
+    } else {
+      this.selectedAfter = toAdd;
+      this.previewAfter  = [];
+      toAdd.forEach(f => { const r = new FileReader(); r.onload = e => { this.previewAfter.push(e.target?.result as string); this.cdr.detectChanges(); }; r.readAsDataURL(f); });
+    }
+
+    input.value = '';
+    this.cdr.detectChanges();
+  }
+
+  uploadPhotos(type: 'before' | 'after'): void {
+    const files = type === 'before' ? this.selectedBefore : this.selectedAfter;
+    if (!files.length) return;
+    const order = this.editingOrder();
+    if (!order) return;
+
+    if (type === 'before') this.uploadingBefore.set(true);
+    else                   this.uploadingAfter.set(true);
+
+    const formData = new FormData();
+    formData.append('type', type);
+    files.forEach(f => formData.append('photos[]', f, f.name));
+
+    this.http.post<any>(`${this.api}/work-orders/${order.id}/photos`, formData).subscribe({
+      next: (res: any) => {
+        const updated: WorkOrder = res.data;
+        this.editingOrder.set(updated);
+        this.orders.update(list => list.map(o => o.id === updated.id ? updated : o));
+
+        if (type === 'before') { this.selectedBefore = []; this.previewBefore = []; this.uploadingBefore.set(false); }
+        else                   { this.selectedAfter  = []; this.previewAfter  = []; this.uploadingAfter.set(false);  }
+
+        this.toast.add({ severity: 'success', summary: 'Succès', detail: res.message });
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Upload échoué.' });
+        if (type === 'before') this.uploadingBefore.set(false);
+        else                   this.uploadingAfter.set(false);
+      }
+    });
+  }
+
+  deletePhoto(photo: WorkPhoto, type: 'before' | 'after'): void {
+    const order = this.editingOrder();
+    if (!order) return;
+
+    this.confirm.confirm({
+      message: 'Supprimer cette photo ?',
+      header: 'Confirmer',
+      icon: 'pi pi-trash',
+      acceptLabel: 'Supprimer', rejectLabel: 'Annuler',
+      acceptButtonStyleClass: 'p-button-danger',
+      accept: () => {
+        this.http.delete<any>(`${this.api}/work-orders/${order.id}/photos/${photo.id}?type=${type}`).subscribe({
+          next: (res: any) => {
+            const updated = {
+              ...order,
+              photos_before: type === 'before' ? order.photos_before.filter(p => p.id !== photo.id) : order.photos_before,
+              photos_after:  type === 'after'  ? order.photos_after.filter(p => p.id !== photo.id)  : order.photos_after,
+            };
+            this.editingOrder.set(updated);
+            this.orders.update(list => list.map(o => o.id === updated.id ? updated : o));
+            this.toast.add({ severity: 'success', summary: 'Supprimée', detail: res.message });
+            this.cdr.detectChanges();
+          },
+          error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression impossible.' })
+        });
+      }
+    });
+  }
+
+  clearAllPreviews(): void {
+    this.selectedBefore = []; this.previewBefore = [];
+    this.selectedAfter  = []; this.previewAfter  = [];
+  }
+
+  formatSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  photoCount(o: WorkOrder): number {
+    return (o.photos_before?.length ?? 0) + (o.photos_after?.length ?? 0);
+  }
+
+  // ── Filtres ───────────────────────────────────────────────
   onSearch(e: Event):         void { this.search.set((e.target as HTMLInputElement).value); }
   onFilterStatus(e: Event):   void { this.filterStatus.set((e.target as HTMLSelectElement).value); }
   onFilterPriority(e: Event): void { this.filterPriority.set((e.target as HTMLSelectElement).value); }
 
-  // ── Labels & classes ───────────────────────────────────────
+  // ── Labels ────────────────────────────────────────────────
   statusLabel(s: string): string {
     return ({ reported: 'Signalé', assigned: 'Assigné', in_progress: 'En cours', completed: 'Terminé', cancelled: 'Annulé' } as any)[s] ?? s;
   }
@@ -313,10 +461,10 @@ export class WorkOrdersComponent implements OnInit {
   formatCurrency(n: number): string {
     return Number(n).toLocaleString('fr-SN') + ' F';
   }
-  propertyOptions = computed(() => this.properties().map(p => ({ label: `${p.name ?? p.reference}`, value: p.id })));
+
+  propertyOptions   = computed(() => this.properties().map(p => ({ label: p.name ?? p.reference, value: p.id })));
   contractorOptions = computed(() => this.contractors().map(c => ({ label: `${c.name} — ${c.specialty}`, value: c.id })));
 
-  // Stats rapides
   get statsReported():   number { return this.orders().filter(o => o.status === 'reported').length; }
   get statsInProgress(): number { return this.orders().filter(o => o.status === 'in_progress' || o.status === 'assigned').length; }
   get statsCompleted():  number { return this.orders().filter(o => o.status === 'completed').length; }

@@ -142,7 +142,9 @@
     <div class="table-card">
       <div class="table-card-header">
         <div class="table-card-title">Loyers en retard</div>
-        <a routerLink="/dashboard/paiements" class="table-card-link">Voir tout →</a>
+        @if (canSeePaiements()) {
+          <a routerLink="/dashboard/paiements" class="table-card-link">Voir tout →</a>
+        }
       </div>
       <div class="data-table-wrapper">
         <table class="data-table">
@@ -182,8 +184,10 @@
     <div class="table-card">
       <div class="table-card-header">
         <div class="table-card-title">Collections — {{ d.period.label }}</div>
-        <a routerLink="/dashboard/paiements" class="table-card-link">Paiements →</a>
-      </div>
+           @if (canSeePaiements()) {
+              <a routerLink="/dashboard/paiements" class="table-card-link">Paiements →</a>
+            }
+        </div>
       <div class="data-table-wrapper">
         <table class="data-table">
           <thead>

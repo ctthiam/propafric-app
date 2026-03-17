@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { RouterLink } from '@angular/router';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../../app/core/services/auth.service';
 
 import { NgApexchartsModule } from 'ng-apexcharts';
 import type {
@@ -110,7 +111,10 @@ export class HomeComponent implements OnInit {
     tooltip: ApexTooltip;
   } | null>(null);
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService
+  ) {}
 
   ngOnInit(): void { this.loadDashboard(); }
 
@@ -129,6 +133,11 @@ export class HomeComponent implements OnInit {
       error: () => this.loading.set(false),
     });
   }
+
+  canSeePaiements(): boolean {
+  const role = this.auth.user()?.role;
+  return role === 'agency_admin' || role === 'agency_accountant';
+}
 
   setPeriod(p: 'month' | 'quarter' | 'year'): void {
     this.period.set(p);

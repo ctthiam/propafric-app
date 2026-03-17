@@ -160,3 +160,38 @@ $red:         #e57373;
 :host ::ng-deep .p-dropdown { width:100%; }
 :host ::ng-deep .w-full { width:100% !important; }
 :host ::ng-deep .p-toast { top:80px !important; }
+
+/* ── Ajouter à la FIN de tenant-lease.component.scss ── */
+
+.form-section-label {
+  font-size: 11px; font-weight: 700; color: #4a6357;
+  text-transform: uppercase; letter-spacing: 1px;
+  margin: 16px 0 8px; padding-bottom: 6px;
+  border-bottom: 1px solid rgba(#0d1f17, .07);
+}
+
+.upload-zone {
+  border: 2px dashed rgba(#2D6A4F, .3); border-radius: 10px;
+  padding: 20px; text-align: center; cursor: pointer;
+  background: rgba(#2D6A4F, .02); transition: all .2s; margin-bottom: 10px;
+  &:hover { border-color: #2D6A4F; background: rgba(#2D6A4F, .05); }
+}
+.upload-icon  { font-size: 24px; color: rgba(#2D6A4F, .4); display: block; margin-bottom: 6px; }
+.upload-label { font-size: 13px; font-weight: 600; color: #4a6357; margin-bottom: 3px; }
+.upload-hint  { font-size: 11px; color: rgba(#4a6357, .6); }
+
+.preview-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px;
+}
+.preview-item {
+  position: relative; border-radius: 8px; overflow: hidden;
+  border: 1px solid rgba(#0d1f17, .08);
+  img { width: 100%; height: 72px; object-fit: cover; display: block; }
+}
+.preview-remove {
+  position: absolute; top: 3px; right: 3px; width: 20px; height: 20px;
+  border-radius: 50%; background: rgba(0,0,0,.6); color: #fff;
+  border: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; font-size: 9px;
+  &:hover { background: #e57373; }
+}

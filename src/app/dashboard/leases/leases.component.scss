@@ -82,17 +82,20 @@ $red:         #e57373;
   cursor: pointer; font-size: 13px; transition: all 0.2s;
   &.btn-edit { background: rgba($green-main, 0.08); color: $green-main; &:hover { background: rgba($green-main, 0.15); } }
   &.btn-warn { background: rgba($red, 0.08); color: $red; &:hover { background: rgba($red, 0.15); } }
+  &.btn-pdf  { background: rgba($gold-main, 0.1); color: darken($gold-main, 10%); &:hover { background: rgba($gold-main, 0.2); } }
 }
 .empty-row { text-align: center; padding: 40px !important; }
 .empty-state-inline { display: inline-flex; align-items: center; gap: 10px; color: $ink-light; font-size: 14px; i { font-size: 20px; } }
 
-// ─── DRAWER CUSTOM ───────────────────────────────────────────
+// ─── DRAWER ──────────────────────────────────────────────────
 .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 1000; }
 .drawer-panel {
   position: fixed; top: 0; right: 0; bottom: 0; width: 520px;
   background: $white; z-index: 1001; display: flex; flex-direction: column;
   box-shadow: -8px 0 32px rgba(0,0,0,0.12);
 }
+.drawer-panel-wide { width: 620px; }
+
 .drawer-header {
   display: flex; align-items: flex-start; justify-content: space-between;
   padding: 20px 24px 16px; border-bottom: 1px solid rgba($ink, 0.08); flex-shrink: 0;
@@ -109,11 +112,18 @@ $red:         #e57373;
 .drawer-form  { display: flex; flex-direction: column; gap: 0; padding-bottom: 80px; }
 
 .form-section-title {
+  display: flex; align-items: center; justify-content: space-between;
   font-size: 11px; font-weight: 700; color: $ink-light; text-transform: uppercase;
   letter-spacing: 1px; margin: 20px 0 12px; padding-bottom: 8px;
   border-bottom: 1px solid rgba($ink, 0.07);
   &:first-child { margin-top: 4px; }
 }
+.section-total {
+  font-size: 12px; font-weight: 700; color: $green-main;
+  background: rgba($green-main, 0.08); padding: 2px 10px; border-radius: 20px;
+  text-transform: none; letter-spacing: 0;
+}
+
 .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .form-group {
@@ -134,13 +144,50 @@ $red:         #e57373;
 }
 textarea.pa-input { resize: vertical; }
 .form-error { font-size: 12px; color: $red; }
+.form-hint  { font-size: 11px; color: $ink-light; font-style: italic; }
 
 :host ::ng-deep .p-dropdown,
 :host ::ng-deep .p-inputnumber,
 :host ::ng-deep .p-calendar { width: 100%; }
 :host ::ng-deep .w-full { width: 100% !important; }
 
-// Calc box
+// ─── POSTES DYNAMIQUES (loyer + charges) ─────────────────────
+.items-list {
+  display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;
+}
+.item-row {
+  display: grid; grid-template-columns: 1fr 160px 32px; gap: 8px; align-items: center;
+}
+.item-label-field { flex: 1; }
+.item-amount-field { width: 160px; }
+
+.btn-remove-item {
+  width: 32px; height: 32px; border-radius: 8px; border: none;
+  background: rgba($red, 0.08); color: $red; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; transition: all 0.2s; flex-shrink: 0;
+  &:hover:not(:disabled) { background: rgba($red, 0.15); }
+  &:disabled { opacity: 0.3; cursor: not-allowed; }
+}
+
+.btn-add-item {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 14px; background: rgba($green-main, 0.06);
+  color: $green-main; border: 1.5px dashed rgba($green-main, 0.3);
+  border-radius: 8px; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s; margin-bottom: 8px;
+  &:hover { background: rgba($green-main, 0.1); border-color: $green-main; }
+}
+
+.charges-hint {
+  display: flex; align-items: flex-start; gap: 8px;
+  font-size: 12px; color: $ink-light; font-style: italic;
+  margin-bottom: 10px;
+  i { color: $green-main; flex-shrink: 0; margin-top: 1px; }
+}
+
+// ─── CALC BOX ────────────────────────────────────────────────
 .calc-box {
   background: $cream; border-radius: 12px; padding: 16px;
   margin: 8px 0 16px; border: 1px solid rgba($ink, 0.07);
@@ -166,73 +213,41 @@ textarea.pa-input { resize: vertical; }
   .p-button-danger { background: $red; border-color: $red; }
 }
 :host ::ng-deep .p-toast { top: 80px !important; }
-/* ── Révision triennale ── */
+
+// ─── RÉVISION TRIENNALE ──────────────────────────────────────
 .revision-alert {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  background: rgba(25, 113, 194, 0.07);
-  border: 1px solid rgba(25, 113, 194, 0.2);
-  border-radius: 10px;
-  margin-bottom: 16px;
-  font-size: 13px;
-  color: #1971c2;
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px; background: rgba(25, 113, 194, 0.07);
+  border: 1px solid rgba(25, 113, 194, 0.2); border-radius: 10px;
+  margin-bottom: 16px; font-size: 13px; color: #1971c2;
   i { font-size: 16px; flex-shrink: 0; }
 }
-
 .btn-revision {
-  background: rgba(25, 113, 194, 0.08) !important;
-  color: #1971c2 !important;
+  background: rgba(25, 113, 194, 0.08) !important; color: #1971c2 !important;
   &:hover { background: rgba(25, 113, 194, 0.15) !important; }
 }
-
 .revision-info-box {
-  background: var(--cream, #faf8f3);
-  border-radius: 10px;
-  padding: 14px 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  background: $cream; border-radius: 10px; padding: 14px 16px;
+  display: flex; flex-direction: column; gap: 8px;
 }
-
 .revision-info-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #4a6357;
-  strong { color: #0d1f17; }
+  display: flex; justify-content: space-between; font-size: 13px; color: $ink-light;
+  strong { color: $ink; }
 }
-
 .revision-preview-box {
-  margin-top: 16px;
-  background: rgba(45, 106, 79, 0.05);
-  border: 1.5px solid rgba(45, 106, 79, 0.2);
-  border-radius: 10px;
-  padding: 14px 16px;
+  margin-top: 16px; background: rgba($green-main, 0.05);
+  border: 1.5px solid rgba($green-main, 0.2); border-radius: 10px; padding: 14px 16px;
 }
-
 .preview-title {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.8px;
-  color: #4a6357;
-  margin-bottom: 10px;
+  font-size: 12px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.8px; color: $ink-light; margin-bottom: 10px;
 }
-
 .preview-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  font-size: 13px;
-  color: #4a6357;
-  border-bottom: 1px solid rgba(45, 106, 79, 0.08);
+  display: flex; justify-content: space-between; padding: 6px 0;
+  font-size: 13px; color: $ink-light;
+  border-bottom: 1px solid rgba($green-main, 0.08);
   &:last-child { border-bottom: none; }
 }
-
-.old-value  { text-decoration: line-through; color: #9e9e9e; }
-.new-value  { color: #2D6A4F; font-size: 15px; }
+.old-value  { text-decoration: line-through; color: rgba($ink, 0.3); }
+.new-value  { color: $green-main; font-size: 15px; }
 .diff-value { color: #e65100; font-weight: 600; }
-
-.form-hint { font-size: 11px; color: #4a6357; font-style: italic; }

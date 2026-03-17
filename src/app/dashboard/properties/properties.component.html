@@ -44,6 +44,7 @@
             <th>Propriétaire</th>
             <th>Type</th>
             <th>Ville</th>
+            <th>Photos</th>
             <th>Statut</th>
             <th style="width:100px; text-align:center">Actions</th>
           </tr>
@@ -51,7 +52,7 @@
         <tbody>
           @if (filteredProperties().length === 0) {
             <tr>
-              <td colspan="7" class="empty-row">
+              <td colspan="8" class="empty-row">
                 <div class="empty-state-inline">
                   <i class="pi pi-building"></i>
                   <span>Aucun bien trouvé</span>
@@ -64,7 +65,13 @@
               <td><span class="badge badge-ref">{{ prop.reference }}</span></td>
               <td>
                 <div class="prop-cell">
-                  <div class="prop-icon"><i [class]="typeIcon(prop.type)"></i></div>
+                  @if (photoCount(prop) > 0) {
+                    <div class="prop-thumb">
+                      <img [src]="prop.photos[0].url" [alt]="prop.name" />
+                    </div>
+                  } @else {
+                    <div class="prop-icon"><i [class]="typeIcon(prop.type)"></i></div>
+                  }
                   <div>
                     <div class="prop-name">{{ prop.name }}</div>
                     <div class="prop-address">{{ prop.address }}</div>
@@ -75,10 +82,23 @@
               <td class="td-muted td-capitalize">{{ prop.type }}</td>
               <td class="td-muted">{{ prop.city }}</td>
               <td>
+                @if (photoCount(prop) > 0) {
+                  <span class="badge badge-photo">
+                    <i class="pi pi-image"></i> {{ photoCount(prop) }}
+                  </span>
+                } @else {
+                  <span class="td-muted" style="font-size:12px">—</span>
+                }
+              </td>
+              <td>
                 <span class="badge {{ statusClass(prop.status) }}">{{ statusLabel(prop.status) }}</span>
               </td>
               <td>
                 <div class="actions-cell">
+                  <button class="btn-icon btn-photo" (click)="openEdit(prop); switchTab('photos')"
+                    pTooltip="Photos" tooltipPosition="top">
+                    <i class="pi pi-images"></i>
+                  </button>
                   <button class="btn-icon btn-edit" (click)="openEdit(prop)" pTooltip="Modifier" tooltipPosition="top">
                     <i class="pi pi-pencil"></i>
                   </button>
@@ -109,136 +129,214 @@
       <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
     </div>
 
+    <!-- Onglets -->
+    <div class="drawer-tabs">
+      <button class="drawer-tab" [class.active]="activeTab === 'info'" (click)="switchTab('info')">
+        <i class="pi pi-info-circle"></i> Informations
+      </button>
+      <button class="drawer-tab" [class.active]="activeTab === 'photos'" (click)="switchTab('photos')"
+        [class.disabled]="!editingProp()">
+        <i class="pi pi-images"></i> Photos
+        @if (currentPhotos().length > 0) {
+          <span class="tab-badge">{{ currentPhotos().length }}</span>
+        }
+      </button>
+    </div>
+
     <div class="drawer-body">
-      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
 
-        <div class="form-section-title">Propriétaire</div>
-        <div class="form-group">
-          <label>Propriétaire <span class="req">*</span></label>
-          <p-dropdown
-            formControlName="owner_id"
-            [options]="ownerOptions"
-            optionLabel="label"
-            optionValue="value"
-            placeholder="Sélectionner un propriétaire"
-            [filter]="true"
-            filterPlaceholder="Rechercher…"
-            styleClass="w-full"
-          />
-          @if (form.get('owner_id')?.invalid && form.get('owner_id')?.touched) {
-            <span class="form-error">Requis</span>
-          }
-        </div>
+      <!-- ─── ONGLET INFORMATIONS ─── -->
+      @if (activeTab === 'info') {
+        <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
 
-        <div class="form-section-title">Informations générales</div>
-        <div class="form-group">
-          <label>Nom du bien <span class="req">*</span></label>
-          <input class="pa-input" formControlName="name" placeholder="Appartement Almadies F3" />
-          @if (form.get('name')?.invalid && form.get('name')?.touched) {
-            <span class="form-error">Requis</span>
-          }
-        </div>
-        <div class="form-row-2">
+          <div class="form-section-title">Propriétaire</div>
           <div class="form-group">
-            <label>Type <span class="req">*</span></label>
-            <p-dropdown formControlName="type" [options]="propertyTypes" optionLabel="label" optionValue="value" styleClass="w-full" />
-          </div>
-          <div class="form-group">
-            <label>Statut <span class="req">*</span></label>
-            <p-dropdown formControlName="status" [options]="statusOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
-          </div>
-        </div>
-
-        <div class="form-section-title">Localisation</div>
-        <div class="form-group">
-          <label>Adresse <span class="req">*</span></label>
-          <input class="pa-input" formControlName="address" placeholder="Rue 10, Cité Keur Gorgui" />
-          @if (form.get('address')?.invalid && form.get('address')?.touched) {
-            <span class="form-error">Requis</span>
-          }
-        </div>
-        <div class="form-row-2">
-          <div class="form-group">
-            <label>Ville <span class="req">*</span></label>
-            <input class="pa-input" formControlName="city" placeholder="Dakar" />
-          </div>
-          <div class="form-group">
-            <label>Zone / Quartier</label>
-            <input class="pa-input" formControlName="zone" placeholder="Almadies" />
-          </div>
-        </div>
-
-        <div class="form-section-title">Options</div>
-        <div class="form-group form-group-check">
-          <p-checkbox formControlName="is_furnished" [binary]="true" inputId="is_furnished" />
-          <label for="is_furnished" class="check-label">
-            Bien meublé
-          </label>
-        </div>
-
-        <!-- Composition interne -->
-        <div class="form-section-title">Composition interne</div>
-        <div class="checkbox-grid">
-          @for (opt of roomOptions; track opt.value) {
-            <label class="check-item" [class.selected]="isSelected(selectedRooms, opt.value)" (click)="toggleRoom(opt.value)">
-              <span class="check-box">
-                @if (isSelected(selectedRooms, opt.value)) {
-                  <i class="pi pi-check"></i>
-                }
-              </span>
-              <span>{{ opt.label }}</span>
-            </label>
-          }
-        </div>
-
-        <!-- Commodités -->
-        <div class="form-section-title">Commodités</div>
-        <div class="checkbox-grid">
-          @for (opt of amenityOptions; track opt.value) {
-            <label class="check-item" [class.selected]="isSelected(selectedAmenities, opt.value)" (click)="toggleAmenity(opt.value)">
-              <span class="check-box">
-                @if (isSelected(selectedAmenities, opt.value)) {
-                  <i class="pi pi-check"></i>
-                }
-              </span>
-              <span>{{ opt.label }}</span>
-            </label>
-          }
-        </div>
-
-        <!-- Équipements -->
-        <div class="form-section-title">Équipements</div>
-        <div class="checkbox-grid">
-          @for (opt of equipmentOptions; track opt.value) {
-            <label class="check-item" [class.selected]="isSelected(selectedEquipment, opt.value)" (click)="toggleEquipment(opt.value)">
-              <span class="check-box">
-                @if (isSelected(selectedEquipment, opt.value)) {
-                  <i class="pi pi-check"></i>
-                }
-              </span>
-              <span>{{ opt.label }}</span>
-            </label>
-          }
-        </div>
-
-        <div class="form-section-title">Description</div>
-        <div class="form-group">
-          <textarea class="pa-input" formControlName="description" rows="3" placeholder="Description du bien…"></textarea>
-        </div>
-
-        <div class="drawer-actions">
-          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
-          <button type="submit" class="btn-primary" [disabled]="saving()">
-            @if (saving()) {
-              <i class="pi pi-spin pi-spinner"></i> Enregistrement…
-            } @else {
-              <i class="pi pi-check"></i>
-              {{ editingProp() ? 'Mettre à jour' : 'Enregistrer' }}
+            <label>Propriétaire <span class="req">*</span></label>
+            <p-dropdown
+              formControlName="owner_id"
+              [options]="ownerOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Sélectionner un propriétaire"
+              [filter]="true"
+              filterPlaceholder="Rechercher…"
+              styleClass="w-full"
+            />
+            @if (form.get('owner_id')?.invalid && form.get('owner_id')?.touched) {
+              <span class="form-error">Requis</span>
             }
-          </button>
-        </div>
+          </div>
 
-      </form>
+          <div class="form-section-title">Informations générales</div>
+          <div class="form-group">
+            <label>Nom du bien <span class="req">*</span></label>
+            <input class="pa-input" formControlName="name" placeholder="Appartement Almadies F3" />
+            @if (form.get('name')?.invalid && form.get('name')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Type <span class="req">*</span></label>
+              <p-dropdown formControlName="type" [options]="propertyTypes" optionLabel="label" optionValue="value" styleClass="w-full" />
+            </div>
+            <div class="form-group">
+              <label>Statut <span class="req">*</span></label>
+              <p-dropdown formControlName="status" [options]="statusOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            </div>
+          </div>
+
+          <div class="form-section-title">Localisation</div>
+          <div class="form-group">
+            <label>Adresse <span class="req">*</span></label>
+            <input class="pa-input" formControlName="address" placeholder="Rue 10, Cité Keur Gorgui" />
+            @if (form.get('address')?.invalid && form.get('address')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Ville <span class="req">*</span></label>
+              <input class="pa-input" formControlName="city" placeholder="Dakar" />
+            </div>
+            <div class="form-group">
+              <label>Zone / Quartier</label>
+              <input class="pa-input" formControlName="zone" placeholder="Almadies" />
+            </div>
+          </div>
+
+          <div class="form-section-title">Options</div>
+          <div class="form-group form-group-check">
+            <p-checkbox formControlName="is_furnished" [binary]="true" inputId="is_furnished" />
+            <label for="is_furnished" class="check-label">Bien meublé</label>
+          </div>
+
+          <div class="form-section-title">Composition interne</div>
+          <div class="checkbox-grid">
+            @for (opt of roomOptions; track opt.value) {
+              <label class="check-item" [class.selected]="isSelected(selectedRooms, opt.value)" (click)="toggleRoom(opt.value)">
+                <span class="check-box">
+                  @if (isSelected(selectedRooms, opt.value)) { <i class="pi pi-check"></i> }
+                </span>
+                <span>{{ opt.label }}</span>
+              </label>
+            }
+          </div>
+
+          <div class="form-section-title">Commodités</div>
+          <div class="checkbox-grid">
+            @for (opt of amenityOptions; track opt.value) {
+              <label class="check-item" [class.selected]="isSelected(selectedAmenities, opt.value)" (click)="toggleAmenity(opt.value)">
+                <span class="check-box">
+                  @if (isSelected(selectedAmenities, opt.value)) { <i class="pi pi-check"></i> }
+                </span>
+                <span>{{ opt.label }}</span>
+              </label>
+            }
+          </div>
+
+          <div class="form-section-title">Équipements</div>
+          <div class="checkbox-grid">
+            @for (opt of equipmentOptions; track opt.value) {
+              <label class="check-item" [class.selected]="isSelected(selectedEquipment, opt.value)" (click)="toggleEquipment(opt.value)">
+                <span class="check-box">
+                  @if (isSelected(selectedEquipment, opt.value)) { <i class="pi pi-check"></i> }
+                </span>
+                <span>{{ opt.label }}</span>
+              </label>
+            }
+          </div>
+
+          <div class="form-section-title">Description</div>
+          <div class="form-group">
+            <textarea class="pa-input" formControlName="description" rows="3" placeholder="Description du bien…"></textarea>
+          </div>
+
+          <div class="drawer-actions">
+            <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+            <button type="submit" class="btn-primary" [disabled]="saving()">
+              @if (saving()) {
+                <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+              } @else {
+                <i class="pi pi-check"></i>
+                {{ editingProp() ? 'Mettre à jour' : 'Enregistrer' }}
+              }
+            </button>
+          </div>
+        </form>
+      }
+
+      <!-- ─── ONGLET PHOTOS ─── -->
+      @if (activeTab === 'photos') {
+        <div class="photos-tab">
+
+          <!-- Zone d'upload -->
+          <div class="upload-zone" (click)="fileInput.click()">
+            <input #fileInput type="file" multiple accept="image/jpeg,image/png,image/webp"
+              style="display:none" (change)="onFilesSelected($event)" />
+            <i class="pi pi-cloud-upload upload-icon"></i>
+            <div class="upload-label">Cliquer pour sélectionner des photos</div>
+            <div class="upload-hint">JPEG, PNG, WebP — max 5MB par photo — max 10 photos</div>
+          </div>
+
+          <!-- Prévisualisation fichiers sélectionnés (avant upload) -->
+          @if (previewUrls.length > 0) {
+            <div class="preview-section">
+              <div class="preview-header">
+                <span class="preview-title">{{ selectedFiles.length }} fichier(s) sélectionné(s)</span>
+                <button class="btn-link" (click)="clearPhotoSelection()">
+                  <i class="pi pi-times"></i> Effacer
+                </button>
+              </div>
+              <div class="preview-grid">
+                @for (url of previewUrls; track url; let i = $index) {
+                  <div class="preview-item">
+                    <img [src]="url" [alt]="selectedFiles[i]?.name" />
+                    <div class="preview-name">{{ selectedFiles[i]?.name }}</div>
+                    <div class="preview-size">{{ formatSize(selectedFiles[i]?.size ?? 0) }}</div>
+                  </div>
+                }
+              </div>
+              <button class="btn-primary btn-upload" (click)="uploadPhotos()" [disabled]="uploadingPhoto()">
+                @if (uploadingPhoto()) {
+                  <i class="pi pi-spin pi-spinner"></i> Upload en cours…
+                } @else {
+                  <i class="pi pi-cloud-upload"></i> Uploader {{ selectedFiles.length }} photo(s)
+                }
+              </button>
+            </div>
+          }
+
+          <!-- Photos existantes -->
+          @if (currentPhotos().length > 0) {
+            <div class="existing-section">
+              <div class="section-label">Photos du bien ({{ currentPhotos().length }}/10)</div>
+              <div class="photos-grid">
+                @for (photo of currentPhotos(); track photo.id) {
+                  <div class="photo-item">
+                    <img [src]="photo.url" [alt]="photo.name" />
+                    <div class="photo-overlay">
+                      <button class="photo-delete" (click)="deletePhoto(photo)" pTooltip="Supprimer" tooltipPosition="top">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </div>
+                    <div class="photo-name">{{ photo.name }}</div>
+                  </div>
+                }
+              </div>
+            </div>
+          } @else {
+            @if (previewUrls.length === 0) {
+              <div class="no-photos">
+                <i class="pi pi-images"></i>
+                <span>Aucune photo pour ce bien</span>
+              </div>
+            }
+          }
+
+        </div>
+      }
+
     </div>
   </div>
 }

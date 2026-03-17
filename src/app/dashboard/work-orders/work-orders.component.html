@@ -78,13 +78,14 @@
             <th>Prestataire</th>
             <th>Date prévue</th>
             <th>Coût estimé</th>
+            <th>Photos</th>
             <th>Statut</th>
-            <th style="width:140px; text-align:center">Actions</th>
+            <th style="width:150px; text-align:center">Actions</th>
           </tr>
         </thead>
         <tbody>
           @if (filteredOrders().length === 0) {
-            <tr><td colspan="8" class="empty-row">
+            <tr><td colspan="9" class="empty-row">
               <div class="empty-state-inline"><i class="pi pi-wrench"></i><span>Aucun ordre de travaux</span></div>
             </td></tr>
           }
@@ -92,23 +93,27 @@
             <tr>
               <td>
                 <div class="td-name">{{ o.title }}</div>
-                @if (o.property) {
-                  <div class="td-muted-sm">{{ o.property.name }}</div>
-                }
-                @if (o.tenant) {
-                  <div class="td-muted-sm">{{ o.tenant.full_name }}</div>
-                }
+                @if (o.property) { <div class="td-muted-sm">{{ o.property.name }}</div> }
+                @if (o.tenant)   { <div class="td-muted-sm">{{ o.tenant.full_name }}</div> }
               </td>
               <td><span class="category-tag">{{ categoryLabel(o.category) }}</span></td>
               <td><span class="priority-dot {{ priorityClass(o.priority) }}"></span> {{ priorityLabel(o.priority) }}</td>
               <td class="td-muted">{{ o.contractor?.name ?? '—' }}</td>
               <td class="td-muted">{{ formatDate(o.scheduled_at) }}</td>
               <td class="td-muted">{{ o.estimated_cost > 0 ? formatCurrency(o.estimated_cost) : '—' }}</td>
+              <td>
+                @if (photoCount(o) > 0) {
+                  <span class="badge badge-photo"><i class="pi pi-images"></i> {{ photoCount(o) }}</span>
+                } @else {
+                  <span class="td-muted" style="font-size:12px">—</span>
+                }
+              </td>
               <td><span class="badge {{ statusClass(o.status) }}">{{ statusLabel(o.status) }}</span></td>
               <td>
                 <div class="actions-cell">
-                  <button class="btn-icon btn-view"   (click)="openDetail(o)"  pTooltip="Détails"   tooltipPosition="top"><i class="pi pi-eye"></i></button>
-                  <button class="btn-icon btn-edit"   (click)="openEdit(o)"    pTooltip="Modifier"  tooltipPosition="top"><i class="pi pi-pencil"></i></button>
+                  <button class="btn-icon btn-view"     (click)="openDetail(o)"  pTooltip="Détails"   tooltipPosition="top"><i class="pi pi-eye"></i></button>
+                  <button class="btn-icon btn-photo"    (click)="openDetail(o); detailTab = 'photos'" pTooltip="Photos" tooltipPosition="top"><i class="pi pi-images"></i></button>
+                  <button class="btn-icon btn-edit"     (click)="openEdit(o)"    pTooltip="Modifier"  tooltipPosition="top"><i class="pi pi-pencil"></i></button>
                   @if (o.status === 'reported' || o.status === 'assigned') {
                     <button class="btn-icon btn-assign"  (click)="openAssign(o)"  pTooltip="Assigner"  tooltipPosition="top"><i class="pi pi-user-plus"></i></button>
                   }
@@ -133,9 +138,7 @@
   <div class="drawer-overlay" (click)="closeAll()"></div>
   <div class="drawer-panel">
     <div class="drawer-header">
-      <div>
-        <div class="drawer-title">{{ editingOrder() ? 'Modifier le travail' : 'Nouveau travail' }}</div>
-      </div>
+      <div class="drawer-title">{{ editingOrder() ? 'Modifier le travail' : 'Nouveau travail' }}</div>
       <button class="drawer-close" (click)="closeAll()"><i class="pi pi-times"></i></button>
     </div>
     <div class="drawer-body">
@@ -159,7 +162,7 @@
 
         <div class="form-group">
           <label>Description</label>
-          <textarea class="pa-input pa-textarea" formControlName="description" placeholder="Décrire le problème en détail…" rows="3"></textarea>
+          <textarea class="pa-input pa-textarea" formControlName="description" placeholder="Décrire le problème…" rows="3"></textarea>
         </div>
 
         <div class="form-row-2">
@@ -207,40 +210,176 @@
       </div>
       <button class="drawer-close" (click)="closeAll()"><i class="pi pi-times"></i></button>
     </div>
+
+    <!-- Onglets -->
+    <div class="drawer-tabs">
+      <button class="drawer-tab" [class.active]="detailTab === 'info'" (click)="detailTab = 'info'">
+        <i class="pi pi-info-circle"></i> Informations
+      </button>
+      <button class="drawer-tab" [class.active]="detailTab === 'photos'" (click)="detailTab = 'photos'">
+        <i class="pi pi-images"></i> Photos
+        @if (photoCount(editingOrder()!) > 0) {
+          <span class="tab-badge">{{ photoCount(editingOrder()!) }}</span>
+        }
+      </button>
+    </div>
+
     <div class="drawer-body">
-      <div class="detail-grid">
-        <div class="detail-row"><span class="detail-label">Statut</span><span class="badge {{ statusClass(editingOrder()!.status) }}">{{ statusLabel(editingOrder()!.status) }}</span></div>
-        <div class="detail-row"><span class="detail-label">Priorité</span><span>{{ priorityLabel(editingOrder()!.priority) }}</span></div>
-        <div class="detail-row"><span class="detail-label">Catégorie</span><span>{{ categoryLabel(editingOrder()!.category) }}</span></div>
-        <div class="detail-row"><span class="detail-label">Bien</span><span>{{ editingOrder()!.property?.name ?? '—' }}</span></div>
-        <div class="detail-row"><span class="detail-label">Locataire</span><span>{{ editingOrder()!.tenant?.full_name ?? '—' }}</span></div>
-        <div class="detail-row"><span class="detail-label">Prestataire</span><span>{{ editingOrder()!.contractor?.name ?? 'Non assigné' }}</span></div>
-        <div class="detail-row"><span class="detail-label">Date signalée</span><span>{{ formatDate(editingOrder()!.requested_at) }}</span></div>
-        <div class="detail-row"><span class="detail-label">Date prévue</span><span>{{ formatDate(editingOrder()!.scheduled_at) }}</span></div>
-        <div class="detail-row"><span class="detail-label">Date terminée</span><span>{{ formatDate(editingOrder()!.completed_at) }}</span></div>
-        <div class="detail-row"><span class="detail-label">Coût estimé</span><span>{{ editingOrder()!.estimated_cost > 0 ? formatCurrency(editingOrder()!.estimated_cost) : '—' }}</span></div>
-        <div class="detail-row"><span class="detail-label">Coût réel</span><span>{{ editingOrder()!.actual_cost > 0 ? formatCurrency(editingOrder()!.actual_cost) : '—' }}</span></div>
-      </div>
-      @if (editingOrder()!.description) {
-        <div class="detail-section-title">Description</div>
-        <div class="detail-desc">{{ editingOrder()!.description }}</div>
-      }
-      @if (editingOrder()!.notes) {
-        <div class="detail-section-title">Notes</div>
-        <div class="detail-desc">{{ editingOrder()!.notes }}</div>
-      }
-      <div class="drawer-actions">
-        @if (editingOrder()!.status === 'reported' || editingOrder()!.status === 'assigned') {
-          <button class="btn-secondary" (click)="openAssign(editingOrder()!)">
-            <i class="pi pi-user-plus"></i> Assigner
-          </button>
+
+      <!-- Onglet Informations -->
+      @if (detailTab === 'info') {
+        <div class="detail-grid">
+          <div class="detail-row"><span class="detail-label">Statut</span><span class="badge {{ statusClass(editingOrder()!.status) }}">{{ statusLabel(editingOrder()!.status) }}</span></div>
+          <div class="detail-row"><span class="detail-label">Priorité</span><span>{{ priorityLabel(editingOrder()!.priority) }}</span></div>
+          <div class="detail-row"><span class="detail-label">Catégorie</span><span>{{ categoryLabel(editingOrder()!.category) }}</span></div>
+          <div class="detail-row"><span class="detail-label">Bien</span><span>{{ editingOrder()!.property?.name ?? '—' }}</span></div>
+          <div class="detail-row"><span class="detail-label">Locataire</span><span>{{ editingOrder()!.tenant?.full_name ?? '—' }}</span></div>
+          <div class="detail-row"><span class="detail-label">Prestataire</span><span>{{ editingOrder()!.contractor?.name ?? 'Non assigné' }}</span></div>
+          <div class="detail-row"><span class="detail-label">Date signalée</span><span>{{ formatDate(editingOrder()!.requested_at) }}</span></div>
+          <div class="detail-row"><span class="detail-label">Date prévue</span><span>{{ formatDate(editingOrder()!.scheduled_at) }}</span></div>
+          <div class="detail-row"><span class="detail-label">Date terminée</span><span>{{ formatDate(editingOrder()!.completed_at) }}</span></div>
+          <div class="detail-row"><span class="detail-label">Coût estimé</span><span>{{ editingOrder()!.estimated_cost > 0 ? formatCurrency(editingOrder()!.estimated_cost) : '—' }}</span></div>
+          <div class="detail-row"><span class="detail-label">Coût réel</span><span>{{ editingOrder()!.actual_cost > 0 ? formatCurrency(editingOrder()!.actual_cost) : '—' }}</span></div>
+        </div>
+        @if (editingOrder()!.description) {
+          <div class="detail-section-title">Description</div>
+          <div class="detail-desc">{{ editingOrder()!.description }}</div>
         }
-        @if (editingOrder()!.status === 'in_progress' || editingOrder()!.status === 'assigned') {
-          <button class="btn-primary" (click)="openComplete(editingOrder()!)">
-            <i class="pi pi-check"></i> Marquer terminé
-          </button>
+        @if (editingOrder()!.notes) {
+          <div class="detail-section-title">Notes</div>
+          <div class="detail-desc">{{ editingOrder()!.notes }}</div>
         }
-      </div>
+        <div class="drawer-actions">
+          @if (editingOrder()!.status === 'reported' || editingOrder()!.status === 'assigned') {
+            <button class="btn-secondary" (click)="openAssign(editingOrder()!)">
+              <i class="pi pi-user-plus"></i> Assigner
+            </button>
+          }
+          @if (editingOrder()!.status === 'in_progress' || editingOrder()!.status === 'assigned') {
+            <button class="btn-primary" (click)="openComplete(editingOrder()!)">
+              <i class="pi pi-check"></i> Marquer terminé
+            </button>
+          }
+        </div>
+      }
+
+      <!-- Onglet Photos -->
+      @if (detailTab === 'photos' && editingOrder(); as order) {
+        <div class="photos-tab">
+
+          <!-- AVANT -->
+          <div class="photos-section">
+            <div class="photos-section-header">
+              <div class="photos-section-label">
+                <span class="section-dot dot-before"></span>
+                Photos AVANT intervention
+                <span class="photos-count">({{ order.photos_before?.length ?? 0 }}/10)</span>
+              </div>
+              <label class="btn-upload-small">
+                <i class="pi pi-plus"></i> Ajouter
+                <input type="file" multiple accept="image/jpeg,image/png,image/webp"
+                  style="display:none" (change)="onFilesSelected($event, 'before')" />
+              </label>
+            </div>
+
+            @if (previewBefore.length > 0) {
+              <div class="preview-bar">
+                <div class="preview-thumbs">
+                  @for (url of previewBefore; track url; let i = $index) {
+                    <div class="preview-thumb">
+                      <img [src]="url" [alt]="selectedBefore[i]?.name" />
+                    </div>
+                  }
+                </div>
+                <button class="btn-primary btn-upload-confirm" (click)="uploadPhotos('before')" [disabled]="uploadingBefore()">
+                  @if (uploadingBefore()) { <i class="pi pi-spin pi-spinner"></i> }
+                  @else { <i class="pi pi-cloud-upload"></i> }
+                  Uploader {{ selectedBefore.length }} photo(s)
+                </button>
+              </div>
+            }
+
+            @if ((order.photos_before?.length ?? 0) > 0) {
+              <div class="photos-grid">
+                @for (photo of order.photos_before; track photo.id) {
+                  <div class="photo-item">
+                    <img [src]="photo.url" [alt]="photo.name" />
+                    <div class="photo-overlay">
+                      <button class="photo-delete" (click)="deletePhoto(photo, 'before')">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              @if (previewBefore.length === 0) {
+                <div class="no-photos-sm">
+                  <i class="pi pi-camera"></i> Aucune photo avant intervention
+                </div>
+              }
+            }
+          </div>
+
+          <div class="photos-divider"></div>
+
+          <!-- APRÈS -->
+          <div class="photos-section">
+            <div class="photos-section-header">
+              <div class="photos-section-label">
+                <span class="section-dot dot-after"></span>
+                Photos APRÈS intervention
+                <span class="photos-count">({{ order.photos_after?.length ?? 0 }}/10)</span>
+              </div>
+              <label class="btn-upload-small">
+                <i class="pi pi-plus"></i> Ajouter
+                <input type="file" multiple accept="image/jpeg,image/png,image/webp"
+                  style="display:none" (change)="onFilesSelected($event, 'after')" />
+              </label>
+            </div>
+
+            @if (previewAfter.length > 0) {
+              <div class="preview-bar">
+                <div class="preview-thumbs">
+                  @for (url of previewAfter; track url; let i = $index) {
+                    <div class="preview-thumb">
+                      <img [src]="url" [alt]="selectedAfter[i]?.name" />
+                    </div>
+                  }
+                </div>
+                <button class="btn-primary btn-upload-confirm" (click)="uploadPhotos('after')" [disabled]="uploadingAfter()">
+                  @if (uploadingAfter()) { <i class="pi pi-spin pi-spinner"></i> }
+                  @else { <i class="pi pi-cloud-upload"></i> }
+                  Uploader {{ selectedAfter.length }} photo(s)
+                </button>
+              </div>
+            }
+
+            @if ((order.photos_after?.length ?? 0) > 0) {
+              <div class="photos-grid">
+                @for (photo of order.photos_after; track photo.id) {
+                  <div class="photo-item">
+                    <img [src]="photo.url" [alt]="photo.name" />
+                    <div class="photo-overlay">
+                      <button class="photo-delete" (click)="deletePhoto(photo, 'after')">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    </div>
+                  </div>
+                }
+              </div>
+            } @else {
+              @if (previewAfter.length === 0) {
+                <div class="no-photos-sm">
+                  <i class="pi pi-camera"></i> Aucune photo après intervention
+                </div>
+              }
+            }
+          </div>
+
+        </div>
+      }
+
     </div>
   </div>
 }

@@ -19,11 +19,15 @@ import { MessageService } from 'primeng/api';
 export class TenantLeaseComponent implements OnInit {
   private apiUrl = `${environment.apiUrl}/portal/tenant`;
 
-  lease        = signal<any>(null);
-  loading      = signal(true);
-  downloading  = signal(false);
-  saving       = signal(false);
-  reportOpen   = false;
+  lease       = signal<any>(null);
+  loading     = signal(true);
+  downloading = signal(false);
+  saving      = signal(false);
+  reportOpen  = false;
+
+  // ── Photos signalement ─────────────────────────────────
+  selectedPhotos: File[]   = [];
+  previewUrls:    string[] = [];
 
   reportForm: FormGroup;
 
@@ -63,7 +67,7 @@ export class TenantLeaseComponent implements OnInit {
     });
   }
 
-  // ── Télécharger contrat PDF ──────────────────────────────
+  // ── Télécharger contrat PDF ───────────────────────────
   downloadContract(): void {
     this.downloading.set(true);
     this.http.get(`${this.apiUrl}/lease/document`, {
@@ -87,15 +91,53 @@ export class TenantLeaseComponent implements OnInit {
     });
   }
 
-  // ── Signaler un problème ────────────────────────────────
+  // ── Signaler un problème ──────────────────────────────
   openReport(): void {
     this.reportForm.reset({ category: 'entretien', priority: 'medium' });
+    this.selectedPhotos = [];
+    this.previewUrls    = [];
     this.reportOpen = true;
     this.cdr.detectChanges();
   }
 
   closeReport(): void {
-    this.reportOpen = false;
+    this.reportOpen     = false;
+    this.selectedPhotos = [];
+    this.previewUrls    = [];
+    this.cdr.detectChanges();
+  }
+
+  onPhotosSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+
+    const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    const valid   = Array.from(input.files).filter(f => {
+      if (!allowed.includes(f.type)) {
+        this.toast.add({ severity: 'warn', summary: 'Format invalide', detail: `${f.name} non supporté` });
+        return false;
+      }
+      if (f.size > 5 * 1024 * 1024) {
+        this.toast.add({ severity: 'warn', summary: 'Trop lourd', detail: `${f.name} : max 5MB` });
+        return false;
+      }
+      return true;
+    });
+
+    this.selectedPhotos = valid.slice(0, 5);
+    this.previewUrls    = [];
+    this.selectedPhotos.forEach(f => {
+      const r = new FileReader();
+      r.onload = e => { this.previewUrls.push(e.target?.result as string); this.cdr.detectChanges(); };
+      r.readAsDataURL(f);
+    });
+    input.value = '';
+    this.cdr.detectChanges();
+  }
+
+  removePhoto(i: number): void {
+    this.selectedPhotos.splice(i, 1);
+    this.previewUrls.splice(i, 1);
     this.cdr.detectChanges();
   }
 
@@ -103,7 +145,14 @@ export class TenantLeaseComponent implements OnInit {
     if (this.reportForm.invalid) { this.reportForm.markAllAsTouched(); return; }
     this.saving.set(true);
 
-    this.http.post<any>(`${this.apiUrl}/work-orders`, this.reportForm.value).subscribe({
+    const formData = new FormData();
+    formData.append('title',       this.reportForm.value.title);
+    formData.append('description', this.reportForm.value.description ?? '');
+    formData.append('category',    this.reportForm.value.category);
+    formData.append('priority',    this.reportForm.value.priority);
+    this.selectedPhotos.forEach(f => formData.append('photos[]', f, f.name));
+
+    this.http.post<any>(`${this.apiUrl}/work-orders`, formData).subscribe({
       next: (res: any) => {
         this.toast.add({ severity: 'success', summary: 'Signalement envoyé', detail: res.message ?? 'Votre demande a été transmise à l\'agence.' });
         this.saving.set(false);
@@ -116,7 +165,7 @@ export class TenantLeaseComponent implements OnInit {
     });
   }
 
-  // ── Helpers ─────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────
   formatCurrency(n: number | string): string {
     return new Intl.NumberFormat('fr-SN').format(Number(n) || 0) + ' F';
   }

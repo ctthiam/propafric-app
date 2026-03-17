@@ -36,6 +36,7 @@ export const routes: Routes = [
       { path: 'messages',      loadComponent: () => import('./dashboard/messages/agency-messages-page.component').then(m => m.AgencyMessagesPageComponent) },
       { path: 'impots',        loadComponent: () => import('./dashboard/property-taxes/property-taxes.component').then(m => m.PropertyTaxesComponent) },
       { path: 'abonnement',    loadComponent: () => import('./dashboard/subscription/subscription.component').then(m => m.SubscriptionComponent) },
+      { path: 'archives', loadComponent: () => import('./dashboard/archives/archives.component').then(m => m.ArchivesComponent) },
     ]
   },
 
@@ -51,6 +52,7 @@ export const routes: Routes = [
       { path: 'echeances',  loadComponent: () => import('./portal/tenant/schedules/tenant-schedules/tenant-schedules.component').then(m => m.TenantSchedulesComponent) },
       { path: 'quittances', loadComponent: () => import('./portal/tenant/receipts/tenant-receipts/tenant-receipts.component').then(m => m.TenantReceiptsComponent) },
       { path: 'messages',  loadComponent: () => import('./portal/tenant/messages/tenant-messages-page.component').then(m => m.TenantMessagesPageComponent) },
+      { path: 'signalements', loadComponent: () => import('./portal/tenant/work-orders/tenant-work-orders.component').then(m => m.TenantWorkOrdersComponent) },
     ]
   },
 

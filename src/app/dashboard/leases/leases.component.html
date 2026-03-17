@@ -36,19 +36,14 @@
 @if (leasesNeedingRevision().length > 0) {
   <div class="revision-alert">
     <i class="pi pi-refresh"></i>
-    <span>
-      <strong>{{ leasesNeedingRevision().length }} bail(s)</strong>
-      arrivent à révision dans les 60 prochains jours.
-    </span>
+    <span><strong>{{ leasesNeedingRevision().length }} bail(s)</strong> arrivent à révision dans les 60 prochains jours.</span>
   </div>
 }
 
 <div class="table-card">
   @if (loading()) {
     <div class="skeleton-rows">
-      @for (i of [1,2,3,4,5]; track i) {
-        <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
-      }
+      @for (i of [1,2,3,4,5]; track i) { <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" /> }
     </div>
   } @else {
     <div class="data-table-wrapper">
@@ -62,16 +57,14 @@
             <th>Début</th>
             <th>Fin</th>
             <th>Statut</th>
-            <th style="width:110px; text-align:center">Actions</th>
+            <th style="width:130px; text-align:center">Actions</th>
           </tr>
         </thead>
         <tbody>
           @if (filteredLeases().length === 0) {
             <tr>
               <td colspan="8" class="empty-row">
-                <div class="empty-state-inline">
-                  <i class="pi pi-file"></i><span>Aucun bail trouvé</span>
-                </div>
+                <div class="empty-state-inline"><i class="pi pi-file"></i><span>Aucun bail trouvé</span></div>
               </td>
             </tr>
           }
@@ -94,21 +87,17 @@
               <td class="td-amount">{{ formatCurrency(lease.total_rent) }}</td>
               <td class="td-muted">{{ formatDateDisplay(lease.start_date) }}</td>
               <td class="td-muted">{{ lease.end_date ? formatDateDisplay(lease.end_date) : 'CDI' }}</td>
-              <td>
-                <span class="badge {{ statusClass(lease.status) }}">{{ statusLabel(lease.status) }}</span>
-              </td>
+              <td><span class="badge {{ statusClass(lease.status) }}">{{ statusLabel(lease.status) }}</span></td>
               <td>
                 <div class="actions-cell">
-                  <button class="btn-icon btn-pdf" (click)="downloadContract(lease)" 
-                          pTooltip="Contrat PDF" tooltipPosition="top">
+                  <button class="btn-icon btn-pdf" (click)="downloadContract(lease)" pTooltip="Contrat PDF" tooltipPosition="top">
                     <i class="pi pi-file-pdf"></i>
                   </button>
                   <button class="btn-icon btn-edit" (click)="openEdit(lease)" pTooltip="Modifier" tooltipPosition="top">
                     <i class="pi pi-pencil"></i>
                   </button>
                   @if (lease.status === 'active' && isDueForRevision(lease)) {
-                    <button class="btn-icon btn-revision" (click)="openRevision(lease)"
-                            pTooltip="Révision triennale" tooltipPosition="top">
+                    <button class="btn-icon btn-revision" (click)="openRevision(lease)" pTooltip="Révision triennale" tooltipPosition="top">
                       <i class="pi pi-refresh"></i>
                     </button>
                   }
@@ -127,39 +116,47 @@
   }
 </div>
 
-<!-- ─── DRAWER CUSTOM ─── -->
+<!-- ─── DRAWER NOUVEAU BAIL ─── -->
 @if (drawerOpen) {
   <div class="drawer-overlay" (click)="closeDrawer()"></div>
-  <div class="drawer-panel">
+  <div class="drawer-panel drawer-panel-wide">
     <div class="drawer-header">
       <div>
         <div class="drawer-title">{{ editingLease() ? 'Modifier le bail' : 'Nouveau bail' }}</div>
-        @if (editingLease()) {
-          <div class="drawer-sub">{{ editingLease()!.reference }}</div>
-        }
+        @if (editingLease()) { <div class="drawer-sub">{{ editingLease()!.reference }}</div> }
       </div>
       <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
     </div>
 
     <div class="drawer-body">
-      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
+      <form [formGroup]="form" class="drawer-form">
 
+        <!-- ── PARTIES ── -->
         <div class="form-section-title">Parties</div>
-        <div class="form-group">
-          <label>Bien <span class="req">*</span></label>
-          <p-dropdown formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" [filter]="true" styleClass="w-full" />
-          @if (form.get('property_id')?.invalid && form.get('property_id')?.touched) {
-            <span class="form-error">Requis</span>
-          }
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Bien <span class="req">*</span></label>
+            <p-dropdown formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" [filter]="true" styleClass="w-full" />
+            @if (form.get('property_id')?.invalid && form.get('property_id')?.touched) { <span class="form-error">Requis</span> }
+          </div>
+          <div class="form-group">
+            <label>Locataire <span class="req">*</span></label>
+            <p-dropdown formControlName="tenant_id" [options]="tenantOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un locataire" [filter]="true" styleClass="w-full" />
+            @if (form.get('tenant_id')?.invalid && form.get('tenant_id')?.touched) { <span class="form-error">Requis</span> }
+          </div>
         </div>
-        <div class="form-group">
-          <label>Locataire <span class="req">*</span></label>
-          <p-dropdown formControlName="tenant_id" [options]="tenantOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un locataire" [filter]="true" styleClass="w-full" />
-          @if (form.get('tenant_id')?.invalid && form.get('tenant_id')?.touched) {
-            <span class="form-error">Requis</span>
-          }
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Type de contrat <span class="req">*</span></label>
+            <p-dropdown formControlName="contract_type" [options]="contractTypeOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>Mode de calcul <span class="req">*</span></label>
+            <p-dropdown formControlName="calculation_mode" [options]="[{label:'À partir du loyer de base → TTC', value:'from_base'},{label:'À partir du loyer TTC → base', value:'from_total'}]" optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
         </div>
 
+        <!-- ── DURÉE ── -->
         <div class="form-section-title">Durée</div>
         <div class="form-group form-group-check">
           <p-checkbox formControlName="is_open_ended" [binary]="true" inputId="open_ended" />
@@ -168,42 +165,109 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Date de début <span class="req">*</span></label>
-            <p-calendar formControlName="start_date" dateFormat="dd/mm/yy" placeholder="01/01/2025" [showIcon]="true" styleClass="w-full" />
-            @if (form.get('start_date')?.invalid && form.get('start_date')?.touched) {
-              <span class="form-error">Requis</span>
-            }
+            <p-calendar formControlName="start_date" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" />
+            @if (form.get('start_date')?.invalid && form.get('start_date')?.touched) { <span class="form-error">Requis</span> }
           </div>
           @if (!isOpenEnded) {
             <div class="form-group">
-              <label>Date de fin <span class="req">*</span></label>
-              <p-calendar formControlName="end_date" dateFormat="dd/mm/yy" placeholder="31/12/2025" [showIcon]="true" styleClass="w-full" />
+              <label>Date de fin</label>
+              <p-calendar formControlName="end_date" dateFormat="dd/mm/yy" [showIcon]="true" styleClass="w-full" />
             </div>
           }
         </div>
-        <div class="form-group">
-          <label>Jour de paiement</label>
-          <p-dropdown formControlName="payment_day" [options]="paymentDayOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
-        </div>
-
-        <div class="form-section-title">Loyer & charges</div>
         <div class="form-row-2">
           <div class="form-group">
-            <label>Loyer de base (F CFA) <span class="req">*</span></label>
-            <p-inputNumber formControlName="rent_amount" placeholder="150 000" [min]="0" locale="fr-SN" styleClass="w-full" />
-            @if (form.get('rent_amount')?.invalid && form.get('rent_amount')?.touched) {
-              <span class="form-error">Minimum 1</span>
-            }
+            <label>Fréquence de paiement</label>
+            <p-dropdown formControlName="payment_frequency" [options]="paymentFrequencyOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
           <div class="form-group">
-            <label>Charges (F CFA)</label>
-            <p-inputNumber formControlName="charges" placeholder="10 000" [min]="0" locale="fr-SN" styleClass="w-full" />
+            <label>Jour de paiement</label>
+            <p-dropdown formControlName="payment_day" [options]="paymentDayOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
         </div>
-        <div class="form-group">
-          <label>Dépôt de garantie (F CFA)</label>
-          <p-inputNumber formControlName="deposit" placeholder="0" [min]="0" locale="fr-SN" styleClass="w-full" />
+
+        <!-- ── LOYER DE BASE (postes dynamiques) ── -->
+        @if (isFromBase) {
+          <div class="form-section-title">
+            Loyer de base
+            <span class="section-total">Total : {{ formatCurrency(totalBaseRent) }}</span>
+          </div>
+          <div class="items-list" formArrayName="base_rent_items">
+            @for (item of baseRentItems.controls; track item; let i = $index) {
+              <div class="item-row" [formGroupName]="i">
+                <div class="item-label-field">
+                  <input class="pa-input" formControlName="label" placeholder="Ex: Loyer de base, Gardiennage…" />
+                </div>
+                <div class="item-amount-field">
+                  <p-inputNumber formControlName="amount" [min]="0" locale="fr-SN" placeholder="0" styleClass="w-full" />
+                </div>
+                <button type="button" class="btn-remove-item" (click)="removeRentItem(i)" [disabled]="baseRentItems.length === 1">
+                  <i class="pi pi-times"></i>
+                </button>
+              </div>
+            }
+          </div>
+          <button type="button" class="btn-add-item" (click)="addRentItem()">
+            <i class="pi pi-plus"></i> Ajouter un poste loyer
+          </button>
+        } @else {
+          <!-- Mode from_total -->
+          <div class="form-section-title">Loyer TTC souhaité</div>
+          <div class="form-group">
+            <label>Loyer TTC total (F CFA) <span class="req">*</span></label>
+            <p-inputNumber formControlName="total_rent_input" [min]="0" locale="fr-SN" placeholder="210 000" styleClass="w-full" />
+            <span class="form-hint">Le loyer de base sera calculé automatiquement.</span>
+          </div>
+        }
+
+        <!-- ── CHARGES (postes dynamiques) ── -->
+        <div class="form-section-title">
+          Charges
+          <span class="section-total">Total : {{ formatCurrency(totalCharges) }}</span>
+        </div>
+        <div class="charges-hint">
+          <i class="pi pi-info-circle"></i>
+          Détaillez chaque charge : gardiennage, pisciniste, électricité parties communes, nettoyage, etc.
+        </div>
+        @if (chargeItems.length > 0) {
+          <div class="items-list" formArrayName="charge_items">
+            @for (item of chargeItems.controls; track item; let i = $index) {
+              <div class="item-row" [formGroupName]="i">
+                <div class="item-label-field">
+                  <input class="pa-input" formControlName="label" placeholder="Ex: Gardiennage, Pisciniste…" />
+                </div>
+                <div class="item-amount-field">
+                  <p-inputNumber formControlName="amount" [min]="0" locale="fr-SN" placeholder="0" styleClass="w-full" />
+                </div>
+                <button type="button" class="btn-remove-item" (click)="removeChargeItem(i)">
+                  <i class="pi pi-times"></i>
+                </button>
+              </div>
+            }
+          </div>
+        }
+        <button type="button" class="btn-add-item" (click)="addChargeItem()">
+          <i class="pi pi-plus"></i> Ajouter une charge
+        </button>
+
+        <!-- ── FRAIS DE GESTION ── -->
+        <div class="form-section-title">Frais de gestion</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Modalité <span class="req">*</span></label>
+            <p-dropdown formControlName="management_fee_type" [options]="feeTypeOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>
+              @if (form.get('management_fee_type')?.value === 'fixed') { Montant (F CFA) }
+              @else { Taux (%) }
+              <span class="req">*</span>
+            </label>
+            <p-inputNumber formControlName="management_fee_value" [min]="0" [minFractionDigits]="0" [maxFractionDigits]="2" locale="fr-SN" styleClass="w-full" />
+          </div>
         </div>
 
+        <!-- ── TAUX FISCAUX ── -->
         <div class="form-section-title">Taux fiscaux</div>
         <div class="form-row-3">
           <div class="form-group">
@@ -211,26 +275,46 @@
             <p-inputNumber formControlName="tom_rate" [minFractionDigits]="1" [min]="0" [max]="100" styleClass="w-full" />
           </div>
           <div class="form-group">
-            <label>TVA (%)</label>
-            <p-inputNumber formControlName="vat_rate" [min]="0" [max]="100" styleClass="w-full" />
+            <label>TVA frais gestion (%)</label>
+            <p-inputNumber formControlName="management_fee_vat_rate" [min]="0" [max]="100" styleClass="w-full" />
           </div>
           <div class="form-group">
-            <label>Taxe (%)</label>
+            <label>Impôt (%)</label>
             <p-inputNumber formControlName="tax_rate" [min]="0" [max]="100" styleClass="w-full" />
           </div>
         </div>
 
-        <div class="calc-box">
-          <div class="calc-title">Récapitulatif mensuel</div>
-          <div class="calc-row"><span>Loyer de base</span><strong>{{ formatCurrency(calcRent()) }}</strong></div>
-          <div class="calc-row"><span>Charges</span><strong>{{ formatCurrency(calcCharges()) }}</strong></div>
-          <div class="calc-row"><span>TOM ({{ calcTomRate() }}%)</span><strong>{{ formatCurrency(calcTom()) }}</strong></div>
-          <div class="calc-row"><span>TVA sur TOM ({{ calcVatRate() }}%)</span><strong>{{ formatCurrency(calcVat()) }}</strong></div>
-          <div class="calc-row calc-row-deduct"><span>Taxe déductible ({{ calcTaxRate() }}%)</span><strong>- {{ formatCurrency(calcTax()) }}</strong></div>
-          <div class="calc-divider"></div>
-          <div class="calc-row calc-total"><span>Total dû / mois</span><strong>{{ formatCurrency(calcTotal()) }}</strong></div>
+        <!-- ── RÉCAPITULATIF CALCUL ── -->
+        @if (isFromBase) {
+          <div class="calc-box">
+            <div class="calc-title">Récapitulatif mensuel</div>
+            <div class="calc-row"><span>Loyer de base</span><strong>{{ formatCurrency(totalBaseRent) }}</strong></div>
+            <div class="calc-row"><span>Charges</span><strong>{{ formatCurrency(totalCharges) }}</strong></div>
+            <div class="calc-row"><span>TOM ({{ calcTomRate() }}%)</span><strong>{{ formatCurrency(calcTom()) }}</strong></div>
+            <div class="calc-row"><span>Frais gestion HT</span><strong>{{ formatCurrency(calcFeeHt()) }}</strong></div>
+            <div class="calc-row"><span>TVA frais gestion ({{ calcVatRate() }}%)</span><strong>{{ formatCurrency(calcFeeVat()) }}</strong></div>
+            @if (calcTax() > 0) {
+              <div class="calc-row"><span>Impôt ({{ calcTaxRate() }}%)</span><strong>{{ formatCurrency(calcTax()) }}</strong></div>
+            }
+            <div class="calc-divider"></div>
+            <div class="calc-row calc-total"><span>Total dû / mois</span><strong>{{ formatCurrency(calcTotal()) }}</strong></div>
+          </div>
+        }
+
+        <!-- ── CAUTION ── -->
+        <div class="form-section-title">Caution & avances</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Dépôt de garantie (F CFA)</label>
+            <p-inputNumber formControlName="deposit_amount" [min]="0" locale="fr-SN" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>Mois d'avance</label>
+            <p-inputNumber formControlName="advance_months" [min]="0" [max]="12" styleClass="w-full" />
+          </div>
         </div>
 
+        <!-- ── NOTES ── -->
         <div class="form-section-title">Notes</div>
         <div class="form-group">
           <textarea class="pa-input" formControlName="notes" rows="3" placeholder="Conditions particulières…"></textarea>
@@ -238,12 +322,9 @@
 
         <div class="drawer-actions">
           <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
-          <button type="submit" class="btn-primary" [disabled]="saving()">
-            @if (saving()) {
-              <i class="pi pi-spin pi-spinner"></i> Enregistrement…
-            } @else {
-              <i class="pi pi-check"></i> {{ editingLease() ? 'Mettre à jour' : 'Enregistrer' }}
-            }
+          <button type="button" class="btn-primary" (click)="save()" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> Enregistrement… }
+            @else { <i class="pi pi-check"></i> {{ editingLease() ? 'Mettre à jour' : 'Enregistrer' }} }
           </button>
         </div>
 
@@ -251,8 +332,9 @@
     </div>
   </div>
 }
-  <!-- ─── DRAWER RÉVISION TRIENNALE ─── -->
-  @if (revisionOpen && revisionLease()) {
+
+<!-- ─── DRAWER RÉVISION TRIENNALE ─── -->
+@if (revisionOpen && revisionLease()) {
   <div class="drawer-overlay" (click)="closeRevision()"></div>
   <div class="drawer-panel">
     <div class="drawer-header">
@@ -263,9 +345,7 @@
       <button class="drawer-close" (click)="closeRevision()"><i class="pi pi-times"></i></button>
     </div>
     <div class="drawer-body">
-      <form [formGroup]="revisionForm" (ngSubmit)="applyRevision()" class="drawer-form">
-
-        <!-- Loyer actuel -->
+      <form [formGroup]="revisionForm" class="drawer-form">
         <div class="revision-info-box">
           <div class="revision-info-row">
             <span>Loyer actuel TTC</span>
@@ -273,55 +353,34 @@
           </div>
           <div class="revision-info-row">
             <span>Prochaine révision prévue</span>
-            <strong>{{ formatDate(revisionLease()!.next_revision_date) }}</strong>
+            <strong>{{ formatDateDisplay(revisionLease()!.next_revision_date) }}</strong>
           </div>
         </div>
-
         <div class="form-group" style="margin-top:16px">
           <label>Taux de révision (%) <span class="req">*</span></label>
-          <input class="pa-input" formControlName="revision_rate" type="number"
-                 step="0.1" min="0" max="50" placeholder="Ex: 5" />
+          <input class="pa-input" formControlName="revision_rate" type="number" step="0.1" min="0" max="50" placeholder="Ex: 5" />
           <span class="form-hint">Basé sur l'indice de construction pondéré de Dakar</span>
           @if (revisionForm.get('revision_rate')?.invalid && revisionForm.get('revision_rate')?.touched) {
             <span class="form-error">Taux entre 0 et 50%</span>
           }
         </div>
-
-      @if (revisionPreview()) {
+        @if (revisionPreview()) {
           <div class="revision-preview-box">
             <div class="preview-title">Aperçu de la révision</div>
-            <div class="preview-row">
-              <span>Ancien loyer TTC</span>
-              <span class="old-value">{{ formatCurrency(revisionPreview()!.before?.total_rent) }}</span>
-            </div>
-            <div class="preview-row">
-              <span>Nouveau loyer TTC</span>
-              <strong class="new-value">{{ formatCurrency(revisionPreview()!.after?.total_rent) }}</strong>
-            </div>
-            <div class="preview-row">
-              <span>Augmentation</span>
-              <span class="diff-value">+ {{ formatCurrency(revisionPreview()!.delta?.total_rent) }}</span>
-            </div>
-            <div class="preview-row">
-              <span>Date d'effet</span>
-              <span>{{ formatDateDisplay(revisionPreview()!.effective_date) }}</span>
-            </div>
-            <div class="preview-row">
-              <span>Prochaine révision</span>
-              <span>{{ formatDateDisplay(revisionPreview()!.next_revision_date) }}</span>
-            </div>
+            <div class="preview-row"><span>Ancien loyer TTC</span><span class="old-value">{{ formatCurrency(revisionPreview()!.before?.total_rent) }}</span></div>
+            <div class="preview-row"><span>Nouveau loyer TTC</span><strong class="new-value">{{ formatCurrency(revisionPreview()!.after?.total_rent) }}</strong></div>
+            <div class="preview-row"><span>Augmentation</span><span class="diff-value">+ {{ formatCurrency(revisionPreview()!.delta?.total_rent) }}</span></div>
+            <div class="preview-row"><span>Date d'effet</span><span>{{ formatDateDisplay(revisionPreview()!.effective_date) }}</span></div>
+            <div class="preview-row"><span>Prochaine révision</span><span>{{ formatDateDisplay(revisionPreview()!.next_revision_date) }}</span></div>
           </div>
         }
-
         <div class="drawer-actions">
           <button type="button" class="btn-secondary" (click)="previewRevision()" [disabled]="revisionForm.invalid || loadingPreview()">
-            @if (loadingPreview()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-eye"></i> }
-            Aperçu
+            @if (loadingPreview()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-eye"></i> } Aperçu
           </button>
           <button type="button" class="btn-secondary" (click)="closeRevision()">Annuler</button>
-          <button type="submit" class="btn-primary" [disabled]="!revisionPreview() || saving()">
-            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-check"></i> }
-            Appliquer la révision
+          <button type="button" class="btn-primary" (click)="applyRevision()" [disabled]="!revisionPreview() || saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-check"></i> } Appliquer
           </button>
         </div>
       </form>

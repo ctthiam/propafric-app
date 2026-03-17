@@ -1,0 +1,234 @@
+<p-toast position="top-right" />
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mes signalements</h1>
+    <p class="page-subtitle">Problèmes signalés dans votre logement</p>
+  </div>
+  <button class="btn-primary" (click)="openForm()">
+    <i class="pi pi-plus"></i> Signaler un problème
+  </button>
+</div>
+
+<!-- KPIs -->
+<div class="kpi-row">
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-blue"><i class="pi pi-list"></i></div>
+    <div><div class="kpi-value">{{ statsTotal }}</div><div class="kpi-label">Total</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-orange"><i class="pi pi-wrench"></i></div>
+    <div><div class="kpi-value">{{ statsActive }}</div><div class="kpi-label">En cours</div></div>
+  </div>
+  <div class="kpi-card">
+    <div class="kpi-icon kpi-green"><i class="pi pi-check-circle"></i></div>
+    <div><div class="kpi-value">{{ statsCompleted }}</div><div class="kpi-label">Résolus</div></div>
+  </div>
+</div>
+
+<!-- Filtre -->
+<div class="toolbar">
+  <select class="filter-select" (change)="onFilter($event)">
+    <option value="">Tous les statuts</option>
+    <option value="active">En cours</option>
+    <option value="completed">Résolus</option>
+    <option value="cancelled">Annulés</option>
+  </select>
+</div>
+
+<!-- Liste -->
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3]; track i) { <p-skeleton height="64px" borderRadius="8px" styleClass="mb-2" /> }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Titre</th>
+            <th>Catégorie</th>
+            <th>Priorité</th>
+            <th>Date</th>
+            <th>Photos</th>
+            <th>Prestataire</th>
+            <th>Statut</th>
+            <th style="width:70px; text-align:center">Détail</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredOrders().length === 0) {
+            <tr><td colspan="8" class="empty-row">
+              <div class="empty-state-inline"><i class="pi pi-check-circle"></i><span>Aucun signalement</span></div>
+            </td></tr>
+          }
+          @for (o of filteredOrders(); track o.id) {
+            <tr>
+              <td>
+                <div class="td-name">{{ o.title }}</div>
+                @if (o.property) { <div class="td-muted-sm">{{ o.property.name }}</div> }
+              </td>
+              <td><span class="category-tag">{{ categoryLabel(o.category) }}</span></td>
+              <td class="td-muted">{{ priorityLabel(o.priority) }}</td>
+              <td class="td-muted">{{ formatDate(o.requested_at) }}</td>
+              <td>
+                @if (photoCount(o) > 0) {
+                  <span class="badge badge-photo"><i class="pi pi-images"></i> {{ photoCount(o) }}</span>
+                } @else {
+                  <span class="td-muted" style="font-size:12px">—</span>
+                }
+              </td>
+              <td class="td-muted">{{ o.contractor?.name ?? '—' }}</td>
+              <td><span class="badge {{ statusClass(o.status) }}">{{ statusLabel(o.status) }}</span></td>
+              <td style="text-align:center">
+                <button class="btn-icon btn-view" (click)="openDetail(o)" pTooltip="Voir" tooltipPosition="top">
+                  <i class="pi pi-eye"></i>
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ─── DRAWER FORMULAIRE SIGNALEMENT ─── -->
+@if (formOpen) {
+  <div class="drawer-overlay" (click)="closeForm()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div class="drawer-title">Signaler un problème</div>
+      <button class="drawer-close" (click)="closeForm()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="drawer-form">
+
+        <div class="form-group">
+          <label>Titre <span class="req">*</span></label>
+          <input class="pa-input" formControlName="title" placeholder="Ex: Fuite robinet salle de bain" />
+          @if (form.get('title')?.invalid && form.get('title')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label>Description</label>
+          <textarea class="pa-input pa-textarea" formControlName="description"
+            placeholder="Décrivez le problème en détail…" rows="3"></textarea>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Catégorie <span class="req">*</span></label>
+            <p-dropdown formControlName="category" [options]="categoryOptions"
+              optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>Urgence <span class="req">*</span></label>
+            <p-dropdown formControlName="priority" [options]="priorityOptions"
+              optionLabel="label" optionValue="value" styleClass="w-full" />
+          </div>
+        </div>
+
+        <!-- Upload photos -->
+        <div class="form-section-title">Photos (optionnel — max 5)</div>
+        <div class="upload-zone" (click)="photoInput.click()">
+          <input #photoInput type="file" multiple accept="image/jpeg,image/png,image/webp"
+            style="display:none" (change)="onPhotosSelected($event)" />
+          <i class="pi pi-camera upload-icon"></i>
+          <div class="upload-label">Ajouter des photos du problème</div>
+          <div class="upload-hint">JPEG, PNG, WebP — max 5MB — max 5 photos</div>
+        </div>
+
+        @if (previewUrls.length > 0) {
+          <div class="preview-grid">
+            @for (url of previewUrls; track url; let i = $index) {
+              <div class="preview-item">
+                <img [src]="url" alt="photo" />
+                <button type="button" class="preview-remove" (click)="removePhoto(i)">
+                  <i class="pi pi-times"></i>
+                </button>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeForm()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> Envoi… }
+            @else { <i class="pi pi-send"></i> Envoyer le signalement }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ─── DRAWER DÉTAIL ─── -->
+@if (detailOpen && selectedOrder(); as order) {
+  <div class="drawer-overlay" (click)="closeDetail()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ order.title }}</div>
+        <div class="drawer-sub">{{ order.property?.name }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeDetail()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+
+      <div class="detail-grid">
+        <div class="detail-row"><span class="detail-label">Statut</span><span class="badge {{ statusClass(order.status) }}">{{ statusLabel(order.status) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Priorité</span><span>{{ priorityLabel(order.priority) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Catégorie</span><span>{{ categoryLabel(order.category) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Date signalée</span><span>{{ formatDate(order.requested_at) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Date prévue</span><span>{{ formatDate(order.scheduled_at) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Date résolue</span><span>{{ formatDate(order.completed_at) }}</span></div>
+        <div class="detail-row">
+          <span class="detail-label">Prestataire</span>
+          <span>
+            @if (order.contractor) { {{ order.contractor.name }} — {{ order.contractor.phone }} }
+            @else { En attente d'assignation }
+          </span>
+        </div>
+      </div>
+
+      @if (order.description) {
+        <div class="detail-section-title">Description</div>
+        <div class="detail-desc">{{ order.description }}</div>
+      }
+
+      <!-- Photos du signalement (avant) -->
+      @if (order.photos_before && order.photos_before.length > 0) {
+        <div class="detail-section-title">
+          <span class="section-dot dot-before"></span> Photos du signalement
+        </div>
+        <div class="photos-grid">
+          @for (photo of order.photos_before; track photo.id) {
+            <div class="photo-item">
+              <img [src]="photo.url" [alt]="photo.name" />
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Photos après intervention -->
+      @if (order.photos_after && order.photos_after.length > 0) {
+        <div class="detail-section-title">
+          <span class="section-dot dot-after"></span> Photos après intervention
+        </div>
+        <div class="photos-grid">
+          @for (photo of order.photos_after; track photo.id) {
+            <div class="photo-item">
+              <img [src]="photo.url" [alt]="photo.name" />
+            </div>
+          }
+        </div>
+      }
+
+    </div>
+  </div>
+}

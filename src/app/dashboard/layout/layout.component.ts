@@ -53,14 +53,15 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Baux',            icon: 'pi pi-file',        route: '/dashboard/baux',           roles: ['agency_admin', 'agency_secretary'] },
     { label: 'Paiements',       icon: 'pi pi-credit-card', route: '/dashboard/paiements',      roles: ['agency_admin', 'agency_accountant'] },
     { label: 'Dépenses',        icon: 'pi pi-wallet',      route: '/dashboard/depenses',       roles: ['agency_admin', 'agency_accountant'] },
-    { label: 'Prestataires',    icon: 'pi pi-briefcase',   route: '/dashboard/prestataires',   roles: ['agency_admin', 'agency_secretary', 'agency_accountant'] },
-    { label: 'Travaux',         icon: 'pi pi-wrench',      route: '/dashboard/travaux',         roles: ['agency_admin', 'agency_secretary'] },
+    { label: 'Prestataires',    icon: 'pi pi-briefcase',   route: '/dashboard/prestataires',   roles: ['agency_admin', 'agency_secretary'] },
+    { label: 'Travaux',         icon: 'pi pi-wrench',      route: '/dashboard/travaux',        roles: ['agency_admin', 'agency_secretary'] },
     { label: 'Relevés',         icon: 'pi pi-chart-bar',   route: '/dashboard/releves',        roles: ['agency_admin', 'agency_accountant'] },
-    { label: 'Impôts fonciers', icon: 'pi pi-building',    route: '/dashboard/impots',          roles: ['agency_admin', 'agency_accountant'] },
+    { label: 'Impôts fonciers', icon: 'pi pi-percentage',  route: '/dashboard/impots',         roles: ['agency_admin', 'agency_accountant'] },
     { label: 'Messages',        icon: 'pi pi-comments',    route: '/dashboard/messages' },
-    { label: 'Abonnement',      icon: 'pi pi-credit-card', route: '/dashboard/abonnement',      roles: ['agency_admin'] },
+    { label: 'Abonnement',      icon: 'pi pi-star',        route: '/dashboard/abonnement',     roles: ['agency_admin'] },
     { label: 'Équipe',          icon: 'pi pi-users',       route: '/dashboard/equipe',         roles: ['agency_admin'] },
-  ];
+    { label: 'Archives',        icon: 'pi pi-inbox',       route: '/dashboard/archives',       roles: ['agency_admin'] },
+];
 
   filteredNavItems = computed(() => {
     const role = this.user()?.role ?? '';
