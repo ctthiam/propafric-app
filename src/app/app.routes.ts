@@ -37,6 +37,7 @@ export const routes: Routes = [
       { path: 'impots',        loadComponent: () => import('./dashboard/property-taxes/property-taxes.component').then(m => m.PropertyTaxesComponent) },
       { path: 'abonnement',    loadComponent: () => import('./dashboard/subscription/subscription.component').then(m => m.SubscriptionComponent) },
       { path: 'archives', loadComponent: () => import('./dashboard/archives/archives.component').then(m => m.ArchivesComponent) },
+      { path: 'parametres', canActivate: [adminOnlyGuard], loadComponent: () => import('./dashboard/settings/settings.component').then(m => m.SettingsComponent) },
     ]
   },
 

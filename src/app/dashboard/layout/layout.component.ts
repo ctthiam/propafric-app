@@ -61,6 +61,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Abonnement',      icon: 'pi pi-star',        route: '/dashboard/abonnement',     roles: ['agency_admin'] },
     { label: 'Équipe',          icon: 'pi pi-users',       route: '/dashboard/equipe',         roles: ['agency_admin'] },
     { label: 'Archives',        icon: 'pi pi-inbox',       route: '/dashboard/archives',       roles: ['agency_admin'] },
+    { label: 'Paramètres',      icon: 'pi pi-cog',         route: '/dashboard/parametres',     roles: ['agency_admin'] },
 ];
 
   filteredNavItems = computed(() => {
