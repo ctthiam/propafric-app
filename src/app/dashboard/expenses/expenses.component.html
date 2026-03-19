@@ -5,7 +5,16 @@
   </ng-template>
 </p-confirmDialog>
 
-<div class="page-header-actions">
+<div class="page-header">
+  <div>
+    <div class="page-title">
+      @if (activeTab() === 'expenses') { Dépenses } @else { Prestataires }
+    </div>
+    <div class="page-subtitle">
+      @if (activeTab() === 'expenses') { Suivi des charges et dépenses } @else { Annuaire des prestataires }
+    </div>
+  </div>
+  <div class="page-header-actions">
     @if (activeTab() === 'expenses') {
       <button class="btn-secondary btn-export" (click)="exportExcel()" [disabled]="exporting()">
         @if (exporting()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-file-excel"></i> }
@@ -16,6 +25,7 @@
       <button class="btn-primary" (click)="openCreateVendor()"><i class="pi pi-plus"></i> Nouveau prestataire</button>
     }
   </div>
+</div>
 
 <div class="tabs-bar">
   <button class="tab-btn" [class.active]="activeTab() === 'expenses'" (click)="activeTab.set('expenses')">
@@ -243,9 +253,24 @@
             <span class="form-error">Requis</span>
           }
         </div>
+        <!-- APRÈS -->
         <div class="form-group">
           <label>Spécialité</label>
-          <input class="pa-input" formControlName="specialty" placeholder="Plomberie, Électricité…" />
+          <select class="pa-input" formControlName="specialty">
+            <option value="plomberie">Plomberie</option>
+            <option value="electricite">Électricité</option>
+            <option value="peinture">Peinture</option>
+            <option value="maconnerie">Maçonnerie</option>
+            <option value="menuiserie">Menuiserie</option>
+            <option value="climatisation">Climatisation</option>
+            <option value="jardinage">Jardinage</option>
+            <option value="nettoyage">Nettoyage</option>
+            <option value="securite">Sécurité</option>
+            <option value="ascenseur">Ascenseur</option>
+            <option value="piscine">Piscine</option>
+            <option value="groupe_electrogene">Groupe électrogène</option>
+            <option value="autre" selected>Autre</option>
+          </select>
         </div>
         <div class="form-row-2">
           <div class="form-group">
@@ -260,6 +285,23 @@
         <div class="form-group">
           <label>Adresse</label>
           <input class="pa-input" formControlName="address" placeholder="Dakar" />
+        </div>
+        <div class="form-section-title">Identité</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Type de pièce</label>
+            <select class="pa-input" formControlName="id_type">
+              <option value="" selected>— Aucun —</option>
+              <option value="cni">CNI</option>
+              <option value="passeport">Passeport</option>
+              <option value="permis">Permis de conduire</option>
+              <option value="carte_sejour">Carte de séjour</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Numéro de pièce</label>
+            <input class="pa-input" formControlName="id_number" placeholder="ex: 1234567890" />
+          </div>
         </div>
         <div class="form-section-title">Notes</div>
         <div class="form-group">

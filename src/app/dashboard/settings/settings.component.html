@@ -12,7 +12,7 @@
 } @else {
   <div class="settings-grid">
 
-    <!-- ─── COLONNE GAUCHE : Logo + Plan ─── -->
+    <!-- ─── COLONNE GAUCHE : Logo + Couleurs + Plan ─── -->
     <div class="settings-sidebar">
 
       <!-- Logo -->
@@ -25,9 +25,7 @@
             <div class="logo-preview">
               <img [src]="logoPreview()!" alt="Logo agence" />
               @if (uploadingLogo()) {
-                <div class="logo-uploading">
-                  <i class="pi pi-spin pi-spinner"></i>
-                </div>
+                <div class="logo-uploading"><i class="pi pi-spin pi-spinner"></i></div>
               }
             </div>
             <div class="logo-actions">
@@ -46,17 +44,81 @@
               <span>Aucun logo</span>
             </div>
             <label class="btn-primary btn-logo-upload" [class.disabled]="uploadingLogo()">
-              @if (uploadingLogo()) {
-                <i class="pi pi-spin pi-spinner"></i> Upload…
-              } @else {
-                <i class="pi pi-upload"></i> Uploader un logo
-              }
+              @if (uploadingLogo()) { <i class="pi pi-spin pi-spinner"></i> Upload… }
+              @else { <i class="pi pi-upload"></i> Uploader un logo }
               <input type="file" accept="image/jpeg,image/png,image/webp"
-                style="display:none" (change)="onLogoSelected($event)"
-                [disabled]="uploadingLogo()" />
+                style="display:none" (change)="onLogoSelected($event)" [disabled]="uploadingLogo()" />
             </label>
             <div class="logo-hint">JPEG, PNG, WebP — max 2MB</div>
           }
+        </div>
+      </div>
+
+      <!-- Couleurs PDF -->
+      <div class="card">
+        <div class="card-title">Couleurs des documents</div>
+        <div class="card-subtitle">Appliquées sur tous les PDFs générés</div>
+
+        <div class="colors-zone">
+          <div class="color-row">
+            <div class="color-info">
+              <div class="color-label">Couleur principale</div>
+              <div class="color-desc">En-têtes, tableaux, tampon PAYÉ</div>
+            </div>
+            <div class="color-picker-wrap">
+              <input type="color"
+                [value]="colorPrimary()"
+                (input)="onColorChange('pdf_color_primary', $any($event.target).value)"
+                class="color-input" />
+              <span class="color-hex">{{ colorPrimary() }}</span>
+            </div>
+          </div>
+
+          <div class="color-row">
+            <div class="color-info">
+              <div class="color-label">Couleur secondaire</div>
+              <div class="color-desc">Sous-titres, labels, pied de page</div>
+            </div>
+            <div class="color-picker-wrap">
+              <input type="color"
+                [value]="colorSecondary()"
+                (input)="onColorChange('pdf_color_secondary', $any($event.target).value)"
+                class="color-input" />
+              <span class="color-hex">{{ colorSecondary() }}</span>
+            </div>
+          </div>
+
+          <!-- Aperçu miniature -->
+          <div class="pdf-preview" [style.border-color]="colorPrimary()">
+            <div class="pdf-preview-header" [style.background]="colorPrimary()">
+              <div class="pdf-preview-logo">
+                @if (logoPreview()) {
+                  <img [src]="logoPreview()!" alt="logo" />
+                } @else {
+                  <div class="pdf-preview-logo-placeholder">
+                    <i class="pi pi-image"></i>
+                  </div>
+                }
+              </div>
+              <div class="pdf-preview-name">{{ agency()?.name ?? 'NOM AGENCE' }}</div>
+              <div class="pdf-preview-tagline" [style.color]="colorSecondary()" style="filter:brightness(2)">
+                Confiance — Éthique — Professionnalisme
+              </div>
+            </div>
+            <div class="pdf-preview-body">
+              <div class="pdf-preview-table-header" [style.background]="colorPrimary()">
+                <span>LOCATAIRE</span><span>MONTANT</span>
+              </div>
+              <div class="pdf-preview-table-row">
+                <span>M. Diallo</span><span>150 000 F</span>
+              </div>
+              <div class="pdf-preview-stamp" [style.border-color]="colorPrimary()" [style.color]="colorPrimary()">
+                PAYÉ
+              </div>
+            </div>
+          </div>
+          <div class="preview-label">Aperçu document</div>
+
         </div>
       </div>
 

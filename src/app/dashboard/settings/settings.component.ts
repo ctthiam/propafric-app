@@ -24,6 +24,10 @@ export class SettingsComponent implements OnInit {
   uploadingLogo = signal(false);
   logoPreview   = signal<string | null>(null);
 
+  // Prévisualisation couleurs en temps réel
+  colorPrimary   = signal<string>('#1a1a1a');
+  colorSecondary = signal<string>('#555555');
+
   form: FormGroup;
 
   constructor(
@@ -33,15 +37,17 @@ export class SettingsComponent implements OnInit {
     private cdr: ChangeDetectorRef,
   ) {
     this.form = this.fb.group({
-      name:      ['', Validators.required],
-      email:     ['', [Validators.required, Validators.email]],
-      phone:     [''],
-      address:   [''],
-      city:      [''],
-      country:   [''],
-      website:   [''],
-      ninea:     [''],
-      rc_number: [''],
+      name:                ['', Validators.required],
+      email:               ['', [Validators.required, Validators.email]],
+      phone:               [''],
+      address:             [''],
+      city:                [''],
+      country:             [''],
+      website:             [''],
+      ninea:               [''],
+      rc_number:           [''],
+      pdf_color_primary:   ['#1a1a1a'],
+      pdf_color_secondary: ['#555555'],
     });
   }
 
@@ -54,22 +60,36 @@ export class SettingsComponent implements OnInit {
         const a = res?.data;
         this.agency.set(a);
         this.logoPreview.set(a?.logo_url ?? null);
+
+        const primary   = a?.pdf_color_primary   ?? '#1a1a1a';
+        const secondary = a?.pdf_color_secondary ?? '#555555';
+        this.colorPrimary.set(primary);
+        this.colorSecondary.set(secondary);
+
         this.form.patchValue({
-          name:      a?.name      ?? '',
-          email:     a?.email     ?? '',
-          phone:     a?.phone     ?? '',
-          address:   a?.address   ?? '',
-          city:      a?.city      ?? '',
-          country:   a?.country   ?? '',
-          website:   a?.website   ?? '',
-          ninea:     a?.ninea     ?? '',
-          rc_number: a?.rc_number ?? '',
+          name:                a?.name      ?? '',
+          email:               a?.email     ?? '',
+          phone:               a?.phone     ?? '',
+          address:             a?.address   ?? '',
+          city:                a?.city      ?? '',
+          country:             a?.country   ?? '',
+          website:             a?.website   ?? '',
+          ninea:               a?.ninea     ?? '',
+          rc_number:           a?.rc_number ?? '',
+          pdf_color_primary:   primary,
+          pdf_color_secondary: secondary,
         });
         this.loading.set(false);
         this.cdr.detectChanges();
       },
       error: () => this.loading.set(false),
     });
+  }
+
+  onColorChange(field: 'pdf_color_primary' | 'pdf_color_secondary', value: string): void {
+    if (field === 'pdf_color_primary')   this.colorPrimary.set(value);
+    if (field === 'pdf_color_secondary') this.colorSecondary.set(value);
+    this.form.get(field)?.setValue(value);
   }
 
   save(): void {

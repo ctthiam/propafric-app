@@ -236,8 +236,7 @@ export class PaymentsComponent implements OnInit {
 
     const raw = this.form.value;
     const payload = {
-      lease_id:       raw.lease_id,
-      schedule_id:    raw.schedule_id,
+      rent_schedule_id:    raw.schedule_id,
       amount:         raw.amount,
       payment_date:   this.formatDate(raw.payment_date),
       payment_method: raw.payment_method,

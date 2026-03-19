@@ -20,6 +20,8 @@ export interface Contractor {
   phone: string | null;
   email: string | null;
   specialty: string | null;
+  id_type: string | null;    // ← ajouté
+  id_number: string | null;  // ← ajouté
 }
 
 export interface Expense {
@@ -143,8 +145,10 @@ export class ExpensesComponent implements OnInit {
       name:      ['', Validators.required],
       phone:     [''],
       email:     [''],
-      specialty: [''],
+      specialty: ['autre'],
       address:   [''],
+      id_type:   [''],      // ← ajouté
+      id_number: [''],
       notes:     [''],
     });
   }
@@ -277,12 +281,23 @@ export class ExpensesComponent implements OnInit {
   }
 
   // ── Prestataires ──
-  openCreateVendor(): void {
-    this.editingVendor.set(null);
-    this.vendorForm.reset();
-    this.vendorDrawer = true;
-    this.cdr.detectChanges();
-  }
+ openCreateVendor(): void {
+  this.editingVendor.set(null);
+  this.vendorForm.patchValue({
+    name:      '',
+    phone:     '',
+    email:     '',
+    specialty: 'autre',
+    address:   '',
+    id_type:   '',
+    id_number: '',
+    notes:     '',
+  });
+  this.vendorForm.markAsPristine();
+  this.vendorForm.markAsUntouched();
+  this.vendorDrawer = true;
+  this.cdr.detectChanges();
+}
 
   openEditVendor(v: Contractor): void {
     this.editingVendor.set(v);
