@@ -59,7 +59,15 @@
               "outputHashing": "all"
             },
             "development": {
-              "optimization": false,
+              "optimization": {
+                "scripts": true,
+                "styles": {
+                  "minify": true,
+                  "inlineCritical": true,
+                  "inlineFonts": false
+                },
+                "fonts": false
+              },
               "extractLicenses": false,
               "sourceMap": true
             }

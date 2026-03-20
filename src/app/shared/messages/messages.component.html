@@ -46,7 +46,7 @@
             (click)="selectConversation(conv)"
           >
             <div class="conv-avatar">
-              {{ conv.subject[0]?.toUpperCase() ?? 'M' }}
+              {{ conv.subject[0] ? conv.subject[0].toUpperCase() : 'M' }}
             </div>
             <div class="conv-item-body">
               <div class="conv-item-top">
