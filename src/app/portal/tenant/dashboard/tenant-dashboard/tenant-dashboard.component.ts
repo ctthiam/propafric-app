@@ -68,7 +68,10 @@ export class TenantDashboardComponent implements OnInit {
       .reduce((sum, s) => sum + Number(s.balance), 0);
   }
   get nextSchedule(): TenantSchedule | null {
-    return this.schedules().find(s => s.status === 'pending' || s.status === 'late') ?? null;
+    const pending = this.schedules()
+      .filter(s => s.status === 'pending' || s.status === 'late')
+      .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime());
+    return pending[0] ?? null;
   }
   get totalPaid(): number {
     return this.schedules()
