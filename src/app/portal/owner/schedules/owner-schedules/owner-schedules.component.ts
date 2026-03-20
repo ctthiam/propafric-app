@@ -17,6 +17,7 @@ export class OwnerSchedulesComponent implements OnInit {
   loading      = signal(true);
   filterStatus = signal('');
   search       = signal('');
+  metaCollected = signal(0);
 
   filteredSchedules = computed(() => {
     let list = this.schedules();
@@ -27,7 +28,7 @@ export class OwnerSchedulesComponent implements OnInit {
     return list;
   });
 
-  get totalCollected(): number { return this.schedules().filter(s => s.status === 'paid').reduce((sum, s) => sum + Number(s.amount_paid), 0); }
+  get totalCollected(): number { return this.metaCollected(); }
   get totalPending(): number { return this.schedules().filter(s => s.status !== 'paid').reduce((sum, s) => sum + Number(s.balance), 0); }
 
   statusOptions = [
@@ -41,7 +42,11 @@ export class OwnerSchedulesComponent implements OnInit {
 
   ngOnInit(): void {
     this.http.get<any>(`${this.apiUrl}/schedules`).subscribe({
-      next: (r: any) => { this.schedules.set(Array.isArray(r?.data) ? r.data : []); this.loading.set(false); },
+      next: (r: any) => {
+        this.schedules.set(Array.isArray(r?.data) ? r.data : []);
+        this.metaCollected.set(Number(r?.meta?.total_collected ?? 0));
+        this.loading.set(false);
+      },
       error: () => this.loading.set(false)
     });
   }
