@@ -78,12 +78,12 @@
           <button
             class="btn-subscribe"
             [class.btn-current]="plan.key === currentPlan"
-            [disabled]="paying() || plan.key === currentPlan"
+            [disabled]="paying() || (plan.key === currentPlan && data().agency.status === 'active')"
             (click)="subscribe(plan.key)"
           >
             @if (paying() && selectedPlan() === plan.key) {
               <i class="pi pi-spin pi-spinner"></i> Redirection…
-            } @else if (plan.key === currentPlan) {
+            } @else if (plan.key === currentPlan && data().agency.status === 'active') {
               Plan actuel
             } @else {
               Choisir ce plan
