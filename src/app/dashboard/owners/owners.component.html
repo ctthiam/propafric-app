@@ -82,6 +82,11 @@
                   <button class="btn-icon btn-edit" (click)="openEdit(owner)" pTooltip="Modifier" tooltipPosition="top">
                     <i class="pi pi-pencil"></i>
                   </button>
+                  @if (!owner.user_id) {
+                    <button class="btn-icon btn-portal" (click)="createPortal(owner)" pTooltip="Créer portail" tooltipPosition="top">
+                      <i class="pi pi-user-plus"></i>
+                    </button>
+                  }
                   <button class="btn-icon btn-delete" (click)="confirmDelete(owner)" pTooltip="Supprimer" tooltipPosition="top">
                     <i class="pi pi-trash"></i>
                   </button>
