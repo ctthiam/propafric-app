@@ -19,6 +19,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 
 export interface Owner {
   id: number;
+  user_id: number | null;
   first_name: string;
   last_name: string;
   full_name: string;
@@ -165,6 +166,26 @@ export class OwnersComponent implements OnInit {
       }
     });
   }
+
+  createPortal(owner: any): void {
+  const password = prompt('Mot de passe pour le portail de ' + owner.full_name + ' :');
+  if (!password || password.length < 8) {
+    this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Mot de passe minimum 8 caractères.' });
+    return;
+  }
+  this.http.post<any>(`${this.api}/owners/${owner.id}/portal`, {
+    password,
+    email: owner.email
+  }).subscribe({
+    next: (res: any) => {
+      this.toast.add({ severity: 'success', summary: 'Portail créé', detail: res.message });
+      this.load();
+    },
+    error: (err: any) => {
+      this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+    }
+  });
+}
 
   confirmDelete(owner: Owner): void {
     this.confirm.confirm({

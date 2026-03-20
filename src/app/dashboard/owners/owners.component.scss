@@ -190,3 +190,4 @@ $red:         #e57373;
   tr:last-child td { border-bottom: none; }
   tbody tr:hover td { background: rgba(45,106,79,0.025); }
 }
+.btn-portal { background: rgba(25, 113, 194, 0.08); color: #1971c2; &:hover { background: rgba(25, 113, 194, 0.15); } }
