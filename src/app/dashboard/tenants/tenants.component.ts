@@ -183,7 +183,10 @@ export class TenantsComponent implements OnInit {
     this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Mot de passe minimum 8 caractères.' });
     return;
   }
-  this.http.post<any>(`${this.api}/tenants/${t.id}/portal`, { password }).subscribe({
+  this.http.post<any>(`${this.api}/tenants/${t.id}/portal`, { 
+    password,
+    email: t.email 
+  }).subscribe({
     next: (res: any) => {
       this.toast.add({ severity: 'success', summary: 'Portail créé', detail: res.message });
       this.load();
