@@ -17,20 +17,20 @@
     <div class="current-plan-left">
       <div class="current-label">Plan actuel</div>
       <div class="current-plan-name">{{ data().agency.plan | titlecase }}</div>
-      @if (data().agency.plan !== 'partner') {
-        <div class="current-expiry">
-          @if (isExpired) {
-            <span class="expiry-danger">⚠ Abonnement expiré</span>
-          } @else {
-            <span class="expiry-ok">
-              Expire le {{ formatDate(data().agency.subscription_ends_at) }}
-              — <strong>{{ daysLeft }} jour(s) restant(s)</strong>
-            </span>
-          }
-        </div>
-      } @else {
-        <div class="current-expiry expiry-ok">Partenaire fondateur — Accès à vie gratuit ✓</div>
-      }
+      @if (data().agency.status === 'pending') {
+          <div class="current-expiry expiry-danger">
+            ⚠ En attente de paiement — Choisissez un plan ci-dessous
+          </div>
+        } @else if (isExpired) {
+          <div class="current-expiry expiry-danger">⚠ Abonnement expiré</div>
+        } @else if (data().agency.plan !== 'partner') {
+          <div class="current-expiry expiry-ok">
+            Expire le {{ formatDate(data().agency.subscription_ends_at) }}
+            — <strong>{{ daysLeft }} jour(s) restant(s)</strong>
+          </div>
+        } @else {
+          <div class="current-expiry expiry-ok">Partenaire fondateur — Accès à vie gratuit ✓</div>
+        }
     </div>
     <div class="current-plan-right">
       <div class="plan-stat">

@@ -128,7 +128,12 @@ export class SubscriptionComponent implements OnInit {
 
   get currentPlan(): string { return this.data()?.agency?.plan ?? ''; }
   get daysLeft():    number { return this.data()?.agency?.days_left ?? 0; }
-  get isExpired():   boolean { return this.daysLeft <= 0 && this.currentPlan !== 'partner'; }
+  get isExpired(): boolean {
+  const status = this.data()?.agency?.status;
+  if (!status || status === 'partner') return false;
+  if (status === 'pending') return true;
+  return this.daysLeft <= 0;
+}
 
   price(plan: PlanOption): number {
     return this.period() === 'monthly' ? plan.price_monthly : plan.price_yearly;
