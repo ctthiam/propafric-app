@@ -98,7 +98,6 @@ export class SuperAgenciesComponent implements OnInit {
       address:          [''],
       city:             ['Dakar'],
       plan:             ['pro', Validators.required],
-      trial_days:       [30],
       admin_first_name: ['', Validators.required],
       admin_last_name:  ['', Validators.required],
       admin_email:      ['', [Validators.required, Validators.email]],
