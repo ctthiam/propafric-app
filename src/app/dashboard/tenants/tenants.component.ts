@@ -13,6 +13,7 @@ import { ConfirmationService, MessageService } from 'primeng/api';
 
 export interface Tenant {
   id: number;
+  user_id: number | null;
   first_name: string;
   last_name: string;
   full_name: string;
@@ -175,6 +176,23 @@ export class TenantsComponent implements OnInit {
       }
     });
   }
+
+  createPortal(t: any): void {
+  const password = prompt('Mot de passe pour le portail de ' + t.full_name + ' :');
+  if (!password || password.length < 8) {
+    this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Mot de passe minimum 8 caractères.' });
+    return;
+  }
+  this.http.post<any>(`${this.api}/tenants/${t.id}/portal`, { password }).subscribe({
+    next: (res: any) => {
+      this.toast.add({ severity: 'success', summary: 'Portail créé', detail: res.message });
+      this.load();
+    },
+    error: (err: any) => {
+      this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+    }
+  });
+}
 
   confirmDelete(t: Tenant): void {
     this.confirm.confirm({

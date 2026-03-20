@@ -141,3 +141,4 @@ textarea.pa-input { resize: vertical; }
   .p-button-danger { background: $red; border-color: $red; }
 }
 :host ::ng-deep .p-toast { top: 80px !important; }
+.btn-portal { background: rgba(25, 113, 194, 0.08); color: #1971c2; &:hover { background: rgba(25, 113, 194, 0.15); } }
