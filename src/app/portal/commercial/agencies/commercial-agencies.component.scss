@@ -71,3 +71,12 @@ $red:    #e57373;
 .pa-input { width:100%; padding:10px 12px; font-size:14px; border:1.5px solid rgba(0,0,0,.12); border-radius:8px; font-family:'DM Sans',sans-serif; color:#0d1f17; background:#fff; outline:none; box-sizing:border-box; &:focus { border-color:#2D6A4F; } &::placeholder { color:rgba(0,0,0,.3); } }
 .form-error { font-size:12px; color:#e57373; }
 .btn-secondary { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:transparent; color:#0d1f17; border:1.5px solid rgba(0,0,0,.15); border-radius:10px; font-size:14px; font-weight:500; cursor:pointer; font-family:'DM Sans',sans-serif; &:hover { border-color:#2D6A4F; color:#2D6A4F; } }
+/* ── Toolbar ── */
+.toolbar { display:flex; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap; }
+.search-box { position:relative; flex:1; min-width:220px; max-width:360px;
+  i { position:absolute; left:12px; top:50%; transform:translateY(-50%); color:rgba(#0d1f17,.3); font-size:13px; pointer-events:none; }
+  input { width:100%; padding:10px 14px 10px 36px; background:#fff; border:1.5px solid rgba(#0d1f17,.1); border-radius:10px; font-size:13px; color:#0d1f17; font-family:'DM Sans',sans-serif; outline:none;
+    &::placeholder { color:rgba(#0d1f17,.3); } &:focus { border-color:#2D6A4F; }
+  }
+}
+.filter-select { padding:10px 14px; background:#fff; border:1.5px solid rgba(#0d1f17,.1); border-radius:10px; font-size:13px; color:#0d1f17; font-family:'DM Sans',sans-serif; outline:none; cursor:pointer; min-width:150px; &:focus { border-color:#2D6A4F; } }
