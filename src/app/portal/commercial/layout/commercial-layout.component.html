@@ -31,12 +31,10 @@
     </div>
   </aside>
 
-  <!-- Overlay mobile -->
   @if (sidebarOpen) {
     <div class="sidebar-overlay" (click)="sidebarOpen = false"></div>
   }
 
-  <!-- Main -->
   <main class="main-content">
     <div class="topbar">
       <button class="menu-toggle" (click)="sidebarOpen = !sidebarOpen">

@@ -18,9 +18,8 @@ export class CommercialLayoutComponent {
   user = signal<any>(null);
 
   navItems = [
-    { label: 'Tableau de bord', icon: 'pi pi-home',     route: '/commercial/dashboard' },
-    { label: 'Mes agences',     icon: 'pi pi-building',  route: '/commercial/agencies' },
-    { label: 'Nouvelle agence', icon: 'pi pi-plus',      route: '/commercial/agencies/create' },
+    { label: 'Tableau de bord', icon: 'pi pi-home',    route: '/commercial/dashboard' },
+    { label: 'Mes agences',     icon: 'pi pi-building', route: '/commercial/agencies' },
   ];
 
   constructor(
@@ -32,7 +31,6 @@ export class CommercialLayoutComponent {
     this.router.events.pipe(filter(e => e instanceof NavigationEnd))
       .subscribe(() => { this.sidebarOpen = false; this.cdr.detectChanges(); });
 
-    // User chargé depuis l'API
     this.http.get<any>(`${environment.apiUrl}/auth/me`).subscribe({
       next: (res: any) => { this.user.set(res?.data ?? null); this.cdr.detectChanges(); }
     });
