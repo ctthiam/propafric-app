@@ -37,7 +37,7 @@ export class SubscriptionComponent implements OnInit {
   plans: PlanOption[] = [
     {
       key: 'starter', label: 'Starter',
-      price_monthly: 100, price_yearly: 100,
+      price_monthly: 200, price_yearly: 200,
       max_properties: '10 biens',
       popular: false,
       features: ['Baux + échéances + paiements', 'Quittances PDF', 'Portail locataire',
@@ -45,7 +45,7 @@ export class SubscriptionComponent implements OnInit {
     },
     {
       key: 'pro', label: 'Pro',
-      price_monthly: 100, price_yearly: 100,
+      price_monthly: 200, price_yearly: 200,
       max_properties: '50 biens',
       popular: true,
       features: ['Tout Starter', 'Portail propriétaire', 'Exports Excel',
@@ -54,7 +54,7 @@ export class SubscriptionComponent implements OnInit {
     },
     {
       key: 'premium', label: 'Premium',
-      price_monthly: 100, price_yearly: 100,
+      price_monthly: 200, price_yearly: 200,
       max_properties: 'Illimité',
       popular: false,
       features: ['Tout Pro', 'Biens illimités', 'Gestion immeubles (unités)',
