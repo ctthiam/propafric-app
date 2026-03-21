@@ -1,0 +1,50 @@
+<div class="commercial-shell">
+  <!-- Sidebar -->
+  <aside class="sidebar" [class.open]="sidebarOpen">
+    <div class="sidebar-header">
+      <div class="brand">
+        <span class="brand-name">PropAfric</span>
+        <span class="brand-tag">Commercial</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of navItems; track item.route) {
+        <a class="nav-item" [routerLink]="item.route" routerLinkActive="active">
+          <i class="{{ item.icon }}"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="user-info">
+        <div class="user-avatar">{{ initials() }}</div>
+        <div class="user-details">
+          <div class="user-name">{{ user()?.first_name }} {{ user()?.last_name }}</div>
+          <div class="user-role">Commercial</div>
+        </div>
+      </div>
+      <button class="btn-logout" (click)="logout()">
+        <i class="pi pi-sign-out"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Overlay mobile -->
+  @if (sidebarOpen) {
+    <div class="sidebar-overlay" (click)="sidebarOpen = false"></div>
+  }
+
+  <!-- Main -->
+  <main class="main-content">
+    <div class="topbar">
+      <button class="menu-toggle" (click)="sidebarOpen = !sidebarOpen">
+        <i class="pi pi-bars"></i>
+      </button>
+    </div>
+    <div class="page-content">
+      <router-outlet />
+    </div>
+  </main>
+</div>

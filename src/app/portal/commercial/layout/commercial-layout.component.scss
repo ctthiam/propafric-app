@@ -1,0 +1,45 @@
+$green:  #2D6A4F;
+$gold:   #C9A84C;
+$cream:  #faf8f3;
+$ink:    #0d1f17;
+$ink-l:  #4a6357;
+$white:  #ffffff;
+$sidebar-w: 260px;
+
+.commercial-shell { display:flex; min-height:100vh; background:$cream; }
+
+.sidebar {
+  width:$sidebar-w; background:$ink; color:$white; display:flex; flex-direction:column;
+  position:fixed; top:0; left:0; bottom:0; z-index:200; transition:transform .3s;
+  @media(max-width:768px) { transform:translateX(-100%); &.open { transform:translateX(0); } }
+}
+.sidebar-header { padding:20px; border-bottom:1px solid rgba($white,.08); }
+.brand-name { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; color:$white; display:block; }
+.brand-tag { font-size:10px; font-weight:600; color:$gold; text-transform:uppercase; letter-spacing:2px; }
+
+.sidebar-nav { flex:1; padding:16px 12px; display:flex; flex-direction:column; gap:4px; overflow-y:auto; }
+.nav-item {
+  display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px;
+  color:rgba($white,.6); text-decoration:none; font-size:13px; font-weight:500; transition:all .2s;
+  i { font-size:16px; width:20px; }
+  &:hover { background:rgba($white,.06); color:$white; }
+  &.active { background:rgba($gold,.15); color:$gold; }
+}
+
+.sidebar-footer { padding:16px; border-top:1px solid rgba($white,.08); display:flex; align-items:center; gap:10px; }
+.user-avatar { width:36px; height:36px; border-radius:50%; background:$gold; color:$ink; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+.user-details { flex:1; overflow:hidden; }
+.user-name { font-size:13px; font-weight:600; color:$white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.user-role { font-size:11px; color:rgba($white,.4); }
+.btn-logout { width:32px; height:32px; border:none; background:rgba($white,.06); border-radius:8px; color:rgba($white,.5); cursor:pointer; display:flex; align-items:center; justify-content:center; &:hover { background:rgba($white,.12); color:$white; } }
+
+.sidebar-overlay { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:199; }
+
+.main-content { flex:1; margin-left:$sidebar-w; display:flex; flex-direction:column; min-height:100vh;
+  @media(max-width:768px) { margin-left:0; }
+}
+.topbar { background:$white; border-bottom:1px solid rgba($ink,.06); padding:12px 20px; display:flex; align-items:center; }
+.menu-toggle { display:none; border:none; background:transparent; font-size:18px; cursor:pointer; color:$ink;
+  @media(max-width:768px) { display:flex; }
+}
+.page-content { flex:1; padding:24px; max-width:1200px; width:100%; }

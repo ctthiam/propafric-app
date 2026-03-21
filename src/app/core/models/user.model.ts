@@ -3,7 +3,7 @@ export interface User {
   name: string;
   email: string;
   phone: string | null;
-  role: 'super_admin' | 'agency_admin' | 'owner' | 'tenant';
+  role: 'super_admin' | 'agency_admin' | 'agency_secretary' | 'agency_accountant' | 'owner' | 'tenant' | 'commercial';
   agency_id: number | null;
   created_at: string;
   updated_at: string;

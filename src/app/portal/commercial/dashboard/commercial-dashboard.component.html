@@ -1,0 +1,96 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Tableau de bord</h1>
+    <p class="page-subtitle">Bienvenue {{ data()?.commercial?.name }}</p>
+  </div>
+  <a routerLink="/commercial/agencies/create" class="btn-primary">
+    <i class="pi pi-plus"></i> Nouvelle agence
+  </a>
+</div>
+
+@if (loading()) {
+  <p-skeleton height="120px" borderRadius="14px" styleClass="mb-4" />
+  <p-skeleton height="280px" borderRadius="14px" />
+} @else if (data()) {
+
+  <!-- Code de parrainage -->
+  @if (data().commercial?.code) {
+    <div class="referral-card">
+      <i class="pi pi-tag"></i>
+      <span>Votre code commercial : <strong>{{ data().commercial.code }}</strong></span>
+    </div>
+  }
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi-card">
+      <div class="kpi-icon kpi-blue"><i class="pi pi-building"></i></div>
+      <div>
+        <div class="kpi-value">{{ data().stats.total_agencies }}</div>
+        <div class="kpi-label">Agences recrutées</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon kpi-green"><i class="pi pi-check-circle"></i></div>
+      <div>
+        <div class="kpi-value">{{ data().stats.active_agencies }}</div>
+        <div class="kpi-label">Agences actives</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon kpi-gold"><i class="pi pi-clock"></i></div>
+      <div>
+        <div class="kpi-value">{{ data().stats.pending_agencies }}</div>
+        <div class="kpi-label">En attente</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon kpi-purple"><i class="pi pi-wallet"></i></div>
+      <div>
+        <div class="kpi-value">{{ formatCurrency(data().stats.commission_due) }}</div>
+        <div class="kpi-label">Commission estimée (25%)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agences récentes -->
+  <div class="table-card">
+    <div class="table-header">
+      <div class="table-title">Dernières agences recrutées</div>
+      <a routerLink="/commercial/agencies" class="btn-link">Voir tout →</a>
+    </div>
+    @if (data().recent_agencies.length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-building"></i>
+        <p>Aucune agence recrutée pour l'instant</p>
+        <a routerLink="/commercial/agencies/create" class="btn-primary">
+          <i class="pi pi-plus"></i> Recruter une agence
+        </a>
+      </div>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Agence</th>
+            <th>Plan</th>
+            <th>Statut</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of data().recent_agencies; track a.id) {
+            <tr>
+              <td>
+                <div class="td-name">{{ a.name }}</div>
+                <div class="td-muted">{{ a.email }}</div>
+              </td>
+              <td><span class="plan-badge plan-{{ a.plan }}">{{ planLabel(a.plan) }}</span></td>
+              <td><span class="badge {{ statusClass(a.status) }}">{{ statusLabel(a.status) }}</span></td>
+              <td class="td-muted">{{ formatDate(a.created_at) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+}

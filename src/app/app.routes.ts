@@ -57,6 +57,17 @@ export const routes: Routes = [
     ]
   },
 
+    // ── Portail Commercial ──────────────────────────────────────────────
+  {
+    path: 'commercial',
+    loadComponent: () => import('./portal/commercial/layout/commercial-layout.component').then(m => m.CommercialLayoutComponent),
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: 'dashboard', loadComponent: () => import('./portal/commercial/dashboard/commercial-dashboard.component').then(m => m.CommercialDashboardComponent) },
+      { path: 'agencies',  loadComponent: () => import('./portal/commercial/agencies/commercial-agencies.component').then(m => m.CommercialAgenciesComponent) },
+    ],
+  },
+
   // ── Portail Propriétaire ──
   {
     path: 'portail-proprietaire',
