@@ -17,6 +17,7 @@ export class SuperLayoutComponent {
     { label: 'Dashboard',  icon: 'pi pi-home',       route: '/super-admin/dashboard' },
     { label: 'Agences',    icon: 'pi pi-building',    route: '/super-admin/agences' },
     { label: 'Revenus',    icon: 'pi pi-chart-bar',   route: '/super-admin/revenus' },
+    { label: 'Commerciaux',  icon: 'pi pi-users',       route: '/super-admin/commerciaux' },
   ];
 
   constructor(public auth: AuthService) {}

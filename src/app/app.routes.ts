@@ -95,6 +95,7 @@ export const routes: Routes = [
       { path: 'dashboard', loadComponent: () => import('./portal/super-admin/dashboard/super-dashboard/super-dashboard.component').then(m => m.SuperDashboardComponent) },
       { path: 'agences',   loadComponent: () => import('./portal/super-admin/agencies/super-agencies/super-agencies.component').then(m => m.SuperAgenciesComponent) },
       { path: 'revenus',   loadComponent: () => import('./portal/super-admin/revenue/super-revenue/super-revenue.component').then(m => m.SuperRevenueComponent) },
+      { path: 'commerciaux',   loadComponent: () => import('./portal/super-admin/commercials/super-commercials/super-commercials.component').then(m => m.SuperCommercialsComponent) },
     ]
   },
 
