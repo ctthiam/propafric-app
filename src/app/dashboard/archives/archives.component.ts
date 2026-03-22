@@ -18,7 +18,7 @@ import { MessageService } from 'primeng/api';
 export class ArchivesComponent implements OnInit {
   private api = `${environment.apiUrl}/agency/archives`;
 
-  activeTab = signal<'leases' | 'tenants' | 'work-orders'>('leases');
+  activeTab = signal<'leases' | 'tenants' | 'work-orders' | 'properties'>('leases');
 
   // Baux
   leases      = signal<any[]>([]);
@@ -36,6 +36,11 @@ export class ArchivesComponent implements OnInit {
   loadingWorkOrders = signal(true);
   searchWorkOrders  = signal('');
   filterWOStatus    = signal('');
+
+  // Biens
+  properties         = signal<any[]>([]);
+  loadingProperties  = signal(true);
+  searchProperties   = signal('');
 
   filteredLeases = computed(() => {
     let list = this.leases();
@@ -67,6 +72,14 @@ export class ArchivesComponent implements OnInit {
     return list;
   });
 
+  filteredProperties = computed(() => {
+    const q = this.searchProperties().toLowerCase();
+    if (!q) return this.properties();
+    return this.properties().filter(p =>
+      `${p.reference} ${p.name} ${p.owner?.full_name}`.toLowerCase().includes(q)
+    );
+  });
+
   constructor(
     private http: HttpClient,
     private toast: MessageService,
@@ -77,9 +90,10 @@ export class ArchivesComponent implements OnInit {
     this.loadLeases();
     this.loadTenants();
     this.loadWorkOrders();
+    this.loadProperties();
   }
 
-  setTab(tab: 'leases' | 'tenants' | 'work-orders'): void {
+  setTab(tab: 'leases' | 'tenants' | 'work-orders' | 'properties'): void {
     this.activeTab.set(tab);
     this.cdr.detectChanges();
   }
@@ -129,11 +143,32 @@ export class ArchivesComponent implements OnInit {
     });
   }
 
+  loadProperties(): void {
+    this.loadingProperties.set(true);
+    this.http.get<any>(`${this.api}/properties`).subscribe({
+      next: (res: any) => {
+        this.properties.set(Array.isArray(res?.data) ? res.data : []);
+        this.loadingProperties.set(false);
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de charger les biens archivés.' });
+        this.loadingProperties.set(false);
+      }
+    });
+  }
+
   onSearchLeases(e: Event): void  { this.searchLeases.set((e.target as HTMLInputElement).value); }
   onSearchTenants(e: Event): void { this.searchTenants.set((e.target as HTMLInputElement).value); }
   onSearchWO(e: Event): void      { this.searchWorkOrders.set((e.target as HTMLInputElement).value); }
   onFilterLeaseStatus(v: string): void { this.filterLeaseStatus.set(v); }
   onFilterWOStatus(v: string): void    { this.filterWOStatus.set(v); }
+  onSearchProperties(e: Event): void { this.searchProperties.set((e.target as HTMLInputElement).value); }
+
+  propertyTypeLabel(t: string): string {
+    return ({ appartement: 'Appartement', villa_simple: 'Villa', bureau: 'Bureau',
+              f1: 'F1', f2: 'F2', f3: 'F3', f4: 'F4', f5: 'F5' } as any)[t] ?? t;
+  }
 
   formatCurrency(n: number | string): string {
     return new Intl.NumberFormat('fr-SN').format(Number(n)) + ' F';

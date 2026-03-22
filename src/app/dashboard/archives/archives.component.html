@@ -21,7 +21,12 @@
     <i class="pi pi-wrench"></i> Travaux
     <span class="tab-count">{{ workOrders().length }}</span>
   </button>
-</div>
+  <button class="tab-btn" [class.active]="activeTab() === 'properties'"
+    (click)="setTab('properties')">
+    <i class="pi pi-building"></i> Biens
+    <span class="tab-count">{{ properties().length }}</span>
+  </button>
+  </div>
 
 <!-- ── BAUX ── -->
 @if (activeTab() === 'leases') {
@@ -230,6 +235,55 @@
           </tbody>
         </table>
       </div>
+    }
+  </div>
+}
+@if (activeTab() === 'properties') {
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="pi pi-search"></i>
+      <input type="text" placeholder="Rechercher un bien…" (input)="onSearchProperties($event)" />
+    </div>
+  </div>
+
+  <div class="table-card">
+    @if (loadingProperties()) {
+      <div class="skeleton-rows">
+        @for (i of [1,2,3]; track i) { <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" /> }
+      </div>
+    } @else {
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Bien</th>
+            <th>Type</th>
+            <th>Propriétaire</th>
+            <th>Ville</th>
+            <th>Archivé le</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredProperties().length === 0) {
+            <tr><td colspan="6" class="empty-row">
+              <div class="empty-state-inline"><i class="pi pi-building"></i><span>Aucun bien archivé</span></div>
+            </td></tr>
+          }
+          @for (p of filteredProperties(); track p.id) {
+            <tr>
+              <td><span class="badge badge-ref">{{ p.reference }}</span></td>
+              <td>
+                <div class="td-name">{{ p.name }}</div>
+                <div class="td-muted-sm">{{ p.address }}</div>
+              </td>
+              <td class="td-muted">{{ propertyTypeLabel(p.type) }}</td>
+              <td class="td-muted">{{ p.owner?.full_name ?? '—' }}</td>
+              <td class="td-muted">{{ p.city }}</td>
+              <td class="td-muted">{{ formatDate(p.archived_at) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
     }
   </div>
 }

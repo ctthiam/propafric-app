@@ -99,12 +99,16 @@
                     pTooltip="Photos" tooltipPosition="top">
                     <i class="pi pi-images"></i>
                   </button>
-                  <button class="btn-icon btn-edit" (click)="openEdit(prop)" pTooltip="Modifier" tooltipPosition="top">
-                    <i class="pi pi-pencil"></i>
-                  </button>
-                  <button class="btn-icon btn-delete" (click)="confirmDelete(prop)" pTooltip="Supprimer" tooltipPosition="top">
-                    <i class="pi pi-trash"></i>
-                  </button>
+                  @if (prop.status !== 'archived') {
+                    <button class="btn-icon btn-edit" (click)="openEdit(prop)" pTooltip="Modifier" tooltipPosition="top">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button class="btn-icon btn-delete" (click)="confirmDelete(prop)" pTooltip="Archiver" tooltipPosition="top">
+                      <i class="pi pi-archive"></i>
+                    </button>
+                  } @else {
+                    <span class="badge badge-neutral" style="font-size:10px">Archivé</span>
+                  }
                 </div>
               </td>
             </tr>

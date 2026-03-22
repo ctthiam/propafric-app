@@ -37,7 +37,7 @@ export interface Property {
   city: string;
   zone: string | null;
   area: string | null;
-  status: 'available' | 'occupied' | 'maintenance';
+  status: 'available' | 'occupied' | 'maintenance' | 'archived';
   is_furnished: boolean;
   photos: PropertyPhoto[];
   owner?: Owner;
