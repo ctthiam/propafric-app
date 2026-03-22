@@ -471,12 +471,12 @@ export class PropertiesComponent implements OnInit {
 
   confirmDelete(p: Property): void {
     this.confirm.confirm({
-      message: `Supprimer le bien <strong>${p.name}</strong> (${p.reference}) ?`,
-      header: 'Confirmer la suppression',
-      icon: 'pi pi-trash',
-      acceptLabel: 'Supprimer',
+      message: `Archiver le bien <strong>${p.name}</strong> (${p.reference}) ? Le bien sera désactivé mais son historique sera conservé.`,
+      header: 'Confirmer l\'archivage',
+      icon: 'pi pi-inbox',           // ← changer l'icône
+      acceptLabel: 'Archiver',       // ← changer le label
       rejectLabel: 'Annuler',
-      acceptButtonStyleClass: 'p-button-danger',
+      acceptButtonStyleClass: 'p-button-warning',  // ← orange au lieu de rouge
       accept: () => this.delete(p.id),
     });
   }
