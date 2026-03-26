@@ -11,7 +11,6 @@ import { ToastModule }         from 'primeng/toast';
 import { SkeletonModule }      from 'primeng/skeleton';
 import { TooltipModule }       from 'primeng/tooltip';
 import { CheckboxModule }      from 'primeng/checkbox';
-import { CalendarModule }      from 'primeng/calendar';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
 export interface LeaseTenant   { id: number; full_name: string; phone: string; }
@@ -41,7 +40,7 @@ export interface DropdownTenant   { id: number; first_name: string; last_name: s
   imports: [
     CommonModule, ReactiveFormsModule,
     DropdownModule, InputNumberModule, ConfirmDialogModule,
-    ToastModule, SkeletonModule, TooltipModule, CheckboxModule, CalendarModule,
+    ToastModule, SkeletonModule, TooltipModule, CheckboxModule,
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './leases.component.html',
@@ -320,8 +319,8 @@ export class LeasesComponent implements OnInit {
     this.form.patchValue({
       property_id: lease.property?.id,
       tenant_id:   lease.tenant?.id,
-      start_date:  new Date(lease.start_date),
-      end_date:    lease.end_date ? new Date(lease.end_date) : null,
+      start_date:  lease.start_date?.split('T')[0] ?? '',
+      end_date:    lease.end_date?.split('T')[0] ?? '',
     });
     this.drawerOpen = true;
     this.cdr.detectChanges();

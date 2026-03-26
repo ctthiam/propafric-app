@@ -10,7 +10,6 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule }         from 'primeng/toast';
 import { SkeletonModule }      from 'primeng/skeleton';
 import { TooltipModule }       from 'primeng/tooltip';
-import { CalendarModule }      from 'primeng/calendar';
 import { CheckboxModule }      from 'primeng/checkbox';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
@@ -46,7 +45,7 @@ export interface Expense {
   imports: [
     CommonModule, ReactiveFormsModule,
     DropdownModule, InputNumberModule, ConfirmDialogModule,
-    ToastModule, SkeletonModule, TooltipModule, CalendarModule, CheckboxModule,
+    ToastModule, SkeletonModule, TooltipModule, CheckboxModule,
   ],
   providers: [ConfirmationService, MessageService],
   templateUrl: './expenses.component.html',
@@ -56,7 +55,7 @@ export class ExpensesComponent implements OnInit {
   private api = `${environment.apiUrl}/agency`;
   exporting = signal(false);
   today = new Date();
-
+  todayStr = new Date().toISOString().split('T')[0];
   expenses       = signal<Expense[]>([]);
   contractors    = signal<Contractor[]>([]);
   properties     = signal<{ id: number; name: string; reference: string }[]>([]);

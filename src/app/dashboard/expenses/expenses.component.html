@@ -184,7 +184,7 @@
           </div>
           <div class="form-group">
             <label>Date <span class="req">*</span></label>
-            <p-calendar formControlName="expense_date" dateFormat="dd/mm/yy" [showIcon]="true" [maxDate]="today" styleClass="w-full" />
+              <input type="date" class="pa-input" formControlName="expense_date" [max]="todayStr" />
           </div>
         </div>
         <div class="form-row-2">

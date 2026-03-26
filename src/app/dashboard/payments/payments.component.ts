@@ -70,7 +70,7 @@ export class PaymentsComponent implements OnInit {
   private api = `${environment.apiUrl}/agency`;
   exporting = signal(false);
   today = new Date();
-
+  todayStr = new Date().toISOString().split('T')[0];
   schedules    = signal<PaymentSchedule[]>([]);
   payments     = signal<Payment[]>([]);
   leases       = signal<LeaseOption[]>([]);
