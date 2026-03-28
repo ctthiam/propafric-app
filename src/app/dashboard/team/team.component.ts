@@ -105,6 +105,7 @@ export class TeamComponent implements OnInit {
   openEdit(m: TeamMember): void {
     this.editingMember.set(m);
     this.form.patchValue(m);
+    this.form.markAsUntouched();
     this.form.get('password')?.clearValidators();
     this.form.get('password')?.updateValueAndValidity();
     this.drawerOpen = true;

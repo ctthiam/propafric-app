@@ -219,6 +219,7 @@ export class PaymentsComponent implements OnInit {
         amount:      Number(schedule.balance),
       });
     }
+    this.form.markAsUntouched();
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }

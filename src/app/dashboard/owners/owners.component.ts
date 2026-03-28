@@ -132,6 +132,7 @@ export class OwnersComponent implements OnInit {
   openEdit(owner: Owner): void {
     this.editingOwner.set(owner);
     this.form.patchValue(owner);
+    this.form.markAsUntouched();
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }

@@ -228,6 +228,7 @@ export class ExpensesComponent implements OnInit {
       contractor_id: e.contractor?.id ?? null,
       expense_date:  new Date(e.expense_date),
     });
+    this.expenseForm.markAsUntouched();
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }
@@ -301,6 +302,7 @@ export class ExpensesComponent implements OnInit {
   openEditVendor(v: Contractor): void {
     this.editingVendor.set(v);
     this.vendorForm.patchValue(v);
+    this.vendorForm.markAsUntouched();
     this.vendorDrawer = true;
     this.cdr.detectChanges();
   }

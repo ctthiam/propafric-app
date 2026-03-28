@@ -322,6 +322,7 @@ export class LeasesComponent implements OnInit {
       start_date:  lease.start_date?.split('T')[0] ?? '',
       end_date:    lease.end_date?.split('T')[0] ?? '',
     });
+    this.form.markAsUntouched();
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }

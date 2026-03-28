@@ -292,6 +292,7 @@ export class PropertiesComponent implements OnInit {
     this.clearPhotoSelection();
     this.activeTab = 'info';
     this.form.patchValue({ ...p, owner_id: p.owner?.id ?? p.owner_id });
+    this.form.markAsUntouched();
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }

@@ -139,6 +139,7 @@ export class TenantsComponent implements OnInit {
   openEdit(t: Tenant): void {
     this.editingTenant.set(t);
     this.form.patchValue({ ...t, portal_password: '' });
+    this.form.markAsUntouched();
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }
