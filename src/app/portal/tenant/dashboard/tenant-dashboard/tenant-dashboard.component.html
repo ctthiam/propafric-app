@@ -10,7 +10,7 @@
   <!-- Bonjour -->
   <div class="welcome-bar">
     <div>
-      <h1 class="welcome-title">Bonjour, {{ profile()?.first_name ?? 'Locataire' }} 👋</h1>
+      <h1 class="welcome-title">Bonjour, {{ profile()?.full_name ?? 'Locataire' }} 👋</h1>
       <p class="welcome-sub">Voici un aperçu de votre situation locative</p>
     </div>
     @if (overdueCount > 0) {

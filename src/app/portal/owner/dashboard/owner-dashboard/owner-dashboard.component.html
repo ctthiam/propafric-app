@@ -6,7 +6,7 @@
 
 <div class="welcome-bar">
   <div>
-    <h1 class="welcome-title">Bonjour, {{ profile()?.first_name ?? 'Propriétaire' }} 👋</h1>
+    <h1 class="welcome-title">Bonjour, {{ profile()?.full_name ?? 'Propriétaire' }} 👋</h1>
     <p class="welcome-sub">Vue d'ensemble de votre patrimoine immobilier</p>
   </div>
   @if (lateCount > 0) {
