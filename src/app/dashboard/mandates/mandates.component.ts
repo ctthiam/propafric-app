@@ -213,8 +213,18 @@ export class MandatesComponent implements OnInit {
   }
 
   downloadDocument(m: any): void {
-    window.open(`${this.api}/${m.id}/document`, '_blank');
-  }
+  this.http.get(`${this.api}/${m.id}/document`, { responseType: 'blob' }).subscribe({
+    next: (blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mandat-${m.reference}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    },
+    error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de télécharger le PDF.' })
+  });
+}
 
   confirmTerminate(m: any): void {
     this.confirm.confirm({
