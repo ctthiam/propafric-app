@@ -83,6 +83,7 @@ export const routes: Routes = [
       { path: 'travaux',   loadComponent: () => import('./portal/owner/owner-work-orders/owner-work-orders.component').then(m => m.OwnerWorkOrdersComponent) },
       { path: 'impots',    loadComponent: () => import('./portal/owner/owner-taxes/owner-taxes.component').then(m => m.OwnerTaxesComponent) },
       { path: 'messages',  loadComponent: () => import('./portal/owner/messages/owner-messages-page.component').then(m => m.OwnerMessagesPageComponent) },
+      { path: 'mandats', loadComponent: () => import('./portal/owner/mandates/owner-mandates.component').then(m => m.OwnerMandatesComponent) },
     ]
   },
 

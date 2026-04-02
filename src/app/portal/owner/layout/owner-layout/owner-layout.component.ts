@@ -18,6 +18,7 @@ export class OwnerLayoutComponent {
     { label: 'Mes biens',       icon: 'pi pi-building',   route: '/portail-proprietaire/biens' },
     { label: 'Échéances',       icon: 'pi pi-calendar',   route: '/portail-proprietaire/echeances' },
     { label: 'Mes relevés',     icon: 'pi pi-file-pdf',   route: '/portail-proprietaire/releves' },
+    { label: 'Mandats',       icon: 'pi pi-file-edit',  route: '/portail-proprietaire/mandats' },
     { label: 'Travaux',         icon: 'pi pi-wrench',     route: '/portail-proprietaire/travaux' },
     { label: 'Impôts fonciers', icon: 'pi pi-building',   route: '/portail-proprietaire/impots' },
     { label: 'Messages',        icon: 'pi pi-comments',   route: '/portail-proprietaire/messages' },

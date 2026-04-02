@@ -1,0 +1,49 @@
+$green:  #2D6A4F;
+$green-l:#52b788;
+$gold:   #C9A84C;
+$cream:  #faf8f3;
+$ink:    #0d1f17;
+$ink-l:  #4a6357;
+$white:  #ffffff;
+$red:    #e57373;
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+:host { display:block; animation: fadeUp 0.4s ease both; }
+
+.page-header { margin-bottom:24px; }
+.page-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:700; color:$ink; margin:0 0 4px; }
+.page-subtitle { font-size:14px; color:$ink-l; margin:0; }
+
+.empty-state { display:flex; flex-direction:column; align-items:center; gap:12px; padding:60px 20px; color:$ink-l;
+  i { font-size:48px; opacity:.2; }
+  p { font-size:15px; margin:0; }
+}
+
+.mandates-list { display:flex; flex-direction:column; gap:16px; }
+
+.mandate-card { background:$white; border-radius:16px; border:1px solid rgba($ink,.07); overflow:hidden; }
+.mandate-card-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid rgba($ink,.06); }
+.mandate-ref { font-family:'DM Mono',monospace; font-size:14px; font-weight:700; color:$green; background:rgba($green,.08); padding:4px 12px; border-radius:6px; }
+
+.mandate-details { padding:16px 20px; display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.detail-row { display:flex; flex-direction:column; gap:2px; }
+.detail-label { font-size:11px; color:$ink-l; text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
+.detail-value { font-size:13px; color:$ink; font-weight:500; }
+
+.mandate-properties { padding:0 20px 16px; }
+.properties-label { font-size:11px; color:$ink-l; text-transform:uppercase; letter-spacing:.5px; font-weight:600; margin-bottom:8px; }
+.property-item { display:flex; align-items:center; gap:8px; font-size:13px; color:$ink; padding:6px 0; border-bottom:1px solid rgba($ink,.04);
+  &:last-child { border-bottom:none; }
+  i { color:$green; font-size:14px; }
+}
+
+.mandate-card-footer { padding:12px 20px; border-top:1px solid rgba($ink,.06); background:$cream; }
+.btn-download { display:inline-flex; align-items:center; gap:8px; padding:8px 16px; background:$green; color:$white; border:none; border-radius:8px; font-size:13px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s;
+  &:hover { background:darken($green,8%); }
+  i { font-size:14px; }
+}
+
+.badge { display:inline-flex; padding:3px 10px; border-radius:100px; font-size:11px; font-weight:700; }
+.badge-success { background:rgba($green-l,.15); color:darken($green-l,20%); }
+.badge-gold    { background:rgba($gold,.15);    color:darken($gold,15%); }
+.badge-danger  { background:rgba($red,.1);      color:darken($red,15%); }
