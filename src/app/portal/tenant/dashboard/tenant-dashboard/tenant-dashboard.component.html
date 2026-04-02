@@ -13,18 +13,36 @@
       <h1 class="welcome-title">Bonjour, {{ profile()?.full_name ?? 'Locataire' }} 👋</h1>
       <p class="welcome-sub">Voici un aperçu de votre situation locative</p>
     </div>
-    @if (overdueCount > 0) {
-      <div class="alert-banner">
-        <i class="pi pi-exclamation-triangle"></i>
-        {{ overdueCount }} échéance(s) en retard — {{ formatCurrency(overdueAmount) }}
-      </div>
-    }
+    <div class="welcome-actions">
+      @if (overdueCount > 0) {
+        <div class="alert-banner">
+          <i class="pi pi-exclamation-triangle"></i>
+          {{ overdueCount }} échéance(s) en retard — {{ formatCurrency(overdueAmount) }}
+        </div>
+      }
+      @if (nextSchedule) {
+        <button class="btn-pay" (click)="initiatePayment()" [disabled]="paying()">
+          @if (paying()) {
+            <i class="pi pi-spin pi-spinner"></i> Paiement en cours…
+          } @else {
+            <i class="pi pi-credit-card"></i> Payer mon loyer
+          }
+        </button>
+      }
+    </div>
   </div>
+
+  <!-- Message erreur/succès paiement -->
+  @if (paymentMessage()) {
+    <div class="payment-alert" [class.success]="paymentSuccess()" [class.error]="!paymentSuccess()">
+      <i class="pi" [class.pi-check-circle]="paymentSuccess()" [class.pi-times-circle]="!paymentSuccess()"></i>
+      {{ paymentMessage() }}
+    </div>
+  }
 
   <!-- KPI Cards -->
   <div class="kpi-grid">
 
-    <!-- Loyer mensuel -->
     <div class="kpi-card">
       <div class="kpi-icon green"><i class="pi pi-home"></i></div>
       <div class="kpi-body">
@@ -34,7 +52,6 @@
       </div>
     </div>
 
-    <!-- Prochaine échéance -->
     <div class="kpi-card" [class.urgent]="nextSchedule?.status === 'late'">
       <div class="kpi-icon gold"><i class="pi pi-calendar"></i></div>
       <div class="kpi-body">
@@ -49,7 +66,6 @@
       </div>
     </div>
 
-    <!-- Total payé -->
     <div class="kpi-card">
       <div class="kpi-icon blue"><i class="pi pi-check-circle"></i></div>
       <div class="kpi-body">
@@ -59,7 +75,6 @@
       </div>
     </div>
 
-    <!-- Statut bail -->
     <div class="kpi-card">
       <div class="kpi-icon purple"><i class="pi pi-file"></i></div>
       <div class="kpi-body">
@@ -74,7 +89,6 @@
 
   </div>
 
-  <!-- Bien loué -->
   @if (lease()) {
     <div class="property-card">
       <div class="property-card-header">
@@ -106,7 +120,6 @@
     </div>
   }
 
-  <!-- Dernières échéances -->
   <div class="section-header">
     <h2 class="section-title">Mes dernières échéances</h2>
     <a routerLink="/portail-locataire/echeances" class="link-btn">Voir tout →</a>
