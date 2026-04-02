@@ -51,6 +51,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Biens',           icon: 'pi pi-building',    route: '/dashboard/biens',          roles: ['agency_admin', 'agency_secretary'] },
     { label: 'Locataires',      icon: 'pi pi-user',        route: '/dashboard/locataires',     roles: ['agency_admin', 'agency_secretary'] },
     { label: 'Baux',            icon: 'pi pi-file',        route: '/dashboard/baux',           roles: ['agency_admin', 'agency_secretary'] },
+    { label: 'Mandats',         icon: 'pi pi-file-edit',   route: '/dashboard/mandats',        roles: ['agency_admin', 'agency_secretary'] },
     { label: 'Paiements',       icon: 'pi pi-credit-card', route: '/dashboard/paiements',      roles: ['agency_admin', 'agency_accountant'] },
     { label: 'Dépenses',        icon: 'pi pi-wallet',      route: '/dashboard/depenses',       roles: ['agency_admin', 'agency_accountant'] },
     { label: 'Prestataires',    icon: 'pi pi-briefcase',   route: '/dashboard/prestataires',   roles: ['agency_admin', 'agency_secretary'] },

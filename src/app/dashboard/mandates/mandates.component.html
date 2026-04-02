@@ -1,0 +1,252 @@
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Mandats de gérance</h1>
+    <p class="page-subtitle">{{ mandates().length }} mandat(s) enregistré(s)</p>
+  </div>
+  <button class="btn-primary" (click)="openCreate()">
+    <i class="pi pi-plus"></i> Nouveau mandat
+  </button>
+</div>
+
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher un mandat…" (input)="onSearch($event)" />
+  </div>
+  <select class="filter-select" (change)="onFilterStatus($event)">
+    <option value="">Tous les statuts</option>
+    <option value="active">Actif</option>
+    <option value="suspended">Suspendu</option>
+    <option value="terminated">Résilié</option>
+  </select>
+</div>
+
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3]; track i) {
+        <p-skeleton height="60px" borderRadius="8px" styleClass="mb-2" />
+      }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Référence</th>
+            <th>Propriétaire</th>
+            <th>Biens</th>
+            <th>Commission</th>
+            <th>Début</th>
+            <th>Statut</th>
+            <th style="text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredMandates().length === 0) {
+            <tr><td colspan="7" class="empty-row">
+              <div class="empty-state-inline">
+                <i class="pi pi-file"></i>
+                <span>Aucun mandat enregistré</span>
+              </div>
+            </td></tr>
+          }
+          @for (m of filteredMandates(); track m.id) {
+            <tr>
+              <td><span class="ref-badge">{{ m.reference }}</span></td>
+              <td>
+                <div class="td-name">{{ ownerName(m) }}</div>
+                <div class="td-muted">{{ m.owner?.phone ?? m.owner?.email ?? '—' }}</div>
+              </td>
+              <td>
+                @if (m.properties?.length) {
+                  @for (p of m.properties; track p.id) {
+                    <div class="td-muted">{{ p.name }}</div>
+                  }
+                } @else {
+                  <span class="td-muted">—</span>
+                }
+              </td>
+              <td>
+                @if (m.commission_type === 'percent') {
+                  <strong>{{ m.commission_rate }}%</strong>
+                } @else {
+                  <strong>{{ m.commission_fixed | number }} F</strong>
+                }
+              </td>
+              <td class="td-muted">{{ formatDate(m.start_date) }}</td>
+              <td><span class="badge {{ statusClass(m.status) }}">{{ statusLabel(m.status) }}</span></td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-edit" (click)="openEdit(m)" pTooltip="Modifier" tooltipPosition="top">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn-icon btn-pdf" (click)="downloadDocument(m)" pTooltip="Télécharger PDF" tooltipPosition="top">
+                    <i class="pi pi-file-pdf"></i>
+                  </button>
+                  @if (m.status === 'active') {
+                    <button class="btn-icon btn-delete" (click)="confirmTerminate(m)" pTooltip="Résilier" tooltipPosition="top">
+                      <i class="pi pi-ban"></i>
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ─── DRAWER ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingMandate() ? 'Modifier le mandat' : 'Nouveau mandat' }}</div>
+        @if (editingMandate()) {
+          <div class="drawer-sub">{{ editingMandate().reference }}</div>
+        }
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
+
+        <!-- Propriétaire -->
+        <div class="form-section-title">Parties</div>
+        <div class="form-group">
+          <label>Propriétaire <span class="req">*</span></label>
+          <select class="pa-input" formControlName="owner_id">
+            <option value="">— Sélectionner —</option>
+            @for (o of owners(); track o.id) {
+              <option [value]="o.id">{{ o.first_name }} {{ o.last_name }}</option>
+            }
+          </select>
+          @if (form.get('owner_id')?.invalid && form.get('owner_id')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <!-- Biens -->
+        <div class="form-group">
+          <label>Biens concernés <span class="req">*</span></label>
+          <div class="property-checkboxes">
+            @for (p of properties(); track p.id) {
+              <div class="property-checkbox-item" [class.selected]="isPropertySelected(p.id)" (click)="toggleProperty(p.id)">
+                <i class="pi" [class.pi-check-square]="isPropertySelected(p.id)" [class.pi-stop]="!isPropertySelected(p.id)"></i>
+                <span>{{ p.name }}</span>
+              </div>
+            }
+          </div>
+          @if (form.get('property_ids')?.invalid && form.get('property_ids')?.touched) {
+            <span class="form-error">Sélectionnez au moins un bien</span>
+          }
+        </div>
+
+        <!-- Durée -->
+        <div class="form-section-title">Durée</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Date de début <span class="req">*</span></label>
+            <input type="date" class="pa-input" formControlName="start_date" />
+            @if (form.get('start_date')?.invalid && form.get('start_date')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Durée (années) <span class="req">*</span></label>
+            <input type="number" class="pa-input" formControlName="duration_years" min="1" max="10" />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Préavis résiliation (mois)</label>
+            <input type="number" class="pa-input" formControlName="notice_months" min="1" />
+          </div>
+          <div class="form-group" style="justify-content:center; padding-top:20px;">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="auto_renew" />
+              <span>Tacite reconduction</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Commission -->
+        <div class="form-section-title">Commission</div>
+        <div class="form-group">
+          <label>Type de commission <span class="req">*</span></label>
+          <select class="pa-input" formControlName="commission_type">
+            <option value="percent">Pourcentage du loyer</option>
+            <option value="fixed">Montant fixe</option>
+          </select>
+        </div>
+        <div class="form-row-2">
+          @if (form.get('commission_type')?.value === 'percent') {
+            <div class="form-group">
+              <label>Taux (%)</label>
+              <input type="number" class="pa-input" formControlName="commission_rate" min="0" max="100" step="0.5" />
+            </div>
+          } @else {
+            <div class="form-group">
+              <label>Montant fixe (FCFA)</label>
+              <input type="number" class="pa-input" formControlName="commission_fixed" min="0" />
+            </div>
+          }
+          <div class="form-group">
+            <label>Assurance justice (FCFA/mois)</label>
+            <input type="number" class="pa-input" formControlName="justice_insurance" min="0" placeholder="Ex: 2500" />
+          </div>
+        </div>
+
+        <!-- Articles légaux -->
+        <div class="form-section-title">
+          Articles légaux
+          <button type="button" class="btn-add-article" (click)="addArticle()">
+            <i class="pi pi-plus"></i> Ajouter
+          </button>
+        </div>
+        <div class="articles-info">Si vide, les articles standards seront utilisés dans le PDF.</div>
+        @for (article of articles.controls; track $index) {
+          <div class="article-item" [formGroup]="$any(article)">
+            <div class="article-header">
+              <span class="article-num">Article {{ $index + 1 }}</span>
+              <button type="button" class="btn-remove-article" (click)="removeArticle($index)">
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+            <div class="form-group">
+              <input class="pa-input" formControlName="title" placeholder="Titre de l'article" />
+            </div>
+            <div class="form-group">
+              <textarea class="pa-input" formControlName="content" rows="3" placeholder="Contenu de l'article…"></textarea>
+            </div>
+          </div>
+        }
+
+        <!-- Notes -->
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea class="pa-input" formControlName="notes" rows="3" placeholder="Observations…"></textarea>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-check"></i> }
+            {{ editingMandate() ? 'Mettre à jour' : 'Créer le mandat' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

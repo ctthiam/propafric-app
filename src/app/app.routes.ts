@@ -24,6 +24,7 @@ export const routes: Routes = [
     children: [
       { path: '',              loadComponent: () => import('./dashboard/home/home.component').then(m => m.HomeComponent) },
       { path: 'proprietaires', loadComponent: () => import('./dashboard/owners/owners.component').then(m => m.OwnersComponent) },
+      { path: 'mandats', loadComponent: () => import('./dashboard/mandates/mandates.component').then(m => m.MandatesComponent) },
       { path: 'biens',         loadComponent: () => import('./dashboard/properties/properties.component').then(m => m.PropertiesComponent) },
       { path: 'locataires',    loadComponent: () => import('./dashboard/tenants/tenants.component').then(m => m.TenantsComponent) },
       { path: 'baux',          loadComponent: () => import('./dashboard/leases/leases.component').then(m => m.LeasesComponent) },
