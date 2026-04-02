@@ -141,7 +141,7 @@
         <div class="form-group">
           <label>Biens concernés <span class="req">*</span></label>
           <div class="property-checkboxes">
-            @for (p of properties(); track p.id) {
+            @for (p of filteredProperties(); track p.id) {
               <div class="property-checkbox-item" [class.selected]="isPropertySelected(p.id)" (click)="toggleProperty(p.id)">
                 <i class="pi" [class.pi-check-square]="isPropertySelected(p.id)" [class.pi-stop]="!isPropertySelected(p.id)"></i>
                 <span>{{ p.name }}</span>

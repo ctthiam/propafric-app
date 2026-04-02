@@ -38,11 +38,19 @@ export class MandatesComponent implements OnInit {
     let list = this.mandates();
     const q = this.search().toLowerCase();
     const s = this.filterStatus();
-    if (q) list = list.filter(m =>
+    if (q) list = list.filter((m: any) =>
       `${m.reference} ${m.owner?.first_name} ${m.owner?.last_name}`.toLowerCase().includes(q)
     );
-    if (s) list = list.filter(m => m.status === s);
+    if (s) list = list.filter((m: any) => m.status === s);
     return list;
+  });
+
+  filteredProperties = computed(() => {
+    const ownerId = this.form?.get('owner_id')?.value;
+    if (!ownerId) return [];
+    return this.properties().filter((p: any) =>
+      p.owner_id === +ownerId || p.owner?.id === +ownerId
+    );
   });
 
   constructor(
@@ -96,13 +104,26 @@ export class MandatesComponent implements OnInit {
 
   loadProperties(): void {
     this.http.get<any>(`${this.propsApi}?per_page=100`).subscribe({
-      next: (res: any) => this.properties.set(Array.isArray(res?.data) ? res.data : []),
+      next: (res: any) => {
+        const data = res?.data ?? [];
+        this.properties.set(Array.isArray(data) ? data : []);
+        this.cdr.detectChanges();
+      },
     });
   }
 
   openCreate(): void {
     this.editingMandate.set(null);
-    this.form.reset({ duration_years: 2, auto_renew: true, commission_type: 'percent', commission_rate: 10, notice_months: 3 });
+    this.form.reset({
+      owner_id: '',
+      property_ids: [],
+      duration_years: 2,
+      auto_renew: true,
+      commission_type: 'percent',
+      commission_rate: 10,
+      notice_months: 3,
+      notes: '',
+    });
     this.form.markAsUntouched();
     while (this.articles.length) this.articles.removeAt(0);
     this.drawerOpen = true;
@@ -152,9 +173,10 @@ export class MandatesComponent implements OnInit {
   toggleProperty(id: number): void {
     const current: number[] = this.form.get('property_ids')!.value ?? [];
     const updated = current.includes(id)
-      ? current.filter(p => p !== id)
+      ? current.filter((p: number) => p !== id)
       : [...current, id];
     this.form.patchValue({ property_ids: updated });
+    this.cdr.detectChanges();
   }
 
   isPropertySelected(id: number): boolean {
@@ -195,7 +217,10 @@ export class MandatesComponent implements OnInit {
       acceptLabel: 'Résilier', rejectLabel: 'Annuler',
       acceptButtonStyleClass: 'p-button-danger',
       accept: () => this.http.delete<any>(`${this.api}/${m.id}`).subscribe({
-        next: (res: any) => { this.toast.add({ severity: 'success', summary: 'Résilié', detail: res.message }); this.load(); },
+        next: (res: any) => {
+          this.toast.add({ severity: 'success', summary: 'Résilié', detail: res.message });
+          this.load();
+        },
         error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible.' })
       })
     });
