@@ -10,7 +10,8 @@ export interface User {
 }
 
 export interface LoginRequest {
-  email: string;
+  email?: string | null;
+  phone?: string | null;
   password: string;
 }
 
