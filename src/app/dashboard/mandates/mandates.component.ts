@@ -45,13 +45,15 @@ export class MandatesComponent implements OnInit {
     return list;
   });
 
-  filteredProperties = computed(() => {
-    const ownerId = this.form?.get('owner_id')?.value;
+ selectedOwnerId = signal<string>('');
+
+    filteredProperties = computed(() => {
+    const ownerId = this.selectedOwnerId();
     if (!ownerId) return [];
     return this.properties().filter((p: any) =>
-      p.owner_id === +ownerId || p.owner?.id === +ownerId
+        p.owner_id === +ownerId || p.owner?.id === +ownerId
     );
-  });
+    });
 
   constructor(
     private http: HttpClient,
@@ -73,6 +75,11 @@ export class MandatesComponent implements OnInit {
       notice_months:    [3],
       notes:            [''],
       articles:         this.fb.array([]),
+    });
+    this.form.get('owner_id')!.valueChanges.subscribe((val) => {
+    this.selectedOwnerId.set(val ?? '');
+    this.form.patchValue({ property_ids: [] });
+    this.cdr.detectChanges();
     });
   }
 
