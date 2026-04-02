@@ -92,7 +92,7 @@ export class TenantsComponent implements OnInit {
     this.form = this.fb.group({
       first_name:              ['', Validators.required],
       last_name:               ['', Validators.required],
-      email:                   ['', [Validators.required, Validators.email]],
+      email:                   ['', Validators.email],
       phone:                   ['', Validators.required],
       phone_2:                 [''],
       tenant_type:             ['individual'],

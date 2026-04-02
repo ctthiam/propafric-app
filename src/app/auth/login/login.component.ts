@@ -5,7 +5,6 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
-// PrimeNG
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ButtonModule } from 'primeng/button';
@@ -36,17 +35,16 @@ export class LoginComponent {
     private auth: AuthService,
   ) {
     this.form = this.fb.group({
-      email:    ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
+      identifier: ['', Validators.required], // email ou téléphone
+      password:   ['', [Validators.required, Validators.minLength(6)]],
     });
   }
 
-  get email()    { return this.form.get('email')!; }
-  get password() { return this.form.get('password')!; }
+  get identifier() { return this.form.get('identifier')!; }
+  get password()   { return this.form.get('password')!; }
 
-  // Remplir le formulaire avec un compte de démo (dev only)
   fillDemo(email: string, password: string): void {
-    this.form.patchValue({ email, password });
+    this.form.patchValue({ identifier: email, password });
   }
 
   onSubmit(): void {
@@ -58,11 +56,20 @@ export class LoginComponent {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    this.auth.login(this.form.value).subscribe({
+    const value = this.form.value;
+    // Déterminer si c'est un email ou un téléphone
+    const isEmail = value.identifier.includes('@');
+    const payload = {
+      email:    isEmail ? value.identifier : null,
+      phone:    isEmail ? null : value.identifier,
+      password: value.password,
+    };
+
+    this.auth.login(payload).subscribe({
       error: (err: HttpErrorResponse) => {
         this.isLoading.set(false);
         if (err.status === 401 || err.status === 422) {
-          this.errorMessage.set('Email ou mot de passe incorrect.');
+          this.errorMessage.set('Identifiant ou mot de passe incorrect.');
         } else {
           this.errorMessage.set('Erreur serveur. Veuillez réessayer.');
         }

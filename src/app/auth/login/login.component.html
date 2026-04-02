@@ -6,19 +6,16 @@
     <div class="login-visual-blob"></div>
 
     <div class="login-visual-content">
-      <!-- Logo -->
       <a routerLink="/" class="login-logo">
         <div class="login-logo-mark"></div>
         <span class="login-logo-text">Prop<span>Afric</span></span>
       </a>
 
-      <!-- Titre -->
       <div class="login-visual-headline">
         <h2>La gestion locative<br><em>réinventée</em><br>pour l'Afrique.</h2>
         <p>Baux, loyers, quittances, relevés propriétaires — tout centralisé dans une seule plateforme.</p>
       </div>
 
-      <!-- Stats -->
       <div class="login-stats">
         <div class="login-stat">
           <div class="login-stat-value">50+</div>
@@ -36,7 +33,6 @@
         </div>
       </div>
 
-      <!-- Mini dashboard card -->
       <div class="login-card-preview">
         <div class="login-card-preview-header">
           <span class="login-card-preview-title">Collecte — Mars 2026</span>
@@ -71,13 +67,11 @@
   <div class="login-form-panel">
     <div class="login-form-wrapper">
 
-      <!-- Header -->
       <div class="login-form-header">
         <h1>Connexion</h1>
         <p>Accédez à votre espace PropAfric</p>
       </div>
 
-      <!-- Erreur globale -->
       @if (errorMessage()) {
         <div class="login-error">
           <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -87,28 +81,25 @@
         </div>
       }
 
-      <!-- Formulaire -->
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
-        <!-- Email -->
+        <!-- Identifiant -->
         <div class="form-group">
-          <label for="email">Adresse email</label>
-          <div class="input-wrapper" [class.input-error]="email.invalid && email.touched">
+          <label for="identifier">Email ou téléphone</label>
+          <div class="input-wrapper" [class.input-error]="identifier.invalid && identifier.touched">
             <svg class="input-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
             </svg>
             <input
-              id="email"
-              type="email"
-              formControlName="email"
-              placeholder="votre@agence.sn"
-              autocomplete="email"
+              id="identifier"
+              type="text"
+              formControlName="identifier"
+              placeholder="votre@agence.sn ou +221 77 000 00 00"
+              autocomplete="username"
             />
           </div>
-          @if (email.invalid && email.touched) {
-            <span class="form-error">
-              {{ email.errors?.['required'] ? 'L\'email est requis.' : 'Email invalide.' }}
-            </span>
+          @if (identifier.invalid && identifier.touched) {
+            <span class="form-error">L'email ou le téléphone est requis.</span>
           }
         </div>
 
@@ -135,7 +126,6 @@
           }
         </div>
 
-        <!-- Submit -->
         <button type="submit" class="btn-submit" [class.loading]="isLoading()" [disabled]="isLoading()">
           @if (isLoading()) {
             <span class="spinner"></span>
@@ -150,30 +140,10 @@
 
       </form>
 
-      <!-- Footer -->
       <div class="login-form-footer">
         <p>Vous n'avez pas encore de compte ?</p>
         <a href="mailto:contact@propafric.com" class="contact-link">Contacter PropAfric →</a>
       </div>
-
-      <!-- Comptes de démo (dev only) -->
-      <!-- <div class="login-demo-accounts">
-        <div class="demo-title">Comptes de test</div>
-        <div class="demo-accounts">
-          <div class="demo-account" (click)="fillDemo('admin@citronvert-immo.sn', 'CitronVert2025!')">
-            <span class="demo-role agency">Agence Admin</span>
-            <span class="demo-email">admin&#64;citronvert-immo.sn</span>
-          </div>
-          <div class="demo-account" (click)="fillDemo('ibrahima.mbodj@gmail.com', 'PropOwner2025')">
-            <span class="demo-role owner">Propriétaire</span>
-            <span class="demo-email">ibrahima.mbodj&#64;gmail.com</span>
-          </div>
-          <div class="demo-account" (click)="fillDemo('alassane.diop@gmail.com', 'Locataire2025')">
-            <span class="demo-role tenant">Locataire</span>
-            <span class="demo-email">alassane.diop&#64;gmail.com</span>
-          </div>
-        </div>
-      </div> -->
 
     </div>
   </div>
