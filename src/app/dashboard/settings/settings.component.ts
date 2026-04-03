@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MessageService } from 'primeng/api';
 import { ToastModule }    from 'primeng/toast';
@@ -24,7 +24,6 @@ export class SettingsComponent implements OnInit {
   uploadingLogo = signal(false);
   logoPreview   = signal<string | null>(null);
 
-  // Prévisualisation couleurs en temps réel
   colorPrimary   = signal<string>('#1a1a1a');
   colorSecondary = signal<string>('#555555');
 
@@ -48,7 +47,22 @@ export class SettingsComponent implements OnInit {
       rc_number:           [''],
       pdf_color_primary:   ['#1a1a1a'],
       pdf_color_secondary: ['#555555'],
+      lease_articles:      this.fb.array([]),
     });
+  }
+
+  get leaseArticles(): FormArray {
+    return this.form.get('lease_articles') as FormArray;
+  }
+
+  addArticle(title = '', content = ''): void {
+    this.leaseArticles.push(this.fb.group({ title: [title], content: [content] }));
+    this.cdr.detectChanges();
+  }
+
+  removeArticle(i: number): void {
+    this.leaseArticles.removeAt(i);
+    this.cdr.detectChanges();
   }
 
   ngOnInit(): void { this.load(); }
@@ -79,6 +93,12 @@ export class SettingsComponent implements OnInit {
           pdf_color_primary:   primary,
           pdf_color_secondary: secondary,
         });
+
+        // Charger les articles de bail
+        while (this.leaseArticles.length) this.leaseArticles.removeAt(0);
+        const articles = a?.lease_articles ?? [];
+        articles.forEach((art: any) => this.addArticle(art.title ?? '', art.content ?? ''));
+
         this.loading.set(false);
         this.cdr.detectChanges();
       },
