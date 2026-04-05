@@ -27,7 +27,6 @@ export interface Tenant {
   has_insurance: boolean;
   has_portal: boolean;
   active_lease: any | null;
-  // champs formulaire
   address?: string | null;
   city?: string | null;
   id_type?: string | null;
@@ -35,6 +34,7 @@ export interface Tenant {
   employer?: string | null;
   emergency_contact_name?: string | null;
   emergency_contact_phone?: string | null;
+  insurance_company?: string | null;
   notes?: string | null;
 }
 
@@ -56,10 +56,10 @@ export class TenantsComponent implements OnInit {
   loading       = signal(true);
   saving        = signal(false);
   editingTenant = signal<Tenant | null>(null);
+  viewingTenant = signal<Tenant | null>(null);
   search        = signal('');
   drawerOpen    = false;
   detailOpen    = false;
-  viewingTenant = signal<any>(null);
 
   filteredTenants = computed(() => {
     const q = this.search().toLowerCase();
@@ -80,7 +80,7 @@ export class TenantsComponent implements OnInit {
   ];
 
   tenantTypes = [
-    { label: 'Particulier',  value: 'individual' },
+    { label: 'Particulier',   value: 'individual' },
     { label: 'Professionnel', value: 'professional' },
   ];
 
@@ -153,6 +153,18 @@ export class TenantsComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  openDetail(t: Tenant): void {
+    this.viewingTenant.set(t);
+    this.detailOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeDetail(): void {
+    this.detailOpen = false;
+    this.viewingTenant.set(null);
+    this.cdr.detectChanges();
+  }
+
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
@@ -181,24 +193,24 @@ export class TenantsComponent implements OnInit {
   }
 
   createPortal(t: any): void {
-  const password = prompt('Mot de passe pour le portail de ' + t.full_name + ' :');
-  if (!password || password.length < 8) {
-    this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Mot de passe minimum 8 caractères.' });
-    return;
-  }
-  this.http.post<any>(`${this.api}/tenants/${t.id}/portal`, { 
-    password,
-    email: t.email 
-  }).subscribe({
-    next: (res: any) => {
-      this.toast.add({ severity: 'success', summary: 'Portail créé', detail: res.message });
-      this.load();
-    },
-    error: (err: any) => {
-      this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+    const password = prompt('Mot de passe pour le portail de ' + t.full_name + ' :');
+    if (!password || password.length < 8) {
+      this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Mot de passe minimum 8 caractères.' });
+      return;
     }
-  });
-}
+    this.http.post<any>(`${this.api}/tenants/${t.id}/portal`, {
+      password,
+      email: t.email
+    }).subscribe({
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Portail créé', detail: res.message });
+        this.load();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+      }
+    });
+  }
 
   confirmDelete(t: Tenant): void {
     this.confirm.confirm({
@@ -220,18 +232,6 @@ export class TenantsComponent implements OnInit {
       },
       error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression impossible.' })
     });
-  }
-
-  openDetail(t: any): void {
-    this.viewingTenant.set(t);
-    this.detailOpen = true;
-    this.cdr.detectChanges();
-  }
-
-  closeDetail(): void {
-    this.detailOpen = false;
-    this.viewingTenant.set(null);
-    this.cdr.detectChanges();
   }
 
   onSearch(e: Event): void { this.search.set((e.target as HTMLInputElement).value); }
