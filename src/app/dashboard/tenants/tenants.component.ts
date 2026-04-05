@@ -154,18 +154,6 @@ export class TenantsComponent implements OnInit {
   viewingTenant = signal<any>(null);
   detailOpen    = false;
 
-  openDetail(t: any): void {
-    this.viewingTenant.set(t);
-    this.detailOpen = true;
-    this.cdr.detectChanges();
-  }
-
-  closeDetail(): void {
-    this.detailOpen = false;
-    this.viewingTenant.set(null);
-    this.cdr.detectChanges();
-  }
-
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
@@ -233,6 +221,18 @@ export class TenantsComponent implements OnInit {
       },
       error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression impossible.' })
     });
+  }
+
+  openDetail(t: any): void {
+    this.viewingTenant.set(t);
+    this.detailOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeDetail(): void {
+    this.detailOpen = false;
+    this.viewingTenant.set(null);
+    this.cdr.detectChanges();
   }
 
   onSearch(e: Event): void { this.search.set((e.target as HTMLInputElement).value); }
