@@ -37,7 +37,6 @@
             <th>Propriétaire</th>
             <th>Contact</th>
             <th>Biens</th>
-            <th>Frais gestion</th>
             <th style="width:120px; text-align:center">Actions</th>
           </tr>
         </thead>
@@ -72,11 +71,6 @@
                 </div>
               </td>
               <td class="td-muted">{{ owner.properties_count ?? 0 }} bien(s)</td>
-              <td class="td-muted">
-                @if (owner.management_fee_value) {
-                  {{ owner.management_fee_type === 'percent' ? owner.management_fee_value + '%' : owner.management_fee_value + ' F' }}
-                } @else { — }
-              </td>
               <td>
                 <div class="actions-cell">
                   <button class="btn-icon btn-view" (click)="openDetail(owner)" pTooltip="Voir détails" tooltipPosition="top">
@@ -269,7 +263,7 @@
 
         <div class="drawer-actions">
           <button type="button" class="btn-secondary" (click)="closeDetail()">Fermer</button>
-          <button type="button" class="btn-primary" (click)="closeDetail(); openEdit(viewingOwner()!)">
+          <button type="button" class="btn-primary" (click)="openEdit(viewingOwner()!); closeDetail()">
             <i class="pi pi-pencil"></i> Modifier
           </button>
         </div>
