@@ -90,6 +90,9 @@
               <td><span class="badge {{ statusClass(lease.status) }}">{{ statusLabel(lease.status) }}</span></td>
               <td>
                 <div class="actions-cell">
+                  <button class="btn-icon btn-view" (click)="openDetail(lease)" pTooltip="Voir détails" tooltipPosition="top">
+                    <i class="pi pi-eye"></i>
+                  </button>
                   <button class="btn-icon btn-pdf" (click)="downloadContract(lease)" pTooltip="Contrat PDF" tooltipPosition="top">
                     <i class="pi pi-file-pdf"></i>
                   </button>
@@ -384,6 +387,54 @@
           </button>
         </div>
       </form>
+    </div>
+  </div>
+}
+
+@if (detailOpen && viewingLease()) {
+  <div class="drawer-overlay" (click)="closeDetail()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">Détails du bail</div>
+        <div class="drawer-sub">{{ viewingLease()!.reference }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeDetail()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="detail-view">
+
+        <div class="detail-section-title">Parties</div>
+        <div class="detail-row"><span class="detail-label">Locataire</span><span class="detail-value">{{ viewingLease()!.tenant?.full_name }}</span></div>
+        <div class="detail-row"><span class="detail-label">Bien</span><span class="detail-value">{{ viewingLease()!.property?.name }}</span></div>
+        <div class="detail-row"><span class="detail-label">Adresse</span><span class="detail-value">{{ viewingLease()!.property?.address || '—' }}</span></div>
+
+        <div class="detail-section-title">Durée</div>
+        <div class="detail-row"><span class="detail-label">Type</span><span class="detail-value">{{ viewingLease()!.contract_type }}</span></div>
+        <div class="detail-row"><span class="detail-label">Début</span><span class="detail-value">{{ formatDate(viewingLease()!.start_date) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Fin</span><span class="detail-value">{{ viewingLease()!.end_date ? formatDate(viewingLease()!.end_date) : 'CDI' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Prochaine révision</span><span class="detail-value">{{ viewingLease()!.next_revision_date ? formatDate(viewingLease()!.next_revision_date) : '—' }}</span></div>
+
+        <div class="detail-section-title">Financier</div>
+        <div class="detail-row"><span class="detail-label">Loyer de base</span><span class="detail-value">{{ formatCurrency(viewingLease()!.base_rent) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Charges</span><span class="detail-value">{{ formatCurrency(viewingLease()!.charges) }}</span></div>
+        <div class="detail-row"><span class="detail-label">TOM</span><span class="detail-value">{{ formatCurrency(viewingLease()!.tom_amount) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Frais gestion TTC</span><span class="detail-value">{{ formatCurrency(viewingLease()!.management_fee_ttc) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Total TTC</span><span class="detail-value" style="color:#2D6A4F; font-weight:700">{{ formatCurrency(viewingLease()!.total_rent) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Dépôt de garantie</span><span class="detail-value">{{ formatCurrency(viewingLease()!.deposit_amount) }}</span></div>
+
+        <div class="detail-section-title">Paiement</div>
+        <div class="detail-row"><span class="detail-label">Fréquence</span><span class="detail-value">{{ viewingLease()!.payment_frequency }}</span></div>
+        <div class="detail-row"><span class="detail-label">Jour de paiement</span><span class="detail-value">Le {{ viewingLease()!.payment_day }} du mois</span></div>
+        <div class="detail-row"><span class="detail-label">Statut</span><span class="detail-value"><span class="badge {{ viewingLease()!.status === 'active' ? 'badge-success' : 'badge-neutral' }}">{{ viewingLease()!.status }}</span></span></div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDetail()">Fermer</button>
+          <button type="button" class="btn-primary" (click)="openEdit(viewingLease()!); closeDetail()">
+            <i class="pi pi-pencil"></i> Modifier
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 }

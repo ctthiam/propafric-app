@@ -60,6 +60,21 @@ export class LeasesComponent implements OnInit {
   filterStatus = signal('');
   drawerOpen   = false;
 
+  detailOpen   = false;
+  viewingLease = signal<any>(null);
+
+  openDetail(lease: any): void {
+    this.viewingLease.set(lease);
+    this.detailOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeDetail(): void {
+    this.detailOpen = false;
+    this.viewingLease.set(null);
+    this.cdr.detectChanges();
+  }
+
   filteredLeases = computed(() => {
     let list = this.leases();
     const q = this.search().toLowerCase();
