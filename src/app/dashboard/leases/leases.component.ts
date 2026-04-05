@@ -21,11 +21,28 @@ export interface Lease {
   reference: string;
   status: 'active' | 'expired' | 'terminated' | 'pending';
   contract_type: string;
+  calculation_mode: string | null;
   total_rent: string;
+  base_rent: number | null;
+  charges: number | null;
+  tom_rate: number | null;
+  tom_amount: number | null;
+  management_fee_type: string | null;
+  management_fee_value: number | null;
+  management_fee_vat_rate: number | null;
+  management_fee_ht: number | null;
+  management_fee_ttc: number | null;
+  impot_rate: number | null;
+  deposit_amount: number | null;
+  advance_months: number | null;
   payment_frequency: string;
+  payment_day: number | null;
   start_date: string;
   end_date: string | null;
   next_revision_date: string | null;
+  notes: string | null;
+  rent_items: any[] | null;
+  charge_items: any[] | null;
   tenant?: LeaseTenant;
   property?: LeaseProperty;
   created_at: string;
@@ -332,11 +349,38 @@ export class LeasesComponent implements OnInit {
   openEdit(lease: Lease): void {
     this.editingLease.set(lease);
     this.form.patchValue({
-      property_id: lease.property?.id,
-      tenant_id:   lease.tenant?.id,
-      start_date:  lease.start_date?.split('T')[0] ?? '',
-      end_date:    lease.end_date?.split('T')[0] ?? '',
+      property_id:          lease.property?.id,
+      tenant_id:            lease.tenant?.id,
+      contract_type:        lease.contract_type,
+      calculation_mode:     lease.calculation_mode,
+      start_date:           lease.start_date?.split('T')[0] ?? '',
+      end_date:             lease.end_date?.split('T')[0] ?? '',
+      payment_frequency:    lease.payment_frequency,
+      payment_day:          lease.payment_day,
+      tom_rate:             lease.tom_rate,
+      management_fee_type:  lease.management_fee_type,
+      management_fee_value: lease.management_fee_value,
+      management_fee_vat_rate: lease.management_fee_vat_rate,
+      impot_rate:           lease.impot_rate,
+      deposit_amount:       lease.deposit_amount,
+      advance_months:       lease.advance_months,
+      notes:                lease.notes ?? '',
     });
+
+    // Remplir les postes loyer
+    while (this.baseRentItems.length) this.baseRentItems.removeAt(0);
+    const rentItems = lease.rent_items ?? [];
+    if (rentItems.length > 0) {
+      rentItems.forEach((item: any) => this.baseRentItems.push(this.createRentItem(item.label, item.amount)));
+    } else {
+      this.baseRentItems.push(this.createRentItem('Loyer', lease.base_rent ?? 0));
+    }
+
+    // Remplir les charges
+    while (this.chargeItems.length) this.chargeItems.removeAt(0);
+    const chargeItems = lease.charge_items ?? [];
+    chargeItems.forEach((item: any) => this.chargeItems.push(this.createChargeItem(item.label, item.amount)));
+
     this.form.markAsUntouched();
     this.drawerOpen = true;
     this.cdr.detectChanges();
