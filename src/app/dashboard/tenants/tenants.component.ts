@@ -58,6 +58,8 @@ export class TenantsComponent implements OnInit {
   editingTenant = signal<Tenant | null>(null);
   search        = signal('');
   drawerOpen    = false;
+  detailOpen    = false;
+  viewingTenant = signal<any>(null);
 
   filteredTenants = computed(() => {
     const q = this.search().toLowerCase();
@@ -150,9 +152,6 @@ export class TenantsComponent implements OnInit {
     this.form.reset();
     this.cdr.detectChanges();
   }
-
-  viewingTenant = signal<any>(null);
-  detailOpen    = false;
 
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
