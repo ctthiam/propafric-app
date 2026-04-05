@@ -144,6 +144,21 @@ export class OwnersComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+  viewingOwner = signal<Owner | null>(null);
+detailOpen   = false;
+
+openDetail(owner: Owner): void {
+  this.viewingOwner.set(owner);
+  this.detailOpen = true;
+  this.cdr.detectChanges();
+}
+
+closeDetail(): void {
+  this.detailOpen = false;
+  this.viewingOwner.set(null);
+  this.cdr.detectChanges();
+}
+
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
