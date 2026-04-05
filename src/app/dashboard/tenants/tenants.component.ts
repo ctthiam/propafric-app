@@ -152,19 +152,19 @@ export class TenantsComponent implements OnInit {
   }
 
   viewingTenant = signal<any>(null);
-detailOpen    = false;
+  detailOpen    = false;
 
-openDetail(t: any): void {
-  this.viewingTenant.set(t);
-  this.detailOpen = true;
-  this.cdr.detectChanges();
-}
+  openDetail(t: any): void {
+    this.viewingTenant.set(t);
+    this.detailOpen = true;
+    this.cdr.detectChanges();
+  }
 
-closeDetail(): void {
-  this.detailOpen = false;
-  this.viewingTenant.set(null);
-  this.cdr.detectChanges();
-}
+  closeDetail(): void {
+    this.detailOpen = false;
+    this.viewingTenant.set(null);
+    this.cdr.detectChanges();
+  }
 
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
