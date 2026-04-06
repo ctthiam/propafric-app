@@ -34,6 +34,21 @@ export class MandatesComponent implements OnInit {
   form: FormGroup;
   todayStr = new Date().toISOString().split('T')[0];
 
+  detailOpen      = false;
+  viewingMandate  = signal<any>(null);
+
+  openDetail(m: any): void {
+    this.viewingMandate.set(m);
+    this.detailOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeDetail(): void {
+    this.detailOpen = false;
+    this.viewingMandate.set(null);
+    this.cdr.detectChanges();
+  }
+
   filteredMandates = computed(() => {
     let list = this.mandates();
     const q = this.search().toLowerCase();
