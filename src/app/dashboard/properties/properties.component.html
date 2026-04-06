@@ -95,6 +95,9 @@
               </td>
               <td>
                 <div class="actions-cell">
+                  <button class="btn-icon btn-view" (click)="openDetail(prop)" pTooltip="Voir détails" tooltipPosition="top">
+                    <i class="pi pi-eye"></i>
+                  </button>
                   <button class="btn-icon btn-photo" (click)="openEdit(prop); switchTab('photos')"
                     pTooltip="Photos" tooltipPosition="top">
                     <i class="pi pi-images"></i>
@@ -341,6 +344,50 @@
         </div>
       }
 
+    </div>
+  </div>
+}
+@if (detailOpen && viewingProp()) {
+  <div class="drawer-overlay" (click)="closeDetail()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">Détails du bien</div>
+        <div class="drawer-sub">{{ viewingProp()!.reference }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeDetail()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="detail-view">
+
+        <div class="detail-section-title">Informations générales</div>
+        <div class="detail-row"><span class="detail-label">Nom</span><span class="detail-value">{{ viewingProp()!.name }}</span></div>
+        <div class="detail-row"><span class="detail-label">Type</span><span class="detail-value">{{ viewingProp()!.type }}</span></div>
+        <div class="detail-row"><span class="detail-label">Statut</span><span class="detail-value">{{ viewingProp()!.status }}</span></div>
+        <div class="detail-row"><span class="detail-label">Meublé</span><span class="detail-value">{{ viewingProp()!.is_furnished ? 'Oui' : 'Non' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Surface</span><span class="detail-value">{{ viewingProp()!.area ? viewingProp()!.area + ' m²' : '—' }}</span></div>
+
+        <div class="detail-section-title">Localisation</div>
+        <div class="detail-row"><span class="detail-label">Adresse</span><span class="detail-value">{{ viewingProp()!.address || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Ville</span><span class="detail-value">{{ viewingProp()!.city || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Zone</span><span class="detail-value">{{ viewingProp()!.zone || '—' }}</span></div>
+
+        <div class="detail-section-title">Propriétaire</div>
+        <div class="detail-row"><span class="detail-label">Nom</span><span class="detail-value">{{ viewingProp()!.owner?.full_name || '—' }}</span></div>
+
+        <div class="detail-section-title">Caractéristiques</div>
+        <div class="detail-row"><span class="detail-label">Pièces</span><span class="detail-value">{{ viewingProp()!.rooms?.join(', ') || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Équipements</span><span class="detail-value">{{ viewingProp()!.equipment?.join(', ') || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Commodités</span><span class="detail-value">{{ viewingProp()!.amenities?.join(', ') || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Unités</span><span class="detail-value">{{ viewingProp()!.units_count }} unité(s)</span></div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDetail()">Fermer</button>
+          <button type="button" class="btn-primary" (click)="openEdit(viewingProp()!); closeDetail()">
+            <i class="pi pi-pencil"></i> Modifier
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 }

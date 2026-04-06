@@ -279,3 +279,10 @@ textarea.pa-input { resize: vertical; }
   i { font-size: 32px; opacity: 0.3; }
   span { font-size: 14px; }
 }
+
+.btn-view { background:rgba(#7048e8,.08); color:#7048e8; &:hover { background:rgba(#7048e8,.15); } }
+.detail-view { padding-bottom:80px; }
+.detail-section-title { font-size:11px; font-weight:700; color:#4a6357; text-transform:uppercase; letter-spacing:1px; margin:20px 0 10px; padding-bottom:6px; border-bottom:1px solid rgba(#0d1f17,.07); &:first-child { margin-top:4px; } }
+.detail-row { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0; border-bottom:1px solid rgba(#0d1f17,.04); &:last-child { border-bottom:none; } }
+.detail-label { font-size:13px; color:#4a6357; min-width:140px; }
+.detail-value { font-size:13px; color:#0d1f17; font-weight:500; text-align:right; }

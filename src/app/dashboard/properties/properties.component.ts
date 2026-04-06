@@ -73,6 +73,21 @@ export class PropertiesComponent implements OnInit {
   filterStatus = signal('');
   drawerOpen   = false;
 
+  detailOpen    = false;
+  viewingProp   = signal<Property | null>(null);
+
+  openDetail(p: Property): void {
+    this.viewingProp.set(p);
+    this.detailOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeDetail(): void {
+    this.detailOpen = false;
+    this.viewingProp.set(null);
+    this.cdr.detectChanges();
+  }
+
   // ── Onglets drawer ──────────────────────────────────────────
   activeTab: 'info' | 'photos' = 'info';
 
