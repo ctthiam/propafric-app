@@ -282,6 +282,6 @@ export class MandatesComponent implements OnInit {
     return new Date(d).toLocaleDateString('fr-SN', { day: '2-digit', month: 'short', year: 'numeric' });
   }
   ownerName(m: any): string {
-    return m.owner ? `${m.owner.first_name} ${m.owner.last_name}` : '—';
+    return m.owner?.full_name ?? '—';
   }
 }
