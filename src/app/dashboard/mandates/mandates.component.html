@@ -272,8 +272,8 @@
         <div class="detail-row"><span class="detail-label">Statut</span><span class="detail-value">{{ viewingMandate()!.status }}</span></div>
 
         <div class="detail-section-title">Durée</div>
-        <div class="detail-row"><span class="detail-label">Début</span><span class="detail-value">{{ viewingMandate()!.start_date || '—' }}</span></div>
-        <div class="detail-row"><span class="detail-label">Fin</span><span class="detail-value">{{ viewingMandate()!.end_date || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Début</span><span class="detail-value">{{ viewingMandate()!.start_date?.split('T')[0] || '—' }}</span></div>
+        <div class="detail-row"><span class="detail-label">Fin</span><span class="detail-value">{{ getEndDate(viewingMandate()!) }}</span></div>
         <div class="detail-row"><span class="detail-label">Durée</span><span class="detail-value">{{ viewingMandate()!.duration_years }} an(s)</span></div>
         <div class="detail-row"><span class="detail-label">Tacite reconduction</span><span class="detail-value">{{ viewingMandate()!.auto_renew ? 'Oui' : 'Non' }}</span></div>
         <div class="detail-row"><span class="detail-label">Préavis</span><span class="detail-value">{{ viewingMandate()!.notice_months }} mois</span></div>

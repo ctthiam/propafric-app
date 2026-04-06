@@ -49,6 +49,16 @@ export class MandatesComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
+    getEndDate(m: any): string {
+    if (m.end_date) return m.end_date.split('T')[0];
+    if (m.start_date && m.duration_years) {
+      const d = new Date(m.start_date);
+      d.setFullYear(d.getFullYear() + m.duration_years);
+      return d.toLocaleDateString('fr-SN', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+    return '—';
+  }
+
   filteredMandates = computed(() => {
     let list = this.mandates();
     const q = this.search().toLowerCase();
