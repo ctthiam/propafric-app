@@ -146,4 +146,19 @@ export class SubscriptionComponent implements OnInit {
     if (!d) return '—';
     return new Date(d).toLocaleDateString('fr-SN', { day: '2-digit', month: 'long', year: 'numeric' });
   }
+
+  downloadInvoice(h: any): void {
+    this.http.get(`${this.api}/subscription/invoice/${h.id}`, { responseType: 'blob' }).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a   = document.createElement('a');
+        a.href     = url;
+        a.download = `${h.invoice_number}.pdf`;
+        a.click();
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Facture introuvable.' })
+    });
+  }
+
 }

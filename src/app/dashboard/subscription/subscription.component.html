@@ -105,6 +105,7 @@
               <th>Début</th>
               <th>Fin</th>
               <th>Statut</th>
+              <th>Facture</th>
             </tr>
           </thead>
           <tbody>
@@ -119,6 +120,15 @@
                         [class.badge-neutral]="h.status !== 'active'">
                     {{ h.status === 'active' ? 'Actif' : h.status === 'pending' ? 'En attente' : 'Expiré' }}
                   </span>
+                </td>
+                <td>
+                  @if (h.status === 'active' && h.invoice_number) {
+                    <button class="btn-icon btn-pdf" (click)="downloadInvoice(h)" pTooltip="Télécharger facture" tooltipPosition="top">
+                      <i class="pi pi-file-pdf"></i>
+                    </button>
+                  } @else {
+                    <span class="td-muted">—</span>
+                  }
                 </td>
               </tr>
             }
