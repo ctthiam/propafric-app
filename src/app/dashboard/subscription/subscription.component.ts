@@ -148,7 +148,7 @@ export class SubscriptionComponent implements OnInit {
   }
 
   downloadInvoice(h: any): void {
-    this.http.get(`${this.api}/subscription/invoice/${h.id}`, { responseType: 'blob' }).subscribe({
+    this.http.get(`${this.api}/invoice/${h.id}`, { responseType: 'blob' }).subscribe({
       next: (blob) => {
         const url = window.URL.createObjectURL(blob);
         const a   = document.createElement('a');
