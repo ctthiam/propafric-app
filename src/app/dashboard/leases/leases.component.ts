@@ -80,6 +80,9 @@ export class LeasesComponent implements OnInit {
   detailOpen   = false;
   viewingLease = signal<any>(null);
 
+  propertyUnits = signal<any[]>([]);
+  loadingUnits  = signal(false);
+
   openDetail(lease: any): void {
     this.viewingLease.set(lease);
     this.detailOpen = true;
@@ -201,6 +204,7 @@ export class LeasesComponent implements OnInit {
     this.form = this.fb.group({
       property_id:         [null, Validators.required],
       tenant_id:           [null, Validators.required],
+      property_unit_id:    [null],
       contract_type:       ['habitation', Validators.required],
       calculation_mode:    ['from_base', Validators.required],
       // Loyer de base — postes dynamiques
@@ -325,6 +329,26 @@ export class LeasesComponent implements OnInit {
   get propertyOptions() { return this.properties().map(p => ({ label: `${p.reference} — ${p.name}`, value: p.id })); }
   get tenantOptions()   { return this.tenants().map(t => ({ label: t.full_name, value: t.id })); }
 
+  onPropertyChange(propertyId: number): void {
+    this.form.patchValue({ property_unit_id: null });
+    this.propertyUnits.set([]);
+    if (!propertyId) return;
+    this.loadingUnits.set(true);
+    this.http.get<any>(`${this.api}/properties/${propertyId}/units`).subscribe({
+      next: (res: any) => {
+        const units = Array.isArray(res?.data) ? res.data.filter((u: any) => u.status === 'available') : [];
+        this.propertyUnits.set(units);
+        this.loadingUnits.set(false);
+        this.cdr.detectChanges();
+      },
+      error: () => this.loadingUnits.set(false),
+    });
+  }
+
+  unitTypeLabel(t: string): string {
+    return ({ studio: 'Studio', f1: 'F1', f2: 'F2', f3: 'F3', f4: 'F4', f5: 'F5', bureau: 'Bureau', boutique: 'Boutique' } as any)[t] ?? t;
+  }
+
   openCreate(): void {
     this.editingLease.set(null);
     this.form.reset({
@@ -366,6 +390,10 @@ export class LeasesComponent implements OnInit {
       advance_months:       lease.advance_months,
       notes:                lease.notes ?? '',
     });
+
+    if (lease.property?.id) {
+      this.onPropertyChange(lease.property.id);
+    }
 
     // Remplir les postes loyer
     while (this.baseRentItems.length) this.baseRentItems.removeAt(0);

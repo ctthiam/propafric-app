@@ -139,8 +139,24 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Bien <span class="req">*</span></label>
-            <p-dropdown formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" [filter]="true" styleClass="w-full" />
+            <p-dropdown formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" [filter]="true" styleClass="w-full" (onChange)="onPropertyChange($event.value)" />
             @if (form.get('property_id')?.invalid && form.get('property_id')?.touched) { <span class="form-error">Requis</span> }
+            @if (propertyUnits().length > 0) {
+              <div class="form-group">
+                <label>Unité</label>
+                <select class="pa-input" formControlName="property_unit_id">
+                  <option [ngValue]="null">— Bien entier (pas d'unité) —</option>
+                  @for (u of propertyUnits(); track u.id) {
+                    <option [ngValue]="u.id">
+                      {{ u.unit_number }} — {{ unitTypeLabel(u.type) }}
+                      @if (u.floor !== null) { (Étage {{ u.floor }}) }
+                      @if (u.area) { — {{ u.area }}m² }
+                    </option>
+                  }
+                </select>
+                <span class="form-hint">{{ propertyUnits().length }} unité(s) disponible(s)</span>
+              </div>
+            }
           </div>
           <div class="form-group">
             <label>Locataire <span class="req">*</span></label>
