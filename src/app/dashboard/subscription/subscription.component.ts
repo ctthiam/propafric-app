@@ -87,6 +87,7 @@ export class SubscriptionComponent implements OnInit {
     this.http.get<any>(`${this.api}`).subscribe({
       next: (res: any) => {
         this.data.set(res?.data ?? null);
+        console.log('history', res?.data?.history);
         this.loading.set(false);
         this.cdr.detectChanges();
       },
