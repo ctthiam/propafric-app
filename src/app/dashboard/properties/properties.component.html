@@ -141,6 +141,10 @@
       <button class="drawer-tab" [class.active]="activeTab === 'info'" (click)="switchTab('info')">
         <i class="pi pi-info-circle"></i> Informations
       </button>
+      <button class="drawer-tab" [class.active]="activeTab === 'units'"
+        (click)="switchTab('units')">
+        <i class="pi pi-building"></i> Unités
+      </button>
       <button class="drawer-tab" [class.active]="activeTab === 'photos'" (click)="switchTab('photos')"
         [class.disabled]="!editingProp()">
         <i class="pi pi-images"></i> Photos
@@ -344,6 +348,64 @@
         </div>
       }
 
+      @if (activeTab === 'units') {
+      <div class="units-section">
+        <div class="units-header">
+          <span class="units-count">{{ units().length }} unité(s)</span>
+          <button type="button" class="btn-primary btn-sm" (click)="openCreateUnit()">
+            <i class="pi pi-plus"></i> Ajouter une unité
+          </button>
+        </div>
+
+        @if (loadingUnits()) {
+          <p-skeleton height="60px" borderRadius="8px" styleClass="mb-2" />
+          <p-skeleton height="60px" borderRadius="8px" styleClass="mb-2" />
+        } @else if (units().length === 0) {
+          <div class="units-empty">
+            <i class="pi pi-building"></i>
+            <span>Aucune unité — ce bien est géré globalement</span>
+          </div>
+        } @else {
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Unité</th>
+                <th>Type</th>
+                <th>Étage</th>
+                <th>Surface</th>
+                <th>Locataire</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (u of units(); track u.id) {
+                <tr>
+                  <td class="td-name">{{ u.unit_number }}</td>
+                  <td>{{ unitTypeLabel(u.type) }}</td>
+                  <td class="td-muted">{{ u.floor !== null ? 'Étage ' + u.floor : '—' }}</td>
+                  <td class="td-muted">{{ u.area ? u.area + ' m²' : '—' }}</td>
+                  <td class="td-muted">{{ u.active_lease?.tenant?.full_name ?? '—' }}</td>
+                  <td><span class="badge {{ unitStatusClass(u.status) }}">{{ unitStatusLabel(u.status) }}</span></td>
+                  <td>
+                    <div class="actions-cell">
+                      <button class="btn-icon btn-edit" (click)="openEditUnit(u)" pTooltip="Modifier" tooltipPosition="top">
+                        <i class="pi pi-pencil"></i>
+                      </button>
+                      @if (u.status !== 'archived' && u.status !== 'occupied') {
+                        <button class="btn-icon btn-delete" (click)="archiveUnit(u)" pTooltip="Archiver" tooltipPosition="top">
+                          <i class="pi pi-trash"></i>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
     </div>
   </div>
 }
@@ -388,6 +450,75 @@
           </button>
         </div>
       </div>
+    </div>
+  </div>
+}
+
+@if (unitDrawerOpen) {
+  <div class="drawer-overlay" (click)="closeUnitDrawer()"></div>
+  <div class="drawer-panel drawer-panel-sm">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingUnit() ? 'Modifier l\'unité' : 'Nouvelle unité' }}</div>
+        <div class="drawer-sub">{{ editingProp()?.name }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeUnitDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="unitForm" (ngSubmit)="saveUnit()" class="drawer-form">
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Numéro <span class="req">*</span></label>
+            <input class="pa-input" formControlName="unit_number" placeholder="101, A1, Studio 2…" />
+            @if (unitForm.get('unit_number')?.invalid && unitForm.get('unit_number')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Type <span class="req">*</span></label>
+            <select class="pa-input" formControlName="type">
+              <option value="studio">Studio</option>
+              <option value="f1">F1</option>
+              <option value="f2">F2</option>
+              <option value="f3">F3</option>
+              <option value="f4">F4</option>
+              <option value="f5">F5</option>
+              <option value="bureau">Bureau</option>
+              <option value="boutique">Boutique</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Étage</label>
+            <input class="pa-input" formControlName="floor" type="number" placeholder="0 = RDC" />
+          </div>
+          <div class="form-group">
+            <label>Surface (m²)</label>
+            <input class="pa-input" formControlName="area" type="number" placeholder="35" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="is_furnished" />
+            Meublé
+          </label>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeUnitDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="savingUnit()">
+            @if (savingUnit()) {
+              <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+            } @else {
+              <i class="pi pi-check"></i> {{ editingUnit() ? 'Mettre à jour' : 'Ajouter' }}
+            }
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 }

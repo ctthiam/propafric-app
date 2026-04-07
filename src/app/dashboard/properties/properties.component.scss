@@ -286,3 +286,10 @@ textarea.pa-input { resize: vertical; }
 .detail-row { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0; border-bottom:1px solid rgba(#0d1f17,.04); &:last-child { border-bottom:none; } }
 .detail-label { font-size:13px; color:#4a6357; min-width:140px; }
 .detail-value { font-size:13px; color:#0d1f17; font-weight:500; text-align:right; }
+
+.units-section { padding: 4px 0; }
+.units-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+.units-count { font-size:13px; color:#4a6357; font-weight:500; }
+.btn-sm { padding:6px 14px; font-size:12px; }
+.units-empty { display:flex; align-items:center; gap:10px; padding:24px; background:#faf8f3; border-radius:8px; color:#4a6357; font-size:13px; i { font-size:20px; opacity:.3; } }
+.drawer-panel-sm { max-width:480px; }

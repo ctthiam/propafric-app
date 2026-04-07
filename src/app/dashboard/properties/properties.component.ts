@@ -89,7 +89,13 @@ export class PropertiesComponent implements OnInit {
   }
 
   // ── Onglets drawer ──────────────────────────────────────────
-  activeTab: 'info' | 'photos' = 'info';
+  activeTab: 'info' | 'photos' | 'units' = 'info';
+  units     = signal<any[]>([]);
+  loadingUnits = signal(false);
+  savingUnit   = signal(false);
+  editingUnit  = signal<any>(null);
+  unitDrawerOpen = false;
+  unitForm: FormGroup;
 
   // ── Photos ──────────────────────────────────────────────────
   currentPhotos  = signal<PropertyPhoto[]>([]);
@@ -249,6 +255,13 @@ export class PropertiesComponent implements OnInit {
       is_furnished:[false],
       description: [''],
     });
+    this.unitForm = this.fb.group({
+      unit_number: ['', Validators.required],
+      type:        ['studio', Validators.required],
+      floor:       [0],
+      area:        [''],
+      is_furnished: [false],
+    });
   }
 
   ngOnInit(): void {
@@ -322,11 +335,17 @@ export class PropertiesComponent implements OnInit {
     this.cdr.detectChanges();
   }
 
-  switchTab(tab: 'info' | 'photos'): void {
-    // L'onglet photos n'est accessible qu'en mode édition (bien existant)
+  switchTab(tab: 'info' | 'photos' | 'units'): void {
     if (tab === 'photos' && !this.editingProp()) {
-      this.toast.add({ severity: 'info', summary: 'Info', detail: 'Enregistrez le bien d\'abord pour ajouter des photos.' });
+      this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Enregistrez d\'abord le bien.' });
       return;
+    }
+    if (tab === 'units' && !this.editingProp()) {
+      this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Enregistrez d\'abord le bien.' });
+      return;
+    }
+    if (tab === 'units' && this.editingProp()) {
+      this.loadUnits(this.editingProp()!.id);
     }
     this.activeTab = tab;
     this.cdr.detectChanges();
@@ -530,5 +549,88 @@ export class PropertiesComponent implements OnInit {
   if (!Array.isArray(p.photos)) return 0;
     // photos peut être un tableau d'objets {id, url, ...} ou vide
     return p.photos.length;
+  }
+
+  loadUnits(propertyId: number): void {
+    this.loadingUnits.set(true);
+    this.http.get<any>(`${this.api}/properties/${propertyId}/units`).subscribe({
+      next: (res: any) => {
+        this.units.set(Array.isArray(res?.data) ? res.data : []);
+        this.loadingUnits.set(false);
+        this.cdr.detectChanges();
+      },
+      error: () => this.loadingUnits.set(false),
+    });
+  }
+
+  openCreateUnit(): void {
+    this.editingUnit.set(null);
+    this.unitForm.reset({ type: 'studio', floor: 0, is_furnished: false });
+    this.unitDrawerOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  openEditUnit(unit: any): void {
+    this.editingUnit.set(unit);
+    this.unitForm.patchValue(unit);
+    this.unitForm.markAsUntouched();
+    this.unitDrawerOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeUnitDrawer(): void {
+    this.unitDrawerOpen = false;
+    this.editingUnit.set(null);
+    this.unitForm.reset();
+    this.cdr.detectChanges();
+  }
+
+  saveUnit(): void {
+    if (this.unitForm.invalid) { this.unitForm.markAllAsTouched(); return; }
+    const prop = this.editingProp();
+    if (!prop) return;
+    this.savingUnit.set(true);
+    const editing = this.editingUnit();
+    const req$ = editing
+      ? this.http.put<any>(`${this.api}/properties/${prop.id}/units/${editing.id}`, this.unitForm.value)
+      : this.http.post<any>(`${this.api}/properties/${prop.id}/units`, this.unitForm.value);
+    req$.subscribe({
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Succès', detail: res.message });
+        this.savingUnit.set(false);
+        this.closeUnitDrawer();
+        this.loadUnits(prop.id);
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+        this.savingUnit.set(false);
+      }
+    });
+  }
+
+  archiveUnit(unit: any): void {
+    const prop = this.editingProp();
+    if (!prop) return;
+    this.http.delete<any>(`${this.api}/properties/${prop.id}/units/${unit.id}`).subscribe({
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Archivé', detail: res.message });
+        this.loadUnits(prop.id);
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+      }
+    });
+  }
+
+  unitTypeLabel(t: string): string {
+    return ({ studio: 'Studio', f1: 'F1', f2: 'F2', f3: 'F3', f4: 'F4', f5: 'F5', bureau: 'Bureau', boutique: 'Boutique' } as any)[t] ?? t;
+  }
+
+  unitStatusClass(s: string): string {
+    return ({ available: 'badge-success', occupied: 'badge-warning', maintenance: 'badge-neutral', archived: 'badge-danger' } as any)[s] ?? '';
+  }
+
+  unitStatusLabel(s: string): string {
+    return ({ available: 'Disponible', occupied: 'Occupé', maintenance: 'En travaux', archived: 'Archivé' } as any)[s] ?? s;
   }
 }
