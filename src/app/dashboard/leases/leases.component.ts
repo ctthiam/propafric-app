@@ -45,6 +45,7 @@ export interface Lease {
   charge_items: any[] | null;
   tenant?: LeaseTenant;
   property?: LeaseProperty;
+  property_unit_id: number | null;
   created_at: string;
 }
 
@@ -375,6 +376,7 @@ export class LeasesComponent implements OnInit {
     this.form.patchValue({
       property_id:          lease.property?.id,
       tenant_id:            lease.tenant?.id,
+      property_unit_id: lease.property_unit_id ?? null,
       contract_type:        lease.contract_type,
       calculation_mode:     lease.calculation_mode,
       start_date:           lease.start_date?.split('T')[0] ?? '',
@@ -392,7 +394,19 @@ export class LeasesComponent implements OnInit {
     });
 
     if (lease.property?.id) {
-      this.onPropertyChange(lease.property.id);
+      this.loadingUnits.set(true);
+      this.http.get<any>(`${this.api}/properties/${lease.property.id}/units`).subscribe({
+        next: (res: any) => {
+          // En modification : montrer toutes les unités sauf archivées
+          const units = Array.isArray(res?.data) ? res.data.filter((u: any) => u.status !== 'archived') : [];
+          this.propertyUnits.set(units);
+          this.loadingUnits.set(false);
+          // Pré-sélectionner l'unité du bail
+          this.form.patchValue({ property_unit_id: lease.property_unit_id ?? null });
+          this.cdr.detectChanges();
+        },
+        error: () => this.loadingUnits.set(false),
+      });
     }
 
     // Remplir les postes loyer
