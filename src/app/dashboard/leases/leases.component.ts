@@ -452,6 +452,7 @@ export class LeasesComponent implements OnInit {
     const payload: any = {
       property_id:              raw.property_id,
       tenant_id:                raw.tenant_id,
+      property_unit_id:         raw.property_unit_id ?? null,
       contract_type:            raw.contract_type,
       calculation_mode:         raw.calculation_mode,
       base_rent_items:          baseRentItems,
