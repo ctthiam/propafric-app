@@ -144,9 +144,13 @@ export class LeasesComponent implements OnInit {
   calcFeeVat  = computed(() => Math.round(this.calcFeeHt() * this.calcVatRate() / 100));
   calcFeeTtc  = computed(() => this.calcFeeHt() + this.calcFeeVat());
   calcTax     = computed(() => Math.round((this.calcBaseRent() + this.calcCharges()) * this.calcTaxRate() / 100));
-  calcTotal   = computed(() =>
-    this.calcBaseRent() + this.calcCharges() + this.calcTom() + this.calcFeeTtc() + this.calcTax()
-  );
+  calcTotal = computed(() => {
+    const base = this.calcBaseRent() + this.calcCharges() + this.calcTom();
+    if (this.agencyFeeModel === 'deducted') {
+      return base;
+    }
+    return base + this.calcFeeTtc();
+  });
 
   form: FormGroup;
 
