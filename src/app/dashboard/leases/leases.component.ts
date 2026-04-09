@@ -391,7 +391,15 @@ export class LeasesComponent implements OnInit {
       deposit_amount:       lease.deposit_amount,
       advance_months:       lease.advance_months,
       notes:                lease.notes ?? '',
-    });
+    }, { emitEvent: false });
+
+    this.calcMode.set(lease.calculation_mode ?? 'from_base');
+    this.calcTomRate.set(lease.tom_rate ?? 3.6);
+    this.calcVatRate.set(lease.management_fee_vat_rate ?? 18);
+    this.calcTaxRate.set(lease.impot_rate ?? 0);        // ← impôt
+    this.calcFeeType.set(lease.management_fee_type ?? 'percent_ht');
+    this.calcFeeValue.set(lease.management_fee_value ?? 0);
+    this.calcCharges.set(lease.charges ?? 0);           // ← charges
 
     if (lease.property?.id) {
       this.loadingUnits.set(true);
