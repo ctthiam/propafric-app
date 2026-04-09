@@ -433,7 +433,10 @@ export class LeasesComponent implements OnInit {
     const chargeItems = lease.charge_items ?? [];
     if (chargeItems.length > 0) {
       chargeItems.forEach((item: any) => this.chargeItems.push(this.createChargeItem(item.label, item.amount)));
+    } else if ((lease.charges ?? 0) > 0) {
+      this.chargeItems.push(this.createChargeItem('Charges', lease.charges ?? 0));
     }
+    this.calcCharges.set(lease.charges ?? 0);
 
     this.form.markAsUntouched();
     this.drawerOpen = true;
