@@ -32,7 +32,6 @@ export interface Lease {
   management_fee_vat_rate: number | null;
   management_fee_ht: number | null;
   management_fee_ttc: number | null;
-  impot_rate: number | null;
   deposit_amount: number | null;
   advance_months: number | null;
   payment_frequency: string;
@@ -387,7 +386,6 @@ export class LeasesComponent implements OnInit {
       management_fee_type:  lease.management_fee_type,
       management_fee_value: lease.management_fee_value,
       management_fee_vat_rate: lease.management_fee_vat_rate,
-      impot_rate:           lease.impot_rate,
       deposit_amount:       lease.deposit_amount,
       advance_months:       lease.advance_months,
       notes:                lease.notes ?? '',
@@ -397,7 +395,6 @@ export class LeasesComponent implements OnInit {
     this.calcMode.set(lease.calculation_mode ?? 'from_base');
     this.calcTomRate.set(lease.tom_rate ?? 3.6);
     this.calcVatRate.set(lease.management_fee_vat_rate ?? 18);
-    this.calcTaxRate.set(lease.impot_rate ?? 0);        // ← impôt
     this.calcFeeType.set(lease.management_fee_type ?? 'percent_ht');
     this.calcFeeValue.set(lease.management_fee_value ?? 0);
     this.calcCharges.set(lease.charges ?? 0);           // ← charges
@@ -421,20 +418,22 @@ export class LeasesComponent implements OnInit {
 
     // Remplir les postes loyer
     while (this.baseRentItems.length) this.baseRentItems.removeAt(0);
-  const rentItems = lease.rent_items ?? [];
-  if (rentItems.length > 0) {
-    rentItems.forEach((item: any) => this.baseRentItems.push(this.createRentItem(item.label, item.amount)));
-  } else {
-    this.baseRentItems.push(this.createRentItem('Loyer de base', lease.base_rent ?? 0));
-  }
-  this.calcBaseRent.set(
-    this.baseRentItems.controls.reduce((sum, c) => sum + (Number(c.get('amount')?.value) || 0), 0)
-  );
+    const rentItems = lease.rent_items ?? [];
+    if (rentItems.length > 0) {
+      rentItems.forEach((item: any) => this.baseRentItems.push(this.createRentItem(item.label, item.amount)));
+    } else {
+      this.baseRentItems.push(this.createRentItem('Loyer de base', lease.base_rent ?? 0));
+    }
+    this.calcBaseRent.set(
+      this.baseRentItems.controls.reduce((sum, c) => sum + (Number(c.get('amount')?.value) || 0), 0)
+    );
 
     // Remplir les charges
     while (this.chargeItems.length) this.chargeItems.removeAt(0);
     const chargeItems = lease.charge_items ?? [];
-    chargeItems.forEach((item: any) => this.chargeItems.push(this.createChargeItem(item.label, item.amount)));
+    if (chargeItems.length > 0) {
+      chargeItems.forEach((item: any) => this.chargeItems.push(this.createChargeItem(item.label, item.amount)));
+    }
 
     this.form.markAsUntouched();
     this.drawerOpen = true;

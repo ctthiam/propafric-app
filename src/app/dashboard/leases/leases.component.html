@@ -297,10 +297,6 @@
             <label>TVA frais gestion (%)</label>
             <p-inputNumber formControlName="management_fee_vat_rate" [min]="0" [max]="100" styleClass="w-full" />
           </div>
-          <div class="form-group">
-            <label>Impôt (%)</label>
-            <p-inputNumber formControlName="tax_rate" [min]="0" [max]="100" styleClass="w-full" />
-          </div>
         </div>
 
         <!-- ── RÉCAPITULATIF CALCUL ── -->
@@ -312,9 +308,6 @@
             <div class="calc-row"><span>TOM ({{ calcTomRate() }}%)</span><strong>{{ formatCurrency(calcTom()) }}</strong></div>
             <div class="calc-row"><span>Frais gestion HT</span><strong>{{ formatCurrency(calcFeeHt()) }}</strong></div>
             <div class="calc-row"><span>TVA frais gestion ({{ calcVatRate() }}%)</span><strong>{{ formatCurrency(calcFeeVat()) }}</strong></div>
-            @if (calcTax() > 0) {
-              <div class="calc-row"><span>Impôt ({{ calcTaxRate() }}%)</span><strong>{{ formatCurrency(calcTax()) }}</strong></div>
-            }
             <div class="calc-divider"></div>
             <div class="calc-row calc-total"><span>Total dû / mois</span><strong>{{ formatCurrency(calcTotal()) }}</strong></div>
           </div>
