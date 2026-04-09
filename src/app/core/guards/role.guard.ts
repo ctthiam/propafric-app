@@ -28,7 +28,7 @@ export const adminOnlyGuard: CanActivateFn = () => {
   const router = inject(Router);
   const role   = auth.user()?.role;
 
-  if (role === 'agency_admin' || role === 'super_admin') return true;
+  if (role === 'agency_admin' || role === 'agency_secretary' || role === 'super_admin') return true;
   // Rediriger vers dashboard si mauvais rôle (pas d'accès)
   return router.createUrlTree(['/dashboard']);
 };
