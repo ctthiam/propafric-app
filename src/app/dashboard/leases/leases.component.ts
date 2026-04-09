@@ -391,6 +391,7 @@ export class LeasesComponent implements OnInit {
       deposit_amount:       lease.deposit_amount,
       advance_months:       lease.advance_months,
       notes:                lease.notes ?? '',
+      is_open_ended:        lease.end_date ? false : true,
     }, { emitEvent: false });
 
     this.calcMode.set(lease.calculation_mode ?? 'from_base');
