@@ -401,6 +401,7 @@ export class LeasesComponent implements OnInit {
     this.calcFeeType.set(lease.management_fee_type ?? 'percent_ht');
     this.calcFeeValue.set(lease.management_fee_value ?? 0);
     this.calcCharges.set(lease.charges ?? 0);           // ← charges
+    this.calcBaseRent.set(lease.base_rent ?? 0);
 
     if (lease.property?.id) {
       this.loadingUnits.set(true);
@@ -420,12 +421,15 @@ export class LeasesComponent implements OnInit {
 
     // Remplir les postes loyer
     while (this.baseRentItems.length) this.baseRentItems.removeAt(0);
-    const rentItems = lease.rent_items ?? [];
-    if (rentItems.length > 0) {
-      rentItems.forEach((item: any) => this.baseRentItems.push(this.createRentItem(item.label, item.amount)));
-    } else {
-      this.baseRentItems.push(this.createRentItem('Loyer', lease.base_rent ?? 0));
-    }
+  const rentItems = lease.rent_items ?? [];
+  if (rentItems.length > 0) {
+    rentItems.forEach((item: any) => this.baseRentItems.push(this.createRentItem(item.label, item.amount)));
+  } else {
+    this.baseRentItems.push(this.createRentItem('Loyer de base', lease.base_rent ?? 0));
+  }
+  this.calcBaseRent.set(
+    this.baseRentItems.controls.reduce((sum, c) => sum + (Number(c.get('amount')?.value) || 0), 0)
+  );
 
     // Remplir les charges
     while (this.chargeItems.length) this.chargeItems.removeAt(0);
