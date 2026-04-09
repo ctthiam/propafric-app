@@ -83,6 +83,8 @@ export class LeasesComponent implements OnInit {
   propertyUnits = signal<any[]>([]);
   loadingUnits  = signal(false);
 
+  agencyFeeModel = 'added';
+
   openDetail(lease: any): void {
     this.viewingLease.set(lease);
     this.detailOpen = true;
@@ -323,6 +325,13 @@ export class LeasesComponent implements OnInit {
     });
     this.http.get<any>(`${this.api}/tenants`).subscribe({
       next: (res: any) => this.tenants.set(Array.isArray(res?.data) ? res.data : [])
+    });
+    this.http.get<any>(`${this.api.replace('/agency', '')}/agency/settings`).subscribe({
+      next: (res: any) => {
+        this.agencyFeeModel = res?.data?.fee_model ?? 'added';
+        this.cdr.detectChanges();
+      },
+      error: () => {}
     });
   }
 

@@ -258,3 +258,4 @@ textarea.pa-input { resize: vertical; }
 .detail-row { display:flex; justify-content:space-between; align-items:flex-start; padding:8px 0; border-bottom:1px solid rgba(#0d1f17,.04); &:last-child { border-bottom:none; } }
 .detail-label { font-size:13px; color:#4a6357; min-width:140px; }
 .detail-value { font-size:13px; color:#0d1f17; font-weight:500; text-align:right; }
+.recap-note { font-size:12px; color:#C9A84C; background:rgba(#C9A84C,.08); border:1px solid rgba(#C9A84C,.2); border-radius:8px; padding:8px 12px; display:flex; align-items:center; gap:8px; margin-bottom:8px; }

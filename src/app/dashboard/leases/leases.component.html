@@ -309,6 +309,12 @@
             <div class="calc-row"><span>Frais gestion HT</span><strong>{{ formatCurrency(calcFeeHt()) }}</strong></div>
             <div class="calc-row"><span>TVA frais gestion ({{ calcVatRate() }}%)</span><strong>{{ formatCurrency(calcFeeVat()) }}</strong></div>
             <div class="calc-divider"></div>
+            @if (agencyFeeModel === 'deducted') {
+              <div class="recap-note">
+                <i class="pi pi-info-circle"></i>
+                Frais de gestion déduits du loyer propriétaire — non inclus dans le loyer locataire
+              </div>
+            }
             <div class="calc-row calc-total"><span>Total dû / mois</span><strong>{{ formatCurrency(calcTotal()) }}</strong></div>
           </div>
         }

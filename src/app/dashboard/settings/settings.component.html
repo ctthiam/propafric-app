@@ -197,6 +197,27 @@
             </div>
           </div>
 
+          <div class="form-section-title">Frais de gestion</div>
+          <div class="form-group">
+            <label>Mode d'application des frais</label>
+            <div class="radio-group">
+              <label class="radio-item">
+                <input type="radio" formControlName="fee_model" value="added" />
+                <div class="radio-content">
+                  <div class="radio-label">Ajoutés au loyer</div>
+                  <div class="radio-desc">Le locataire paie loyer + frais gestion</div>
+                </div>
+              </label>
+              <label class="radio-item">
+                <input type="radio" formControlName="fee_model" value="deducted" />
+                <div class="radio-content">
+                  <div class="radio-label">Déduits du loyer</div>
+                  <div class="radio-desc">Le locataire paie le loyer brut, le propriétaire supporte les frais</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
           <!-- ─── Articles bail personnalisés ─── -->
           <div class="form-section-title">
             Articles du contrat de bail

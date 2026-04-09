@@ -47,6 +47,7 @@ export class SettingsComponent implements OnInit {
       rc_number:           [''],
       pdf_color_primary:   ['#1a1a1a'],
       pdf_color_secondary: ['#555555'],
+      fee_model:           ['added'],
       lease_articles:      this.fb.array([]),
     });
   }
@@ -90,6 +91,7 @@ export class SettingsComponent implements OnInit {
           website:             a?.website   ?? '',
           ninea:               a?.ninea     ?? '',
           rc_number:           a?.rc_number ?? '',
+          fee_model:           a?.fee_model ?? 'added',
           pdf_color_primary:   primary,
           pdf_color_secondary: secondary,
         });
