@@ -509,7 +509,9 @@ export class LeasesComponent implements OnInit {
   }
 
   private terminate(id: number): void {
-    this.http.post<any>(`${this.api}/leases/${id}/terminate`, {}).subscribe({
+  this.http.post<any>(`${this.api}/leases/${id}/terminate`, {
+    termination_date: new Date().toISOString().split('T')[0],
+    reason: 'Résiliation à l\'initiative de l\'agence',}).subscribe({
       next: (res: any) => {
         this.toast.add({ severity: 'success', summary: 'Résilié', detail: res.message });
         this.load();
