@@ -259,7 +259,7 @@
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="btn-primary" [disabled]="saving() || saveSuccess()">
+            <button type="submit" class="btn-primary" [class.btn-save-success]="saveSuccess()" [disabled]="saving()">
               @if (saving()) {
                 <i class="pi pi-spin pi-spinner"></i> Enregistrement…
               } @else if (saveSuccess()) {
