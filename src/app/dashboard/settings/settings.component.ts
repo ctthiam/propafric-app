@@ -21,6 +21,7 @@ export class SettingsComponent implements OnInit {
   agency        = signal<any>(null);
   loading       = signal(true);
   saving        = signal(false);
+  saveSuccess   = signal(false);
   uploadingLogo = signal(false);
   logoPreview   = signal<string | null>(null);
 
@@ -121,6 +122,9 @@ export class SettingsComponent implements OnInit {
       next: (res: any) => {
         this.toast.add({ severity: 'success', summary: 'Succès', detail: res.message });
         this.saving.set(false);
+        this.saveSuccess.set(true);
+        setTimeout(() => this.saveSuccess.set(false), 3000);
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });

@@ -213,3 +213,8 @@ $blue:        #1971c2;
 }
 .radio-label { font-size:13px; font-weight:600; color:#0d1f17; }
 .radio-desc  { font-size:12px; color:#4a6357; margin-top:2px; }
+
+.btn-primary:has(.pi-check-circle) {
+  background: #52b788;
+  pointer-events: none;
+}

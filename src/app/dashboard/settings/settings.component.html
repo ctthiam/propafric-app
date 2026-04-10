@@ -1,4 +1,4 @@
-<p-toast position="top-right" />
+<p-toast position="bottom-right" />
 
 <div class="page-header">
   <div>
@@ -259,9 +259,11 @@
           </div>
 
           <div class="form-actions">
-            <button type="submit" class="btn-primary" [disabled]="saving()">
+            <button type="submit" class="btn-primary" [disabled]="saving() || saveSuccess()">
               @if (saving()) {
                 <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+              } @else if (saveSuccess()) {
+                <i class="pi pi-check-circle"></i> Modifications enregistrées ✓
               } @else {
                 <i class="pi pi-check"></i> Enregistrer les modifications
               }
