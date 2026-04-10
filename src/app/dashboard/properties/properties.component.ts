@@ -68,36 +68,22 @@ export class PropertiesComponent implements OnInit {
   owners       = signal<Owner[]>([]);
   loading      = signal(true);
   saving       = signal(false);
+  saveSuccess  = signal(false);
   editingProp  = signal<Property | null>(null);
+  viewingProp  = signal<Property | null>(null);
   search       = signal('');
   filterStatus = signal('');
   drawerOpen   = false;
+  detailOpen   = false;
 
-  detailOpen    = false;
-  viewingProp   = signal<Property | null>(null);
-
-  openDetail(p: Property): void {
-    this.viewingProp.set(p);
-    this.detailOpen = true;
-    this.cdr.detectChanges();
-  }
-
-  closeDetail(): void {
-    this.detailOpen = false;
-    this.viewingProp.set(null);
-    this.cdr.detectChanges();
-  }
-
-  // ── Onglets drawer ──────────────────────────────────────────
   activeTab: 'info' | 'photos' | 'units' = 'info';
-  units     = signal<any[]>([]);
+  units        = signal<any[]>([]);
   loadingUnits = signal(false);
   savingUnit   = signal(false);
   editingUnit  = signal<any>(null);
   unitDrawerOpen = false;
   unitForm: FormGroup;
 
-  // ── Photos ──────────────────────────────────────────────────
   currentPhotos  = signal<PropertyPhoto[]>([]);
   uploadingPhoto = signal(false);
   selectedFiles: File[] = [];
@@ -223,16 +209,10 @@ export class PropertiesComponent implements OnInit {
   selectedAmenities: string[] = [];
   selectedEquipment: string[] = [];
 
-  isSelected(list: string[], value: string): boolean {
-    return list.includes(value);
-  }
-
+  isSelected(list: string[], value: string): boolean { return list.includes(value); }
   toggleItem(list: string[], value: string): string[] {
-    return list.includes(value)
-      ? list.filter(v => v !== value)
-      : [...list, value];
+    return list.includes(value) ? list.filter(v => v !== value) : [...list, value];
   }
-
   toggleRoom(value: string):      void { this.selectedRooms     = this.toggleItem(this.selectedRooms, value); }
   toggleAmenity(value: string):   void { this.selectedAmenities = this.toggleItem(this.selectedAmenities, value); }
   toggleEquipment(value: string): void { this.selectedEquipment = this.toggleItem(this.selectedEquipment, value); }
@@ -294,18 +274,15 @@ export class PropertiesComponent implements OnInit {
     });
   }
 
-  get ownerOptions() {
-    return this.owners().map(o => ({ label: o.full_name, value: o.id }));
-  }
+  get ownerOptions() { return this.owners().map(o => ({ label: o.full_name, value: o.id })); }
 
   openCreate(): void {
     this.editingProp.set(null);
-    this.selectedRooms     = [];
-    this.selectedAmenities = [];
-    this.selectedEquipment = [];
+    this.selectedRooms = []; this.selectedAmenities = []; this.selectedEquipment = [];
     this.currentPhotos.set([]);
     this.clearPhotoSelection();
     this.activeTab = 'info';
+    this.saveSuccess.set(false);
     this.form.reset({ type: 'appartement', status: 'available', city: 'Dakar', is_furnished: false });
     this.drawerOpen = true;
     this.cdr.detectChanges();
@@ -319,6 +296,7 @@ export class PropertiesComponent implements OnInit {
     this.currentPhotos.set(Array.isArray(p.photos) ? [...p.photos] : []);
     this.clearPhotoSelection();
     this.activeTab = 'info';
+    this.saveSuccess.set(false);
     this.form.patchValue({ ...p, owner_id: p.owner?.id ?? p.owner_id });
     this.form.markAsUntouched();
     this.drawerOpen = true;
@@ -331,22 +309,29 @@ export class PropertiesComponent implements OnInit {
     this.currentPhotos.set([]);
     this.clearPhotoSelection();
     this.activeTab = 'info';
+    this.saveSuccess.set(false);
     this.form.reset();
     this.cdr.detectChanges();
   }
 
+  openDetail(p: Property): void {
+    this.viewingProp.set(p);
+    this.detailOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeDetail(): void {
+    this.detailOpen = false;
+    this.viewingProp.set(null);
+    this.cdr.detectChanges();
+  }
+
   switchTab(tab: 'info' | 'photos' | 'units'): void {
-    if (tab === 'photos' && !this.editingProp()) {
+    if ((tab === 'photos' || tab === 'units') && !this.editingProp()) {
       this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Enregistrez d\'abord le bien.' });
       return;
     }
-    if (tab === 'units' && !this.editingProp()) {
-      this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Enregistrez d\'abord le bien.' });
-      return;
-    }
-    if (tab === 'units' && this.editingProp()) {
-      this.loadUnits(this.editingProp()!.id);
-    }
+    if (tab === 'units' && this.editingProp()) this.loadUnits(this.editingProp()!.id);
     this.activeTab = tab;
     this.cdr.detectChanges();
   }
@@ -354,6 +339,7 @@ export class PropertiesComponent implements OnInit {
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
+    this.saveSuccess.set(false);
 
     const payload = {
       ...this.form.value,
@@ -371,8 +357,13 @@ export class PropertiesComponent implements OnInit {
       next: (res: any) => {
         this.toast.add({ severity: 'success', summary: 'Succès', detail: res.message });
         this.saving.set(false);
-        this.closeDrawer();
-        this.load();
+        this.saveSuccess.set(true);
+        setTimeout(() => {
+          this.saveSuccess.set(false);
+          this.closeDrawer();
+          this.load();
+        }, 1500);
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         const msg = err.error?.message ?? 'Une erreur est survenue.';
@@ -382,51 +373,27 @@ export class PropertiesComponent implements OnInit {
     });
   }
 
-  // ── GESTION PHOTOS ────────────────────────────────────────────
-
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
-
     const files = Array.from(input.files);
-    const maxSize = 5 * 1024 * 1024; // 5MB
+    const maxSize = 5 * 1024 * 1024;
     const allowed = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
-
     const valid = files.filter(f => {
-      if (!allowed.includes(f.type)) {
-        this.toast.add({ severity: 'warn', summary: 'Format invalide', detail: `${f.name} : format non supporté (jpeg, png, webp)` });
-        return false;
-      }
-      if (f.size > maxSize) {
-        this.toast.add({ severity: 'warn', summary: 'Fichier trop lourd', detail: `${f.name} : max 5MB` });
-        return false;
-      }
+      if (!allowed.includes(f.type)) { this.toast.add({ severity: 'warn', summary: 'Format invalide', detail: `${f.name} : format non supporté` }); return false; }
+      if (f.size > maxSize) { this.toast.add({ severity: 'warn', summary: 'Fichier trop lourd', detail: `${f.name} : max 5MB` }); return false; }
       return true;
     });
-
     if (!valid.length) return;
-
-    // Limiter à 10 photos total
     const remaining = 10 - this.currentPhotos().length;
-    if (remaining <= 0) {
-      this.toast.add({ severity: 'warn', summary: 'Limite atteinte', detail: 'Maximum 10 photos par bien.' });
-      return;
-    }
-
+    if (remaining <= 0) { this.toast.add({ severity: 'warn', summary: 'Limite atteinte', detail: 'Maximum 10 photos par bien.' }); return; }
     this.selectedFiles = valid.slice(0, remaining);
-
-    // Générer les prévisualisations
     this.previewUrls = [];
     this.selectedFiles.forEach(file => {
       const reader = new FileReader();
-      reader.onload = (e) => {
-        this.previewUrls.push(e.target?.result as string);
-        this.cdr.detectChanges();
-      };
+      reader.onload = (e) => { this.previewUrls.push(e.target?.result as string); this.cdr.detectChanges(); };
       reader.readAsDataURL(file);
     });
-
-    // Réinitialiser l'input pour permettre re-sélection du même fichier
     input.value = '';
     this.cdr.detectChanges();
   }
@@ -435,29 +402,21 @@ export class PropertiesComponent implements OnInit {
     if (!this.selectedFiles.length) return;
     const prop = this.editingProp();
     if (!prop) return;
-
     this.uploadingPhoto.set(true);
     const formData = new FormData();
     this.selectedFiles.forEach(f => formData.append('photos[]', f));
-
     this.http.post<any>(`${this.api}/properties/${prop.id}/photos`, formData).subscribe({
       next: (res: any) => {
         const allPhotos: PropertyPhoto[] = res?.data?.all ?? [];
         this.currentPhotos.set(allPhotos);
-
-        // Mettre à jour le bien dans la liste locale
-        this.properties.update(list =>
-          list.map(p => p.id === prop.id ? { ...p, photos: allPhotos } : p)
-        );
-
+        this.properties.update(list => list.map(p => p.id === prop.id ? { ...p, photos: allPhotos } : p));
         this.clearPhotoSelection();
         this.uploadingPhoto.set(false);
         this.toast.add({ severity: 'success', summary: 'Succès', detail: res.message });
         this.cdr.detectChanges();
       },
       error: (err: any) => {
-        const msg = err.error?.message ?? 'Erreur lors de l\'upload.';
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: msg });
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur lors de l\'upload.' });
         this.uploadingPhoto.set(false);
       }
     });
@@ -466,22 +425,15 @@ export class PropertiesComponent implements OnInit {
   deletePhoto(photo: PropertyPhoto): void {
     const prop = this.editingProp();
     if (!prop) return;
-
     this.confirm.confirm({
-      message: `Supprimer cette photo ?`,
-      header: 'Confirmer',
-      icon: 'pi pi-trash',
-      acceptLabel: 'Supprimer',
-      rejectLabel: 'Annuler',
-      acceptButtonStyleClass: 'p-button-danger',
+      message: `Supprimer cette photo ?`, header: 'Confirmer', icon: 'pi pi-trash',
+      acceptLabel: 'Supprimer', rejectLabel: 'Annuler', acceptButtonStyleClass: 'p-button-danger',
       accept: () => {
         this.http.delete<any>(`${this.api}/properties/${prop.id}/photos/${photo.id}`).subscribe({
           next: (res: any) => {
             const updated = this.currentPhotos().filter(p => p.id !== photo.id);
             this.currentPhotos.set(updated);
-            this.properties.update(list =>
-              list.map(p => p.id === prop.id ? { ...p, photos: updated } : p)
-            );
+            this.properties.update(list => list.map(p => p.id === prop.id ? { ...p, photos: updated } : p));
             this.toast.add({ severity: 'success', summary: 'Supprimée', detail: res.message });
             this.cdr.detectChanges();
           },
@@ -491,74 +443,34 @@ export class PropertiesComponent implements OnInit {
     });
   }
 
-  clearPhotoSelection(): void {
-    this.selectedFiles = [];
-    this.previewUrls = [];
-  }
-
+  clearPhotoSelection(): void { this.selectedFiles = []; this.previewUrls = []; }
   formatSize(bytes: number): string {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(0) + ' KB';
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   }
 
-  // ── Utilitaires ───────────────────────────────────────────────
-
   confirmDelete(p: Property): void {
     this.confirm.confirm({
-      message: `Archiver le bien <strong>${p.name}</strong> (${p.reference}) ? Le bien sera désactivé mais son historique sera conservé.`,
-      header: 'Confirmer l\'archivage',
-      icon: 'pi pi-inbox',           // ← changer l'icône
-      acceptLabel: 'Archiver',       // ← changer le label
-      rejectLabel: 'Annuler',
-      acceptButtonStyleClass: 'p-button-warning',  // ← orange au lieu de rouge
+      message: `Archiver le bien <strong>${p.name}</strong> (${p.reference}) ?`,
+      header: 'Confirmer l\'archivage', icon: 'pi pi-inbox',
+      acceptLabel: 'Archiver', rejectLabel: 'Annuler',
+      acceptButtonStyleClass: 'p-button-warning',
       accept: () => this.delete(p.id),
     });
   }
 
   private delete(id: number): void {
     this.http.delete<any>(`${this.api}/properties/${id}`).subscribe({
-      next: (res: any) => {
-        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: res.message });
-        this.load();
-      },
-      error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression impossible.' })
+      next: (res: any) => { this.toast.add({ severity: 'success', summary: 'Archivé', detail: res.message }); this.load(); },
+      error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Archivage impossible.' })
     });
-  }
-
-  onSearch(e: Event): void { this.search.set((e.target as HTMLInputElement).value); }
-  onFilterStatus(value: string): void { this.filterStatus.set(value); }
-
-  statusLabel(s: string): string {
-    return ({ available: 'Disponible', occupied: 'Occupé', maintenance: 'Maintenance' } as any)[s] ?? s;
-  }
-
-  statusClass(s: string): string {
-    return ({ available: 'badge-success', occupied: 'badge-info', maintenance: 'badge-warning' } as any)[s] ?? '';
-  }
-
-  typeIcon(t: string): string {
-    return ({ villa: 'pi pi-home', bureau: 'pi pi-briefcase' } as any)[t] ?? 'pi pi-building';
-  }
-
-  ownerName(p: Property): string {
-    return p.owner?.full_name ?? '—';
-  }
-
-  photoCount(p: Property): number {
-  if (!Array.isArray(p.photos)) return 0;
-    // photos peut être un tableau d'objets {id, url, ...} ou vide
-    return p.photos.length;
   }
 
   loadUnits(propertyId: number): void {
     this.loadingUnits.set(true);
     this.http.get<any>(`${this.api}/properties/${propertyId}/units`).subscribe({
-      next: (res: any) => {
-        this.units.set(Array.isArray(res?.data) ? res.data : []);
-        this.loadingUnits.set(false);
-        this.cdr.detectChanges();
-      },
+      next: (res: any) => { this.units.set(Array.isArray(res?.data) ? res.data : []); this.loadingUnits.set(false); this.cdr.detectChanges(); },
       error: () => this.loadingUnits.set(false),
     });
   }
@@ -612,25 +524,19 @@ export class PropertiesComponent implements OnInit {
     const prop = this.editingProp();
     if (!prop) return;
     this.http.delete<any>(`${this.api}/properties/${prop.id}/units/${unit.id}`).subscribe({
-      next: (res: any) => {
-        this.toast.add({ severity: 'success', summary: 'Archivé', detail: res.message });
-        this.loadUnits(prop.id);
-      },
-      error: (err: any) => {
-        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
-      }
+      next: (res: any) => { this.toast.add({ severity: 'success', summary: 'Archivé', detail: res.message }); this.loadUnits(prop.id); },
+      error: (err: any) => { this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' }); }
     });
   }
 
-  unitTypeLabel(t: string): string {
-    return ({ studio: 'Studio', f1: 'F1', f2: 'F2', f3: 'F3', f4: 'F4', f5: 'F5', bureau: 'Bureau', boutique: 'Boutique' } as any)[t] ?? t;
-  }
-
-  unitStatusClass(s: string): string {
-    return ({ available: 'badge-success', occupied: 'badge-warning', maintenance: 'badge-neutral', archived: 'badge-danger' } as any)[s] ?? '';
-  }
-
-  unitStatusLabel(s: string): string {
-    return ({ available: 'Disponible', occupied: 'Occupé', maintenance: 'En travaux', archived: 'Archivé' } as any)[s] ?? s;
-  }
+  onSearch(e: Event): void { this.search.set((e.target as HTMLInputElement).value); }
+  onFilterStatus(value: string): void { this.filterStatus.set(value); }
+  statusLabel(s: string): string { return ({ available: 'Disponible', occupied: 'Occupé', maintenance: 'Maintenance' } as any)[s] ?? s; }
+  statusClass(s: string): string { return ({ available: 'badge-success', occupied: 'badge-info', maintenance: 'badge-warning' } as any)[s] ?? ''; }
+  typeIcon(t: string): string { return ({ villa: 'pi pi-home', bureau: 'pi pi-briefcase' } as any)[t] ?? 'pi pi-building'; }
+  ownerName(p: Property): string { return p.owner?.full_name ?? '—'; }
+  photoCount(p: Property): number { return Array.isArray(p.photos) ? p.photos.length : 0; }
+  unitTypeLabel(t: string): string { return ({ studio: 'Studio', f1: 'F1', f2: 'F2', f3: 'F3', f4: 'F4', f5: 'F5', bureau: 'Bureau', boutique: 'Boutique' } as any)[t] ?? t; }
+  unitStatusClass(s: string): string { return ({ available: 'badge-success', occupied: 'badge-warning', maintenance: 'badge-neutral', archived: 'badge-danger' } as any)[s] ?? ''; }
+  unitStatusLabel(s: string): string { return ({ available: 'Disponible', occupied: 'Occupé', maintenance: 'En travaux', archived: 'Archivé' } as any)[s] ?? s; }
 }

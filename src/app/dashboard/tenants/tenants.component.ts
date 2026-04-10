@@ -55,6 +55,7 @@ export class TenantsComponent implements OnInit {
   tenants       = signal<Tenant[]>([]);
   loading       = signal(true);
   saving        = signal(false);
+  saveSuccess   = signal(false);
   editingTenant = signal<Tenant | null>(null);
   viewingTenant = signal<Tenant | null>(null);
   search        = signal('');
@@ -134,6 +135,7 @@ export class TenantsComponent implements OnInit {
   openCreate(): void {
     this.editingTenant.set(null);
     this.form.reset({ nationality: 'Sénégalaise', tenant_type: 'individual' });
+    this.saveSuccess.set(false);
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }
@@ -142,6 +144,7 @@ export class TenantsComponent implements OnInit {
     this.editingTenant.set(t);
     this.form.patchValue({ ...t, portal_password: '' });
     this.form.markAsUntouched();
+    this.saveSuccess.set(false);
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }
@@ -150,6 +153,7 @@ export class TenantsComponent implements OnInit {
     this.drawerOpen = false;
     this.editingTenant.set(null);
     this.form.reset();
+    this.saveSuccess.set(false);
     this.cdr.detectChanges();
   }
 
@@ -168,6 +172,7 @@ export class TenantsComponent implements OnInit {
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
+    this.saveSuccess.set(false);
 
     const editing = this.editingTenant();
     const payload = { ...this.form.value };
@@ -181,8 +186,13 @@ export class TenantsComponent implements OnInit {
       next: (res: any) => {
         this.toast.add({ severity: 'success', summary: 'Succès', detail: res.message });
         this.saving.set(false);
-        this.closeDrawer();
-        this.load();
+        this.saveSuccess.set(true);
+        setTimeout(() => {
+          this.saveSuccess.set(false);
+          this.closeDrawer();
+          this.load();
+        }, 1500);
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         const msg = err.error?.message ?? 'Une erreur est survenue.';

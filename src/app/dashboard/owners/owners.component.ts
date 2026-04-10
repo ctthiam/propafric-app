@@ -9,7 +9,6 @@ import { ButtonModule }        from 'primeng/button';
 import { InputTextModule }     from 'primeng/inputtext';
 import { InputTextareaModule } from 'primeng/inputtextarea';
 import { DropdownModule }      from 'primeng/dropdown';
-
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule }         from 'primeng/toast';
 import { TagModule }           from 'primeng/tag';
@@ -59,9 +58,12 @@ export class OwnersComponent implements OnInit {
   owners       = signal<Owner[]>([]);
   loading      = signal(true);
   saving       = signal(false);
+  saveSuccess  = signal(false);
   editingOwner = signal<Owner | null>(null);
+  viewingOwner = signal<Owner | null>(null);
   search       = signal('');
   drawerOpen   = false;
+  detailOpen   = false;
 
   filteredOwners = computed(() => {
     const q = this.search().toLowerCase();
@@ -125,6 +127,7 @@ export class OwnersComponent implements OnInit {
   openCreate(): void {
     this.editingOwner.set(null);
     this.form.reset();
+    this.saveSuccess.set(false);
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }
@@ -133,6 +136,7 @@ export class OwnersComponent implements OnInit {
     this.editingOwner.set(owner);
     this.form.patchValue(owner);
     this.form.markAsUntouched();
+    this.saveSuccess.set(false);
     this.drawerOpen = true;
     this.cdr.detectChanges();
   }
@@ -141,27 +145,26 @@ export class OwnersComponent implements OnInit {
     this.drawerOpen = false;
     this.form.reset();
     this.editingOwner.set(null);
+    this.saveSuccess.set(false);
     this.cdr.detectChanges();
   }
 
-  viewingOwner = signal<Owner | null>(null);
-detailOpen   = false;
+  openDetail(owner: Owner): void {
+    this.viewingOwner.set(owner);
+    this.detailOpen = true;
+    this.cdr.detectChanges();
+  }
 
-openDetail(owner: Owner): void {
-  this.viewingOwner.set(owner);
-  this.detailOpen = true;
-  this.cdr.detectChanges();
-}
-
-closeDetail(): void {
-  this.detailOpen = false;
-  this.viewingOwner.set(null);
-  this.cdr.detectChanges();
-}
+  closeDetail(): void {
+    this.detailOpen = false;
+    this.viewingOwner.set(null);
+    this.cdr.detectChanges();
+  }
 
   save(): void {
     if (this.form.invalid) { this.form.markAllAsTouched(); return; }
     this.saving.set(true);
+    this.saveSuccess.set(false);
 
     const editing = this.editingOwner();
     const req$ = editing
@@ -172,8 +175,13 @@ closeDetail(): void {
       next: (res: any) => {
         this.toast.add({ severity: 'success', summary: 'Succès', detail: res.message });
         this.saving.set(false);
-        this.closeDrawer();
-        this.load();
+        this.saveSuccess.set(true);
+        setTimeout(() => {
+          this.saveSuccess.set(false);
+          this.closeDrawer();
+          this.load();
+        }, 1500);
+        this.cdr.detectChanges();
       },
       error: (err: any) => {
         const msg = err.error?.message ?? 'Une erreur est survenue.';
@@ -184,24 +192,24 @@ closeDetail(): void {
   }
 
   createPortal(owner: any): void {
-  const password = prompt('Mot de passe pour le portail de ' + owner.full_name + ' :');
-  if (!password || password.length < 8) {
-    this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Mot de passe minimum 8 caractères.' });
-    return;
-  }
-  this.http.post<any>(`${this.api}/owners/${owner.id}/portal`, {
-    password,
-    email: owner.email
-  }).subscribe({
-    next: (res: any) => {
-      this.toast.add({ severity: 'success', summary: 'Portail créé', detail: res.message });
-      this.load();
-    },
-    error: (err: any) => {
-      this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+    const password = prompt('Mot de passe pour le portail de ' + owner.full_name + ' :');
+    if (!password || password.length < 8) {
+      this.toast.add({ severity: 'warn', summary: 'Attention', detail: 'Mot de passe minimum 8 caractères.' });
+      return;
     }
-  });
-}
+    this.http.post<any>(`${this.api}/owners/${owner.id}/portal`, {
+      password,
+      email: owner.email
+    }).subscribe({
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Portail créé', detail: res.message });
+        this.load();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+      }
+    });
+  }
 
   confirmDelete(owner: Owner): void {
     this.confirm.confirm({
@@ -226,12 +234,6 @@ closeDetail(): void {
   }
 
   fullName(o: Owner): string { return `${o.first_name} ${o.last_name}`; }
-
-  initials(o: Owner): string {
-    return `${(o.first_name?.[0] ?? '')}${(o.last_name?.[0] ?? '')}`.toUpperCase();
-  }
-
-  onSearch(event: Event): void {
-    this.search.set((event.target as HTMLInputElement).value);
-  }
+  initials(o: Owner): string { return `${(o.first_name?.[0] ?? '')}${(o.last_name?.[0] ?? '')}`.toUpperCase(); }
+  onSearch(event: Event): void { this.search.set((event.target as HTMLInputElement).value); }
 }

@@ -72,6 +72,7 @@ export class LeasesComponent implements OnInit {
   tenants    = signal<DropdownTenant[]>([]);
   loading    = signal(true);
   saving     = signal(false);
+  saveSuccess = signal(false);
   editingLease = signal<Lease | null>(null);
   search       = signal('');
   filterStatus = signal('');
@@ -381,6 +382,7 @@ export class LeasesComponent implements OnInit {
     this.calcFeeType.set('percent_ht'); this.calcFeeValue.set(0);
     this.drawerOpen = true;
     this.cdr.detectChanges();
+    this.saveSuccess.set(false);
   }
 
   openEdit(lease: Lease): void {
@@ -454,6 +456,7 @@ export class LeasesComponent implements OnInit {
     this.form.markAsUntouched();
     this.drawerOpen = true;
     this.cdr.detectChanges();
+    this.saveSuccess.set(false);
   }
 
   closeDrawer(): void {
@@ -512,10 +515,9 @@ export class LeasesComponent implements OnInit {
 
     req$.subscribe({
       next: (res: any) => {
+        this.saveSuccess.set(true); setTimeout(() => { this.saveSuccess.set(false); this.closeDrawer(); this.load(); }, 1500);
         this.toast.add({ severity: 'success', summary: 'Succès', detail: res.message });
         this.saving.set(false);
-        this.closeDrawer();
-        this.load();
       },
       error: (err: any) => {
         this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Une erreur est survenue.' });

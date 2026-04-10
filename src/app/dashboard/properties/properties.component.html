@@ -265,9 +265,11 @@
 
           <div class="drawer-actions">
             <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
-            <button type="submit" class="btn-primary" [disabled]="saving()">
+           <button type="submit" class="btn-primary" [disabled]="saving()">
               @if (saving()) {
                 <i class="pi pi-spin pi-spinner"></i> Enregistrement…
+              } @else if (saveSuccess()) {
+                <i class="pi pi-check-circle"></i> Enregistré avec succès ✓
               } @else {
                 <i class="pi pi-check"></i>
                 {{ editingProp() ? 'Mettre à jour' : 'Enregistrer' }}
