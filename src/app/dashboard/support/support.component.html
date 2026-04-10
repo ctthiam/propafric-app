@@ -1,0 +1,157 @@
+<p-toast position="top-right" />
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Support & Contact</h1>
+    <p class="page-subtitle">Signalez un problème, proposez une amélioration ou contactez notre équipe</p>
+  </div>
+  <button class="btn-primary" (click)="openForm()">
+    <i class="pi pi-plus"></i> Nouveau ticket
+  </button>
+</div>
+
+<!-- Cartes info -->
+<div class="info-cards">
+  <div class="info-card">
+    <div class="info-icon red"><i class="pi pi-exclamation-triangle"></i></div>
+    <div>
+      <div class="info-label">Bug / Problème</div>
+      <div class="info-desc">Un dysfonctionnement sur la plateforme</div>
+    </div>
+  </div>
+  <div class="info-card">
+    <div class="info-icon gold"><i class="pi pi-lightbulb"></i></div>
+    <div>
+      <div class="info-label">Demande de fonctionnalité</div>
+      <div class="info-desc">Une idée pour améliorer PropAfric</div>
+    </div>
+  </div>
+  <div class="info-card">
+    <div class="info-icon green"><i class="pi pi-envelope"></i></div>
+    <div>
+      <div class="info-label">Contact général</div>
+      <div class="info-desc">Toute autre question ou demande</div>
+    </div>
+  </div>
+</div>
+
+<!-- Liste des tickets -->
+<div class="section-header">
+  <h2 class="section-title">Mes tickets ({{ tickets().length }})</h2>
+</div>
+
+@if (loading()) {
+  <p-skeleton height="80px" borderRadius="12px" styleClass="mb-3" />
+  <p-skeleton height="80px" borderRadius="12px" styleClass="mb-3" />
+} @else if (tickets().length === 0) {
+  <div class="empty-state">
+    <i class="pi pi-life-ring"></i>
+    <p>Aucun ticket pour l'instant</p>
+    <button class="btn-primary" (click)="openForm()">
+      <i class="pi pi-plus"></i> Créer mon premier ticket
+    </button>
+  </div>
+} @else {
+  <div class="tickets-list">
+    @for (t of tickets(); track t.id) {
+      <div class="ticket-card" [class.ticket-resolved]="t.status === 'resolved' || t.status === 'closed'">
+        <div class="ticket-header">
+          <div class="ticket-badges">
+            <span class="badge {{ typeClass(t.type) }}">
+              <i class="{{ typeIcon(t.type) }}"></i> {{ typeLabel(t.type) }}
+            </span>
+            <span class="badge {{ priorityClass(t.priority) }}">{{ priorityLabel(t.priority) }}</span>
+          </div>
+          <span class="badge {{ statusClass(t.status) }}">{{ statusLabel(t.status) }}</span>
+        </div>
+        <div class="ticket-subject">{{ t.subject }}</div>
+        <div class="ticket-message">{{ t.message }}</div>
+        @if (t.admin_response) {
+          <div class="admin-response">
+            <div class="admin-response-label">
+              <i class="pi pi-reply"></i> Réponse de l'équipe ImmoAfric
+            </div>
+            <div class="admin-response-text">{{ t.admin_response }}</div>
+          </div>
+        }
+        <div class="ticket-footer">
+          <span class="ticket-date">{{ formatDate(t.created_at) }}</span>
+          @if (t.resolved_at) {
+            <span class="ticket-resolved-at">Résolu le {{ formatDate(t.resolved_at) }}</span>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Drawer formulaire -->
+@if (showForm) {
+  <div class="drawer-overlay" (click)="closeForm()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">Nouveau ticket</div>
+        <div class="drawer-sub">Notre équipe vous répondra sous 24-48h</div>
+      </div>
+      <button class="drawer-close" (click)="closeForm()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="submit()" class="drawer-form">
+
+        <div class="form-section-title">Type de demande</div>
+        <div class="type-grid">
+          @for (opt of typeOptions; track opt.value) {
+            <label class="type-item" [class.selected]="form.get('type')?.value === opt.value">
+              <input type="radio" formControlName="type" [value]="opt.value" style="display:none" />
+              {{ opt.label }}
+            </label>
+          }
+        </div>
+
+        <div class="form-section-title">Priorité</div>
+        <div class="priority-grid">
+          @for (opt of priorityOptions; track opt.value) {
+            <label class="priority-item" [class.selected]="form.get('priority')?.value === opt.value"
+              [class.priority-urgent]="opt.value === 'urgent'" [class.priority-high]="opt.value === 'high'">
+              <input type="radio" formControlName="priority" [value]="opt.value" style="display:none" />
+              {{ opt.label }}
+            </label>
+          }
+        </div>
+
+        <div class="form-section-title">Détails</div>
+        <div class="form-group">
+          <label>Sujet <span class="req">*</span></label>
+          <input class="pa-input" formControlName="subject" placeholder="Résumez votre demande en une phrase…" />
+          @if (form.get('subject')?.invalid && form.get('subject')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+        <div class="form-group">
+          <label>Description <span class="req">*</span></label>
+          <textarea class="pa-input" formControlName="message" rows="6"
+            placeholder="Décrivez votre problème ou demande en détail. Plus c'est précis, plus vite on peut vous aider…">
+          </textarea>
+          @if (form.get('message')?.invalid && form.get('message')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeForm()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) {
+              <i class="pi pi-spin pi-spinner"></i> Envoi…
+            } @else if (saveSuccess()) {
+              <i class="pi pi-check-circle"></i> Ticket envoyé ✓
+            } @else {
+              <i class="pi pi-send"></i> Envoyer le ticket
+            }
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}

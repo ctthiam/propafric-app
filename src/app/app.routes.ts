@@ -39,6 +39,7 @@ export const routes: Routes = [
       { path: 'abonnement',    loadComponent: () => import('./dashboard/subscription/subscription.component').then(m => m.SubscriptionComponent) },
       { path: 'archives', loadComponent: () => import('./dashboard/archives/archives.component').then(m => m.ArchivesComponent) },
       { path: 'parametres', canActivate: [adminOnlyGuard], loadComponent: () => import('./dashboard/settings/settings.component').then(m => m.SettingsComponent) },
+      { path: 'support', loadComponent: () => import('./dashboard/support/support.component').then(m => m.SupportComponent) },
     ]
   },
 
@@ -98,6 +99,7 @@ export const routes: Routes = [
       { path: 'agences',   loadComponent: () => import('./portal/super-admin/agencies/super-agencies/super-agencies.component').then(m => m.SuperAgenciesComponent) },
       { path: 'revenus',   loadComponent: () => import('./portal/super-admin/revenue/super-revenue/super-revenue.component').then(m => m.SuperRevenueComponent) },
       { path: 'commerciaux',   loadComponent: () => import('./portal/super-admin/commercials/super-commercials/super-commercials.component').then(m => m.SuperCommercialsComponent) },
+      { path: 'support', loadComponent: () => import('./portal/super-admin/support/super-support.component').then(m => m.SuperSupportComponent) },
     ]
   },
 

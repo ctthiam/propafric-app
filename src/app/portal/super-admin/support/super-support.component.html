@@ -1,0 +1,113 @@
+<p-toast position="top-right" />
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Tickets Support</h1>
+    <p class="page-subtitle">{{ tickets().length }} ticket(s) au total</p>
+  </div>
+</div>
+
+<!-- Filtres -->
+<div class="toolbar">
+  <select class="filter-select" [(ngModel)]="filterStatus" (change)="onFilterChange()">
+    @for (opt of statusOptions; track opt.value) {
+      <option [value]="opt.value">{{ opt.label }}</option>
+    }
+  </select>
+  <select class="filter-select" [(ngModel)]="filterType" (change)="onFilterChange()">
+    @for (opt of typeOptions; track opt.value) {
+      <option [value]="opt.value">{{ opt.label }}</option>
+    }
+  </select>
+</div>
+
+@if (loading()) {
+  <p-skeleton height="80px" borderRadius="12px" styleClass="mb-3" />
+  <p-skeleton height="80px" borderRadius="12px" styleClass="mb-3" />
+  <p-skeleton height="80px" borderRadius="12px" styleClass="mb-3" />
+} @else if (tickets().length === 0) {
+  <div class="empty-state">
+    <i class="pi pi-life-ring"></i>
+    <p>Aucun ticket</p>
+  </div>
+} @else {
+  <div class="tickets-list">
+    @for (t of tickets(); track t.id) {
+      <div class="ticket-card" [class.ticket-resolved]="t.status === 'resolved' || t.status === 'closed'"
+        (click)="openTicket(t)">
+        <div class="ticket-header">
+          <div class="ticket-badges">
+            <span class="badge {{ typeClass(t.type) }}">
+              <i class="{{ typeIcon(t.type) }}"></i> {{ typeLabel(t.type) }}
+            </span>
+            <span class="badge {{ priorityClass(t.priority) }}">{{ priorityLabel(t.priority) }}</span>
+            <span class="badge badge-agency">{{ t.agency?.name }}</span>
+          </div>
+          <span class="badge {{ statusClass(t.status) }}">{{ statusLabel(t.status) }}</span>
+        </div>
+        <div class="ticket-subject">{{ t.subject }}</div>
+        <div class="ticket-preview">{{ t.message }}</div>
+        <div class="ticket-footer">
+          <span class="ticket-user">{{ t.user?.name }}</span>
+          <span class="ticket-date">{{ formatDate(t.created_at) }}</span>
+        </div>
+      </div>
+    }
+  </div>
+}
+
+<!-- Drawer réponse -->
+@if (drawerOpen && selectedTicket()) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ selectedTicket()!.subject }}</div>
+        <div class="drawer-sub">
+          {{ selectedTicket()!.agency?.name }} — {{ selectedTicket()!.user?.name }}
+          — {{ formatDate(selectedTicket()!.created_at) }}
+        </div>
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+
+      <div class="ticket-badges" style="margin-bottom:16px;">
+        <span class="badge {{ typeClass(selectedTicket()!.type) }}">{{ typeLabel(selectedTicket()!.type) }}</span>
+        <span class="badge {{ priorityClass(selectedTicket()!.priority) }}">{{ priorityLabel(selectedTicket()!.priority) }}</span>
+        <span class="badge {{ statusClass(selectedTicket()!.status) }}">{{ statusLabel(selectedTicket()!.status) }}</span>
+      </div>
+
+      <div class="detail-section-title">Message du client</div>
+      <div class="ticket-full-message">{{ selectedTicket()!.message }}</div>
+
+      <form [formGroup]="responseForm" (ngSubmit)="respond()" class="response-form">
+        <div class="detail-section-title">Répondre</div>
+
+        <div class="form-group">
+          <label>Statut</label>
+          <select class="pa-input" formControlName="status">
+            <option value="open">Ouvert</option>
+            <option value="in_progress">En cours</option>
+            <option value="resolved">Résolu</option>
+            <option value="closed">Fermé</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Réponse</label>
+          <textarea class="pa-input" formControlName="admin_response" rows="6"
+            placeholder="Votre réponse au client…"></textarea>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> Envoi… }
+            @else { <i class="pi pi-check"></i> Mettre à jour }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
