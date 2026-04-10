@@ -1,5 +1,7 @@
 import { Component, signal, computed, HostListener, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
+
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
@@ -45,6 +47,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
 
   readonly user = this.auth.user;
 
+  navigating = false;
+
   private readonly allNavItems: NavItem[] = [
     { label: 'Tableau de bord', icon: 'pi pi-th-large',   route: '/dashboard' },
     { label: 'Propriétaires',   icon: 'pi pi-users',       route: '/dashboard/proprietaires', roles: ['agency_admin', 'agency_secretary'] },
@@ -75,7 +79,14 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private router: Router,
     private cdr: ChangeDetectorRef,
-  ) {}
+  ) {
+     this.router.events.subscribe(event => {
+      if (event instanceof NavigationStart) this.navigating = true;
+      if (event instanceof NavigationEnd || event instanceof NavigationCancel || event instanceof NavigationError) {
+        this.navigating = false;
+      }
+    });
+  }
 
   ngOnInit(): void {
     this.loadUnreadCount();

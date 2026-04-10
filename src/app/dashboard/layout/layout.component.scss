@@ -558,3 +558,19 @@ $transition:          0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-shrink: 0;
   margin-top: 4px;
 }
+
+.nav-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #2D6A4F, #C9A84C);
+  z-index: 9999;
+  animation: progress 1s ease-in-out infinite;
+}
+@keyframes progress {
+  0%   { width: 0%; opacity: 1; }
+  50%  { width: 70%; opacity: 1; }
+  100% { width: 100%; opacity: 0; }
+}
