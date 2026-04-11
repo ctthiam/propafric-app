@@ -36,6 +36,13 @@ export class SubscriptionComponent implements OnInit {
 
   plans: PlanOption[] = [
     {
+      key: 'solo', label: 'Solo',
+      price_monthly: 5000, price_yearly: 50000,
+      max_properties: '5 biens',
+      popular: false,
+      features: ['Gestion en autonomie', 'Baux + échéances + paiements', 'Quittances PDF', 'Portail locataire', 'Support standard'],
+    },
+    {
       key: 'starter', label: 'Starter',
       price_monthly: 10000, price_yearly: 100000,
       max_properties: '10 biens',

@@ -183,10 +183,10 @@ export class SettingsComponent implements OnInit {
     });
   }
 
-  planLabel(p: string): string {
-    return ({ starter: 'Starter', pro: 'Pro', premium: 'Premium', partner: 'Partenaire' } as any)[p] ?? p;
+ planLabel(p: string): string {
+    return ({ solo: 'Solo', starter: 'Starter', pro: 'Pro', premium: 'Premium', partner: 'Partenaire' } as any)[p] ?? p;
   }
   planClass(p: string): string {
-    return ({ starter: 'badge-neutral', pro: 'badge-blue', premium: 'badge-gold', partner: 'badge-success' } as any)[p] ?? '';
+    return ({ solo: 'badge-green', starter: 'badge-neutral', pro: 'badge-blue', premium: 'badge-gold', partner: 'badge-success' } as any)[p] ?? '';
   }
 }
