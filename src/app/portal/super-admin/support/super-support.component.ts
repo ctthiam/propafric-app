@@ -17,7 +17,7 @@ import { MessageService } from 'primeng/api';
   styleUrls: ['./super-support.component.scss'],
 })
 export class SuperSupportComponent implements OnInit {
-  private api = `${environment.apiUrl}/super-admin/support/tickets`;
+  private api = `${environment.apiUrl}/agency/super-admin/support/tickets`;
 
   tickets      = signal<any[]>([]);
   loading      = signal(true);
