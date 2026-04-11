@@ -99,7 +99,7 @@ export class TenantsComponent implements OnInit {
       phone:                   ['', Validators.required],
       phone_2:                 [''],
       tenant_type:             ['individual'],
-      nationality:             ['Sénégalaise'],
+      nationality:             [''], // Sénégalaise
       profession:              [''],
       company_name:            [''],
       employer:                [''],
@@ -134,7 +134,7 @@ export class TenantsComponent implements OnInit {
 
   openCreate(): void {
     this.editingTenant.set(null);
-    this.form.reset({ nationality: 'Sénégalaise', tenant_type: 'individual' });
+    this.form.reset({ nationality: '', tenant_type: 'individual' });
     this.saveSuccess.set(false);
     this.drawerOpen = true;
     this.cdr.detectChanges();
