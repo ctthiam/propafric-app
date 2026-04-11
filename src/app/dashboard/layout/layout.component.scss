@@ -106,7 +106,7 @@ $transition:          0.3s cubic-bezier(0.4, 0, 0.2, 1);
   flex-direction: column;
   gap: 2px;
 
-  &::-webkit-scrollbar { width: 5px; }
+  &::-webkit-scrollbar { width: 8px; }
   &::-webkit-scrollbar-thumb { background: rgba(white, 0.3); border-radius: 4px; }
   &::-webkit-scrollbar-thumb:hover { background: rgba(white, 0.5); }
 }
