@@ -80,9 +80,9 @@ export class LandingComponent implements OnInit, AfterViewInit, OnDestroy {
     },
     {
       id: 'enterprise',
-      name: 'Entreprise',
-      priceMonthly: null,
-      priceAnnual:  null,
+      name: 'Premium',
+      priceMonthly: '50 000',
+      priceAnnual:  '500 000',
       period: 'Biens illimités · Multi-agences',
       desc: 'Pour les grands groupes immobiliers et les réseaux d\'agences en Afrique de l\'Ouest.',
       features: [
