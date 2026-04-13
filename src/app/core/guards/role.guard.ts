@@ -77,3 +77,15 @@ export const superAdminGuard: CanActivateFn = () => {
   if (role === 'owner')  return router.createUrlTree(['/portail-proprietaire']);
   return router.createUrlTree(['/auth/login']);
 };
+
+export const ownerManagerGuard: CanActivateFn = () => {
+  const auth   = inject(AuthService);
+  const router = inject(Router);
+  const role   = auth.user()?.role;
+  if (role === 'owner_manager') return true;
+  if (role && AGENCY_ROLES.includes(role)) return router.createUrlTree(['/dashboard']);
+  if (role === 'super_admin') return router.createUrlTree(['/super-admin/dashboard']);
+  if (role === 'tenant')      return router.createUrlTree(['/portail-locataire']);
+  if (role === 'owner')       return router.createUrlTree(['/portail-proprietaire']);
+  return router.createUrlTree(['/auth/login']);
+};

@@ -1,0 +1,40 @@
+$green:  #2D6A4F;
+$gold:   #C9A84C;
+$ink:    #0d1f17;
+$ink-l:  #4a6357;
+$white:  #ffffff;
+$red:    #e57373;
+$cream:  #faf8f3;
+
+.register-page { min-height:100vh; background:$cream; display:flex; align-items:center; justify-content:center; padding:24px; }
+.register-card { background:$white; border-radius:20px; border:1px solid rgba($ink,.08); padding:40px; width:100%; max-width:480px; box-shadow:0 8px 40px rgba($ink,.08); }
+
+.register-header { text-align:center; margin-bottom:28px; }
+.register-logo { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:700; color:$ink; margin-bottom:16px;
+  span { color:$gold; }
+}
+.register-title { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; color:$ink; margin:0 0 8px; }
+.register-sub { font-size:13px; color:$ink-l; margin:0; }
+
+.alert-error   { background:rgba($red,.08); border:1px solid rgba($red,.2); border-radius:10px; padding:12px 14px; font-size:13px; color:darken($red,15%); display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+.alert-success { background:rgba($green,.08); border:1px solid rgba($green,.2); border-radius:10px; padding:12px 14px; font-size:13px; color:$green; display:flex; align-items:center; gap:8px; margin-bottom:16px; }
+
+.register-form { display:flex; flex-direction:column; gap:14px; }
+.form-row-2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.form-group { display:flex; flex-direction:column; gap:6px;
+  label { font-size:13px; font-weight:500; color:$ink-l; }
+}
+.pa-input { width:100%; padding:10px 14px; border:1.5px solid rgba($ink,.12); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; color:$ink; background:$white; outline:none; transition:border-color .2s; box-sizing:border-box;
+  &:focus { border-color:$green; }
+}
+.form-error { font-size:11px; color:$red; }
+.req { color:$red; }
+
+.btn-register { width:100%; padding:14px; background:$green; color:$white; border:none; border-radius:12px; font-size:14px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; display:flex; align-items:center; justify-content:center; gap:8px; transition:all .2s; margin-top:8px;
+  &:hover:not(:disabled) { background:darken($green,8%); }
+  &:disabled { opacity:.7; cursor:not-allowed; }
+}
+
+.register-footer { text-align:center; margin-top:20px; font-size:13px; color:$ink-l;
+  a { color:$green; font-weight:600; text-decoration:none; &:hover { text-decoration:underline; } }
+}

@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard }  from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
+import { ownerManagerGuard } from './core/guards/role.guard';
 import { agencyGuard, adminOnlyGuard, tenantGuard, ownerGuard, superAdminGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
@@ -102,6 +103,22 @@ export const routes: Routes = [
       { path: 'support', loadComponent: () => import('./portal/super-admin/support/super-support.component').then(m => m.SuperSupportComponent) },
     ]
   },
+
+  {
+  path: 'gestionnaire',
+  canActivate: [authGuard, ownerManagerGuard],
+  loadComponent: () => import('./owner-manager/layout/om-layout.component').then(m => m.OmLayoutComponent),
+  children: [
+    { path: '',           redirectTo: 'dashboard', pathMatch: 'full' },
+    { path: 'inscription-gestionnaire', loadComponent: () => import('./owner-manager/auth/om-register.component').then(m => m.OmRegisterComponent) },
+    { path: 'dashboard',  loadComponent: () => import('./owner-manager/dashboard/om-dashboard.component').then(m => m.OmDashboardComponent) },
+    { path: 'biens',      loadComponent: () => import('./owner-manager/properties/om-properties.component').then(m => m.OmPropertiesComponent) },
+    { path: 'locataires', loadComponent: () => import('./owner-manager/tenants/om-tenants.component').then(m => m.OmTenantsComponent) },
+    { path: 'baux',       loadComponent: () => import('./owner-manager/leases/om-leases.component').then(m => m.OmLeasesComponent) },
+    { path: 'paiements',  loadComponent: () => import('./owner-manager/payments/om-payments.component').then(m => m.OmPaymentsComponent) },
+    { path: 'depenses',   loadComponent: () => import('./owner-manager/expenses/om-expenses.component').then(m => m.OmExpensesComponent) },
+  ]
+},
 
   { path: '**', redirectTo: 'dashboard' }
 ];

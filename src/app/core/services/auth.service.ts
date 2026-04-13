@@ -13,7 +13,7 @@ export interface User {
   last_name?: string;
   email: string;
   phone: string | null;
-  role: 'super_admin' | 'agency_admin' | 'agency_secretary' | 'agency_accountant' | 'owner' | 'tenant' | 'commercial';
+  role: 'super_admin' | 'agency_admin' | 'agency_secretary' | 'agency_accountant' | 'owner' | 'tenant' | 'commercial' | 'owner_manager';
   agency_id: number | null;
 }
 
@@ -133,6 +133,9 @@ private redirectAfterLogin(user: User): void {
     case 'commercial':
       this.router.navigate(['/commercial/dashboard']);
       break;
+    case 'owner_manager':
+      this.router.navigate(['/gestionnaire']);
+      break;      
     default:
       this.router.navigate(['/dashboard']);
   }

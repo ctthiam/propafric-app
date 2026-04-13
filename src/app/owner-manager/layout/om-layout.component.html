@@ -1,0 +1,40 @@
+@if (navigating) {
+  <div class="nav-progress"></div>
+}
+
+<div class="om-shell">
+  <!-- Sidebar -->
+  <aside class="om-sidebar">
+    <div class="om-logo">
+      <span class="om-logo-text">Prop<span class="om-logo-accent">Afric</span></span>
+      <span class="om-logo-badge">Gestionnaire</span>
+    </div>
+
+    <nav class="om-nav">
+      @for (item of navItems; track item.route) {
+        <a class="om-nav-item" [routerLink]="item.route" routerLinkActive="active">
+          <i class="{{ item.icon }}"></i>
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="om-sidebar-footer">
+      <div class="om-user">
+        <div class="om-avatar">{{ initials }}</div>
+        <div class="om-user-info">
+          <div class="om-user-name">{{ userName }}</div>
+          <div class="om-user-role">Gestionnaire indépendant</div>
+        </div>
+      </div>
+      <button class="om-logout" (click)="logout()">
+        <i class="pi pi-sign-out"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="om-main">
+    <router-outlet />
+  </main>
+</div>

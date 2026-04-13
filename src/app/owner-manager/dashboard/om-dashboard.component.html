@@ -1,0 +1,79 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Tableau de bord</h1>
+    <p class="page-subtitle">Bienvenue, {{ data()?.manager?.full_name ?? 'Gestionnaire' }}</p>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="kpi-grid">
+    @for (i of [1,2,3,4]; track i) {
+      <p-skeleton height="100px" borderRadius="16px" />
+    }
+  </div>
+} @else if (data()) {
+
+  @if (data().manager.status === 'trial') {
+    <div class="trial-banner">
+      <i class="pi pi-clock"></i>
+      Période d'essai — expire le {{ data().manager.trial_ends_at }}
+    </div>
+  }
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-icon green"><i class="pi pi-building"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-label">Total biens</div>
+        <div class="kpi-value">{{ data().stats.total_properties }}</div>
+        <div class="kpi-sub">sur {{ data().manager.max_properties }} max</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon gold"><i class="pi pi-home"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-label">Biens occupés</div>
+        <div class="kpi-value">{{ data().stats.occupied_properties }}</div>
+        <div class="kpi-sub">{{ data().stats.available_properties }} disponible(s)</div>
+      </div>
+    </div>
+    <div class="kpi-card" [class.urgent]="data().stats.overdue_count > 0">
+      <div class="kpi-icon red"><i class="pi pi-exclamation-triangle"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-label">Loyers en retard</div>
+        <div class="kpi-value">{{ data().stats.overdue_count }}</div>
+        <div class="kpi-sub">{{ formatCurrency(data().stats.total_due) }}</div>
+      </div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-icon blue"><i class="pi pi-star"></i></div>
+      <div class="kpi-body">
+        <div class="kpi-label">Plan actuel</div>
+        <div class="kpi-value" style="font-size:18px; text-transform:capitalize">{{ data().manager.plan }}</div>
+        <div class="kpi-sub">{{ data().manager.status }}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <h2 class="section-title">Actions rapides</h2>
+    <div class="actions-grid">
+      <a routerLink="/gestionnaire/biens" class="action-card">
+        <i class="pi pi-building"></i>
+        <span>Gérer mes biens</span>
+      </a>
+      <a routerLink="/gestionnaire/locataires" class="action-card">
+        <i class="pi pi-users"></i>
+        <span>Mes locataires</span>
+      </a>
+      <a routerLink="/gestionnaire/baux" class="action-card">
+        <i class="pi pi-file"></i>
+        <span>Mes baux</span>
+      </a>
+      <a routerLink="/gestionnaire/paiements" class="action-card">
+        <i class="pi pi-credit-card"></i>
+        <span>Paiements</span>
+      </a>
+    </div>
+  </div>
+}

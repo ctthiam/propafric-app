@@ -1,0 +1,42 @@
+$green:  #2D6A4F;
+$gold:   #C9A84C;
+$cream:  #faf8f3;
+$ink:    #0d1f17;
+$ink-l:  #4a6357;
+$white:  #ffffff;
+$sidebar-w: 240px;
+
+.nav-progress { position:fixed; top:0; left:0; width:100%; height:3px; background:linear-gradient(90deg,$green,$gold); z-index:9999; animation:progress 1s ease-in-out infinite; }
+@keyframes progress { 0% { width:0%; opacity:1; } 50% { width:70%; opacity:1; } 100% { width:100%; opacity:0; } }
+
+.om-shell { display:flex; min-height:100vh; background:$cream; }
+
+.om-sidebar { width:$sidebar-w; background:$ink; display:flex; flex-direction:column; position:fixed; top:0; left:0; bottom:0; z-index:200; }
+
+.om-logo { padding:24px 20px 20px; border-bottom:1px solid rgba(white,.08); }
+.om-logo-text { font-family:'Cormorant Garamond',serif; font-size:22px; font-weight:700; color:white; }
+.om-logo-accent { color:$gold; }
+.om-logo-badge { display:block; font-size:10px; color:rgba(white,.5); text-transform:uppercase; letter-spacing:1.5px; margin-top:4px; }
+
+.om-nav { flex:1; padding:16px 10px; display:flex; flex-direction:column; gap:2px; overflow-y:auto; overflow-x:hidden;
+  &::-webkit-scrollbar { width:4px; }
+  &::-webkit-scrollbar-thumb { background:rgba(white,.15); border-radius:4px; }
+}
+
+.om-nav-item { display:flex; align-items:center; gap:12px; padding:10px 14px; border-radius:10px; color:rgba(white,.6); font-size:13px; font-weight:500; text-decoration:none; transition:all .2s; font-family:'DM Sans',sans-serif;
+  i { font-size:16px; width:20px; flex-shrink:0; }
+  &:hover { background:rgba(white,.07); color:rgba(white,.9); }
+  &.active { background:rgba($gold,.15); color:$gold; font-weight:700; }
+}
+
+.om-sidebar-footer { padding:16px; border-top:1px solid rgba(white,.08); display:flex; align-items:center; gap:10px; }
+.om-user { display:flex; align-items:center; gap:10px; flex:1; min-width:0; }
+.om-avatar { width:36px; height:36px; border-radius:10px; background:rgba($gold,.2); color:$gold; display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; flex-shrink:0; }
+.om-user-info { min-width:0; }
+.om-user-name { font-size:13px; font-weight:600; color:white; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.om-user-role { font-size:11px; color:rgba(white,.4); }
+.om-logout { width:32px; height:32px; border:none; background:rgba(white,.06); border-radius:8px; cursor:pointer; color:rgba(white,.5); display:flex; align-items:center; justify-content:center; font-size:14px; transition:all .2s; flex-shrink:0;
+  &:hover { background:rgba(white,.12); color:white; }
+}
+
+.om-main { margin-left:$sidebar-w; flex:1; padding:32px; min-height:100vh; }
