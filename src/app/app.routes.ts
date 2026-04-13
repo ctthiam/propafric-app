@@ -14,6 +14,7 @@ export const routes: Routes = [
     children: [
       { path: 'login', loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
       { path: '', redirectTo: 'login', pathMatch: 'full' },
+      { path: 'inscription-gestionnaire', loadComponent: () => import('./owner-manager/auth/om-register.component').then(m => m.OmRegisterComponent) },
     ]
   },
 
@@ -110,7 +111,6 @@ export const routes: Routes = [
   loadComponent: () => import('./owner-manager/layout/om-layout.component').then(m => m.OmLayoutComponent),
   children: [
     { path: '',           redirectTo: 'dashboard', pathMatch: 'full' },
-    { path: 'inscription-gestionnaire', loadComponent: () => import('./owner-manager/auth/om-register.component').then(m => m.OmRegisterComponent) },
     { path: 'dashboard',  loadComponent: () => import('./owner-manager/dashboard/om-dashboard.component').then(m => m.OmDashboardComponent) },
     { path: 'biens',      loadComponent: () => import('./owner-manager/properties/om-properties.component').then(m => m.OmPropertiesComponent) },
     { path: 'locataires', loadComponent: () => import('./owner-manager/tenants/om-tenants.component').then(m => m.OmTenantsComponent) },
