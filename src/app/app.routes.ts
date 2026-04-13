@@ -13,7 +13,8 @@ export const routes: Routes = [
     canActivate: [guestGuard],
     children: [
       { path: 'login', loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
-      { path: '', redirectTo: 'login', pathMatch: 'full' },
+      { path: 'landing-p', loadComponent: () => import('./landing/landing.component').then(m => m.LandingComponent) },
+      { path: '', redirectTo: 'landing-p', pathMatch: 'full' },
       { path: 'inscription-gestionnaire', loadComponent: () => import('./owner-manager/auth/om-register.component').then(m => m.OmRegisterComponent) },
     ]
   },
