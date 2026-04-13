@@ -5,16 +5,14 @@ import { ownerManagerGuard } from './core/guards/role.guard';
 import { agencyGuard, adminOnlyGuard, tenantGuard, ownerGuard, superAdminGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-
+  { path: '', loadComponent: () => import('./landing/landing.component').then(m => m.LandingComponent) },
   // ── Auth ──
   {
     path: 'auth',
     canActivate: [guestGuard],
     children: [
       { path: 'login', loadComponent: () => import('./auth/login/login.component').then(m => m.LoginComponent) },
-      { path: 'landing-p', loadComponent: () => import('./landing/landing.component').then(m => m.LandingComponent) },
-      { path: '', redirectTo: 'landing-p', pathMatch: 'full' },
+      { path: '', redirectTo: 'login', pathMatch: 'full' },
       { path: 'inscription-gestionnaire', loadComponent: () => import('./owner-manager/auth/om-register.component').then(m => m.OmRegisterComponent) },
     ]
   },
