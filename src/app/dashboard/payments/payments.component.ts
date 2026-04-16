@@ -295,12 +295,15 @@ export class PaymentsComponent implements OnInit {
   }
 
   private cancelPayment(id: number): void {
-    this.http.delete<any>(`${this.api}/rent-payments/${id}`).subscribe({
+    this.http.request<any>('delete', `${this.api}/rent-payments/${id}`, {
+      body: { reason: 'Annulation à la demande de l\'agence' }
+    }).subscribe({
       next: (res: any) => {
         this.toast.add({ severity: 'success', summary: 'Annulé', detail: res.message });
+        this.loadPayments();
         this.loadSchedules();
       },
-      error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Annulation impossible.' })
+      error: (err: any) => this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Annulation impossible.' })
     });
   }
 
