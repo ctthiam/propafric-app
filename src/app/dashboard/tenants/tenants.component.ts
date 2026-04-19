@@ -11,6 +11,16 @@ import { SkeletonModule }      from 'primeng/skeleton';
 import { TooltipModule }       from 'primeng/tooltip';
 import { ConfirmationService, MessageService } from 'primeng/api';
 
+export interface TenantActiveLease {
+  id: number;
+  reference: string;
+  property_id: number;
+  property?: { id: number; name: string; reference: string; owner_id: number | null; };
+}
+
+export interface OwnerOption   { id: number; full_name: string; }
+export interface PropertyOption { id: number; name: string; reference: string; owner_id: number | null; }
+
 export interface Tenant {
   id: number;
   user_id: number | null;
@@ -26,7 +36,7 @@ export interface Tenant {
   tenant_type: string;
   has_insurance: boolean;
   has_portal: boolean;
-  active_lease: any | null;
+  active_lease: TenantActiveLease | null;
   address?: string | null;
   city?: string | null;
   id_type?: string | null;
@@ -52,23 +62,34 @@ export interface Tenant {
 export class TenantsComponent implements OnInit {
   private api = `${environment.apiUrl}/agency`;
 
-  tenants       = signal<Tenant[]>([]);
-  loading       = signal(true);
-  saving        = signal(false);
-  saveSuccess   = signal(false);
-  editingTenant = signal<Tenant | null>(null);
-  viewingTenant = signal<Tenant | null>(null);
-  search        = signal('');
-  drawerOpen    = false;
-  detailOpen    = false;
+  tenants          = signal<Tenant[]>([]);
+  owners           = signal<OwnerOption[]>([]);
+  properties       = signal<PropertyOption[]>([]);
+  loading          = signal(true);
+  saving           = signal(false);
+  saveSuccess      = signal(false);
+  editingTenant    = signal<Tenant | null>(null);
+  viewingTenant    = signal<Tenant | null>(null);
+  search           = signal('');
+  filterOwnerId    = signal<number | null>(null);
+  filterPropertyId = signal<number | null>(null);
+  drawerOpen       = false;
+  detailOpen       = false;
+
+  filteredPropertyOptions = computed(() => {
+    const oid = this.filterOwnerId();
+    return oid ? this.properties().filter(p => p.owner_id === oid) : this.properties();
+  });
 
   filteredTenants = computed(() => {
-    const q = this.search().toLowerCase();
-    const list = this.tenants();
-    if (!q) return list;
-    return list.filter(t =>
-      `${t.first_name} ${t.last_name} ${t.email} ${t.phone}`.toLowerCase().includes(q)
-    );
+    const q   = this.search().toLowerCase();
+    const oid = this.filterOwnerId();
+    const pid = this.filterPropertyId();
+    let list  = this.tenants();
+    if (q)   list = list.filter(t => `${t.first_name} ${t.last_name} ${t.email} ${t.phone}`.toLowerCase().includes(q));
+    if (oid)  list = list.filter(t => t.active_lease?.property?.owner_id === oid);
+    if (pid)  list = list.filter(t => t.active_lease?.property_id === pid);
+    return list;
   });
 
   form: FormGroup;
@@ -114,11 +135,15 @@ export class TenantsComponent implements OnInit {
     });
   }
 
-  ngOnInit(): void { this.load(); }
+  ngOnInit(): void {
+    this.load();
+    this.loadOwners();
+    this.loadProperties();
+  }
 
   load(): void {
     this.loading.set(true);
-    this.http.get<any>(`${this.api}/tenants`).subscribe({
+    this.http.get<any>(`${this.api}/tenants?per_page=500`).subscribe({
       next: (res: any) => {
         const list = Array.isArray(res?.data) ? res.data : [];
         this.tenants.set(list);
@@ -142,7 +167,7 @@ export class TenantsComponent implements OnInit {
 
   openEdit(t: Tenant): void {
     this.editingTenant.set(t);
-    this.form.patchValue({ ...t, portal_password: '' });
+    this.form.patchValue({ ...t, portal_password: '' }, { emitEvent: false });
     this.form.markAsUntouched();
     this.saveSuccess.set(false);
     this.drawerOpen = true;
@@ -242,6 +267,31 @@ export class TenantsComponent implements OnInit {
       },
       error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Suppression impossible.' })
     });
+  }
+
+  loadOwners(): void {
+    this.http.get<any>(`${this.api}/owners?per_page=200`).subscribe({
+      next: (res: any) => this.owners.set(Array.isArray(res?.data) ? res.data : [])
+    });
+  }
+
+  loadProperties(): void {
+    this.http.get<any>(`${this.api}/properties?per_page=500`).subscribe({
+      next: (res: any) => this.properties.set(Array.isArray(res?.data) ? res.data : [])
+    });
+  }
+
+  onFilterOwner(e: Event): void {
+    const val = (e.target as HTMLSelectElement).value;
+    this.filterOwnerId.set(val ? +val : null);
+    this.filterPropertyId.set(null);
+    this.cdr.detectChanges();
+  }
+
+  onFilterProperty(e: Event): void {
+    const val = (e.target as HTMLSelectElement).value;
+    this.filterPropertyId.set(val ? +val : null);
+    this.cdr.detectChanges();
   }
 
   onSearch(e: Event): void { this.search.set((e.target as HTMLInputElement).value); }

@@ -20,6 +20,18 @@
     <i class="pi pi-search"></i>
     <input type="text" placeholder="Rechercher un locataire…" (input)="onSearch($event)" />
   </div>
+  <select class="filter-select" (change)="onFilterOwner($event)">
+    <option value="">Tous les propriétaires</option>
+    @for (o of owners(); track o.id) {
+      <option [value]="o.id" [selected]="filterOwnerId() === o.id">{{ o.full_name }}</option>
+    }
+  </select>
+  <select class="filter-select" (change)="onFilterProperty($event)">
+    <option value="" [selected]="filterPropertyId() === null">Tous les biens</option>
+    @for (p of filteredPropertyOptions(); track p.id) {
+      <option [value]="p.id" [selected]="filterPropertyId() === p.id">{{ p.name }}</option>
+    }
+  </select>
 </div>
 
 <div class="table-card">

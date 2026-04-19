@@ -157,7 +157,7 @@ export class PaymentsComponent implements OnInit {
 
   loadSchedules(): void {
     this.loading.set(true);
-    this.http.get<any>(`${this.api}/rent-schedules`).subscribe({
+    this.http.get<any>(`${this.api}/rent-schedules?per_page=500`).subscribe({
       next: (res: any) => {
         const list: PaymentSchedule[] = Array.isArray(res?.data) ? res.data : [];
         this.schedules.set(list);
