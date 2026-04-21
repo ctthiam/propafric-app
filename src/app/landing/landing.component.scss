@@ -458,7 +458,8 @@ footer { background: var(--green-deep); padding: 60px 60px 32px; }
   :host { cursor: auto; }
   .cursor, .cursor-ring { display: none; }
   nav { padding: 16px 24px; &.scrolled { padding: 12px 24px; } }
-  .nav-links, .nav-cta { display: none; }
+  .nav-links { display: none; }
+  .nav-cta .btn-primary { display: none; }
   .hero { padding: 100px 24px 60px; }
   .logos-section { padding: 32px 24px; }
   .logos-row { gap: 32px; }
