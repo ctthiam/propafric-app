@@ -136,7 +136,7 @@ export class HomeComponent implements OnInit {
 
   canSeePaiements(): boolean {
   const role = this.auth.user()?.role;
-  return role === 'agency_admin' || role === 'agency_accountant';
+  return role === 'agency_admin' || role === 'agency_accountant' || role === 'agency_secretary';
 }
 
   setPeriod(p: 'month' | 'quarter' | 'year'): void {

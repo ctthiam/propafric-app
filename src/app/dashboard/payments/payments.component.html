@@ -25,7 +25,7 @@
 <div class="tabs-bar">
   <button class="tab-btn" [class.active]="activeTab() === 'schedules'" (click)="activeTab.set('schedules')">
     <i class="pi pi-calendar-times"></i> Échéances
-    <span class="tab-count" [class.danger]="schedules().length > 0">{{ schedules().length }}</span>
+    <span class="tab-count" [class.danger]="schedules().filter(s => s.status === 'late').length > 0">{{ schedules().length }}</span>
   </button>
   <button class="tab-btn" [class.active]="activeTab() === 'payments'" (click)="activeTab.set('payments')">
     <i class="pi pi-credit-card"></i> Paiements
@@ -105,7 +105,7 @@
                 <td><span class="badge {{ statusClass(sc.status) }}">{{ statusLabel(sc.status) }}</span></td>
                 <td>
                   <div class="actions-cell">
-                    @if (sc.status !== 'paid') {
+                    @if (sc.status !== 'paid' && sc.status !== 'cancelled') {
                       <button class="btn-icon btn-pay" (click)="openCreate(sc)" pTooltip="Encaisser" tooltipPosition="top">
                         <i class="pi pi-plus"></i>
                       </button>
@@ -211,8 +211,10 @@
         </div>
         <div class="form-group">
           <label>Échéance (optionnel)</label>
-          <p-dropdown formControlName="schedule_id" [options]="scheduleOptions" optionLabel="label" optionValue="value" placeholder="Lier à une échéance" [showClear]="true" styleClass="w-full" />
-          <span class="form-hint">Si vide, s'applique à l'échéance la plus ancienne.</span>
+          <p-dropdown formControlName="schedule_id" [options]="scheduleOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner une échéance" styleClass="w-full" />
+          @if (form.get('schedule_id')?.invalid && form.get('schedule_id')?.touched) {
+            <span class="form-error">Requis</span>
+          }
         </div>
 
         <div class="form-section-title">Détails du paiement</div>

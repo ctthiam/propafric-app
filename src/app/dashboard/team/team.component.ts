@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+import { AuthService } from '../../core/services/auth.service';
 import { DropdownModule }      from 'primeng/dropdown';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ToastModule }         from 'primeng/toast';
@@ -59,12 +60,15 @@ export class TeamComponent implements OnInit {
     { label: 'Comptable',       value: 'agency_accountant' },
   ];
 
+  readonly isAdmin = computed(() => this.auth.user()?.role === 'agency_admin');
+
   constructor(
     private http: HttpClient,
     private fb: FormBuilder,
     private confirm: ConfirmationService,
     private toast: MessageService,
     private cdr: ChangeDetectorRef,
+    private auth: AuthService,
   ) {
     this.form = this.fb.group({
       first_name: ['', Validators.required],

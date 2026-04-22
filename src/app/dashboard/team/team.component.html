@@ -10,9 +10,11 @@
     <h1 class="page-title">Équipe</h1>
     <p class="page-subtitle">{{ members().length }} membre(s) dans votre agence</p>
   </div>
-  <button class="btn-primary" (click)="openCreate()">
-    <i class="pi pi-plus"></i> Ajouter un membre
-  </button>
+  @if (isAdmin()) {
+    <button class="btn-primary" (click)="openCreate()">
+      <i class="pi pi-plus"></i> Ajouter un membre
+    </button>
+  }
 </div>
 
 <div class="toolbar">
@@ -75,24 +77,26 @@
                 }
               </td>
               <td>
-                <div class="actions-cell">
-                  <button class="btn-icon btn-edit" (click)="openEdit(m)" pTooltip="Modifier" tooltipPosition="top">
-                    <i class="pi pi-pencil"></i>
-                  </button>
-                  <button
-                    class="btn-icon"
-                    [class.btn-warn]="m.is_active"
-                    [class.btn-success]="!m.is_active"
-                    (click)="toggleActive(m)"
-                    [pTooltip]="m.is_active ? 'Désactiver' : 'Activer'"
-                    tooltipPosition="top"
-                  >
-                    <i [class]="m.is_active ? 'pi pi-ban' : 'pi pi-check-circle'"></i>
-                  </button>
-                  <button class="btn-icon btn-delete" (click)="confirmDelete(m)" pTooltip="Supprimer" tooltipPosition="top">
-                    <i class="pi pi-trash"></i>
-                  </button>
-                </div>
+                @if (isAdmin()) {
+                  <div class="actions-cell">
+                    <button class="btn-icon btn-edit" (click)="openEdit(m)" pTooltip="Modifier" tooltipPosition="top">
+                      <i class="pi pi-pencil"></i>
+                    </button>
+                    <button
+                      class="btn-icon"
+                      [class.btn-warn]="m.is_active"
+                      [class.btn-success]="!m.is_active"
+                      (click)="toggleActive(m)"
+                      [pTooltip]="m.is_active ? 'Désactiver' : 'Activer'"
+                      tooltipPosition="top"
+                    >
+                      <i [class]="m.is_active ? 'pi pi-ban' : 'pi pi-check-circle'"></i>
+                    </button>
+                    <button class="btn-icon btn-delete" (click)="confirmDelete(m)" pTooltip="Supprimer" tooltipPosition="top">
+                      <i class="pi pi-trash"></i>
+                    </button>
+                  </div>
+                }
               </td>
             </tr>
           }
@@ -170,7 +174,7 @@
           <div class="role-info-box">
             @if (form.get('role')?.value === 'agency_secretary') {
               <i class="pi pi-info-circle"></i>
-              <span>Le secrétaire a accès à : Dashboard, Biens, Propriétaires, Locataires, Baux, Prestataires</span>
+              <span>Le secrétaire a accès à toutes les fonctionnalités opérationnelles (baux, paiements, locataires, biens, relevés…). Il ne peut pas gérer l'équipe ni les paramètres.</span>
             }
             @if (form.get('role')?.value === 'agency_accountant') {
               <i class="pi pi-info-circle"></i>

@@ -25,7 +25,7 @@ export interface PaymentSchedule {
   total_amount: string;
   amount_paid: string;
   balance: string;
-  status: 'pending' | 'partial' | 'paid' | 'late';
+  status: 'pending' | 'partial' | 'paid' | 'late' | 'cancelled';
   paid_at: string | null;
   days_overdue: number | null;
   tenant?: ScheduleTenant;
@@ -100,7 +100,7 @@ export class PaymentsComponent implements OnInit {
     const q = this.search().toLowerCase();
     const m = this.filterMethod();
     if (q) list = list.filter(p =>
-      `${p.receipt_number}`.toLowerCase().includes(q)
+      `${p.receipt_number} ${p.tenant?.full_name ?? ''} ${p.property?.name ?? ''}`.toLowerCase().includes(q)
     );
     if (m) list = list.filter(p => p.payment_method === m);
     return list;
@@ -140,9 +140,9 @@ export class PaymentsComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       lease_id:       [null, Validators.required],
-      schedule_id:    [null],
+      schedule_id:    [null, Validators.required],
       amount:         [null, [Validators.required, Validators.min(1)]],
-      payment_date:   [new Date(), Validators.required],
+      payment_date:   [this.todayStr, Validators.required],
       payment_method: ['cash', Validators.required],
       reference:      [''],
       notes:          [''],
@@ -157,7 +157,7 @@ export class PaymentsComponent implements OnInit {
 
   loadSchedules(): void {
     this.loading.set(true);
-    this.http.get<any>(`${this.api}/rent-schedules?per_page=500`).subscribe({
+    this.http.get<any>(`${this.api}/rent-schedules?per_page=1000`).subscribe({
       next: (res: any) => {
         const list: PaymentSchedule[] = Array.isArray(res?.data) ? res.data : [];
         this.schedules.set(list);
@@ -201,7 +201,7 @@ export class PaymentsComponent implements OnInit {
   get scheduleOptions() {
     const leaseId = this.form.get('lease_id')?.value;
     return this.schedules()
-      .filter(s => s.status !== 'paid')
+      .filter(s => s.status !== 'paid' && s.status !== 'cancelled')
       .filter(s => !leaseId || s.lease_id === leaseId)
       .map(s => ({
         label: `${s.period_label} — solde ${this.formatCurrency(s.balance)}`,
@@ -211,7 +211,7 @@ export class PaymentsComponent implements OnInit {
 
   openCreate(schedule?: PaymentSchedule): void {
     this.selectedSchedule.set(schedule ?? null);
-    this.form.reset({ payment_date: new Date(), payment_method: 'cash' });
+    this.form.reset({ payment_date: this.todayStr, payment_method: 'cash' });
     if (schedule) {
       this.form.patchValue({
         lease_id:    schedule.lease_id,
@@ -331,11 +331,11 @@ export class PaymentsComponent implements OnInit {
   }
 
   statusLabel(s: string): string {
-    return ({ pending: 'En attente', partial: 'Partiel', paid: 'Payé', late: 'En retard' } as any)[s] ?? s;
+    return ({ pending: 'En attente', partial: 'Partiel', paid: 'Payé', late: 'En retard', cancelled: 'Annulé' } as any)[s] ?? s;
   }
 
   statusClass(s: string): string {
-    return ({ paid: 'badge-success', partial: 'badge-warning', pending: 'badge-neutral', late: 'badge-danger' } as any)[s] ?? 'badge-neutral';
+    return ({ paid: 'badge-success', partial: 'badge-warning', pending: 'badge-neutral', late: 'badge-danger', cancelled: 'badge-neutral' } as any)[s] ?? 'badge-neutral';
   }
   // ── 4. Méthode utilitaire à ajouter dans CHAQUE composant ──
 private triggerDownload(blob: Blob, filename: string): void {
