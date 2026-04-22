@@ -95,6 +95,8 @@ export class PaymentsComponent implements OnInit {
     return list;
   });
 
+  hasLateSchedules = computed(() => this.schedules().some(s => s.status === 'late'));
+
   filteredPayments = computed(() => {
     let list = this.payments();
     const q = this.search().toLowerCase();

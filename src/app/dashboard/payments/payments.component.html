@@ -25,7 +25,7 @@
 <div class="tabs-bar">
   <button class="tab-btn" [class.active]="activeTab() === 'schedules'" (click)="activeTab.set('schedules')">
     <i class="pi pi-calendar-times"></i> Échéances
-    <span class="tab-count" [class.danger]="schedules().filter(s => s.status === 'late').length > 0">{{ schedules().length }}</span>
+    <span class="tab-count" [class.danger]="hasLateSchedules()">{{ schedules().length }}</span>
   </button>
   <button class="tab-btn" [class.active]="activeTab() === 'payments'" (click)="activeTab.set('payments')">
     <i class="pi pi-credit-card"></i> Paiements
