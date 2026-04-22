@@ -102,6 +102,8 @@ export class LeasesComponent implements OnInit {
     let list = this.leases();
     const q = this.search().toLowerCase();
     const s = this.filterStatus();
+    // Masquer les baux résiliés par défaut — accessibles via le filtre "Résilié"
+    if (!s) list = list.filter(l => l.status !== 'terminated');
     if (q) list = list.filter(l =>
       `${l.reference} ${l.tenant?.full_name} ${l.property?.name}`.toLowerCase().includes(q)
     );
