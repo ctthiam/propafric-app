@@ -88,6 +88,8 @@ export class PaymentsComponent implements OnInit {
     let list = this.schedules();
     const q = this.search().toLowerCase();
     const s = this.filterStatus();
+    // Masquer les annulées par défaut — visibles uniquement via le filtre explicite
+    if (!s) list = list.filter(sc => sc.status !== 'cancelled');
     if (q) list = list.filter(sc =>
       `${sc.lease?.reference} ${sc.tenant?.full_name} ${sc.property?.name} ${sc.period_label}`.toLowerCase().includes(q)
     );
@@ -126,6 +128,7 @@ export class PaymentsComponent implements OnInit {
     { label: 'Partiel',          value: 'partial' },
     { label: 'Payé',             value: 'paid' },
     { label: 'En retard',        value: 'late' },
+    { label: 'Annulé',           value: 'cancelled' },
   ];
 
   methodFilterOptions = [
