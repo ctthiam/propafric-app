@@ -1,0 +1,247 @@
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div class="confirm-msg" [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<!-- ─── En-tête ─── -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Salaires</h1>
+    <p class="page-subtitle">Gestion de la paie du personnel</p>
+  </div>
+  <div class="page-header-actions">
+    <button class="btn-primary" (click)="openCreate()">
+      <i class="pi pi-plus"></i> Nouveau salaire
+    </button>
+  </div>
+</div>
+
+<!-- ─── Période ─── -->
+<div class="period-bar">
+  <select class="period-select" [value]="selectedMonth()" (change)="selectedMonth.set(+$any($event.target).value); onPeriodChange()">
+    @for (m of months; track m.value) {
+      <option [value]="m.value">{{ m.label }}</option>
+    }
+  </select>
+  <select class="period-select" [value]="selectedYear()" (change)="selectedYear.set(+$any($event.target).value); onPeriodChange()">
+    @for (y of years; track y.value) {
+      <option [value]="y.value">{{ y.label }}</option>
+    }
+  </select>
+
+  @if (!loading() && records().length > 0) {
+    <div class="total-badge">
+      Total net : <strong>{{ formatCurrency(totalNet()) }}</strong>
+    </div>
+  }
+</div>
+
+<!-- ─── Toolbar ─── -->
+<div class="toolbar">
+  <div class="search-box">
+    <i class="pi pi-search"></i>
+    <input type="text" placeholder="Rechercher employé…" (input)="onSearch($event)" />
+  </div>
+</div>
+
+<!-- ─── Table ─── -->
+<div class="table-card">
+  @if (loading()) {
+    <div class="skeleton-rows">
+      @for (i of [1,2,3,4]; track i) {
+        <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
+      }
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Employé</th>
+            <th>Fonction</th>
+            <th>Contrat</th>
+            <th>Période</th>
+            <th class="col-num">Base</th>
+            <th class="col-num">Bonus</th>
+            <th class="col-num">Avances</th>
+            <th class="col-num">Ret.</th>
+            <th class="col-num">Net versé</th>
+            <th>Mode</th>
+            <th>Date</th>
+            <th style="width:80px; text-align:center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (filteredRecords().length === 0) {
+            <tr>
+              <td colspan="12" class="empty-row">
+                <div class="empty-state-inline">
+                  <i class="pi pi-id-card"></i>
+                  <span>Aucun salaire pour cette période</span>
+                </div>
+              </td>
+            </tr>
+          }
+          @for (r of filteredRecords(); track r.id) {
+            <tr>
+              <td class="td-name">{{ r.employee_name }}</td>
+              <td class="td-muted">{{ r.employee_function }}</td>
+              <td><span class="badge badge-contract">{{ contractLabel(r.contract_type) }}</span></td>
+              <td class="td-muted">{{ monthLabel(r.period_month) }} {{ r.period_year }}</td>
+              <td class="col-num td-amount">{{ formatCurrency(r.base_salary) }}</td>
+              <td class="col-num td-muted">{{ r.bonus > 0 ? formatCurrency(r.bonus) : '—' }}</td>
+              <td class="col-num td-deduct">{{ r.advance > 0 ? formatCurrency(r.advance) : '—' }}</td>
+              <td class="col-num td-deduct">{{ r.deductions > 0 ? formatCurrency(r.deductions) : '—' }}</td>
+              <td class="col-num td-net">{{ formatCurrency(r.net_salary) }}</td>
+              <td class="td-muted">{{ methodLabel(r.payment_method) }}</td>
+              <td class="td-muted td-date">{{ formatDate(r.payment_date) }}</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-pdf" (click)="downloadSlip(r)" [disabled]="downloading() === r.id" pTooltip="Bulletin PDF" tooltipPosition="top">
+                    <i [class]="downloading() === r.id ? 'pi pi-spin pi-spinner' : 'pi pi-file-pdf'"></i>
+                  </button>
+                  <button class="btn-icon btn-edit" (click)="openEdit(r)" pTooltip="Modifier" tooltipPosition="top">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn-icon btn-delete" (click)="confirmDelete(r)" pTooltip="Supprimer" tooltipPosition="top">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- ─── DRAWER ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingRecord() ? 'Modifier le salaire' : 'Nouveau salaire' }}</div>
+        <div class="drawer-sub">L'écriture comptable sera créée automatiquement</div>
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
+
+        <div class="form-section-title">Employé</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Nom complet <span class="req">*</span></label>
+            <input type="text" class="pa-input" formControlName="employee_name" placeholder="Prénom NOM" />
+            @if (form.get('employee_name')?.invalid && form.get('employee_name')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Fonction <span class="req">*</span></label>
+            <input type="text" class="pa-input" formControlName="employee_function" placeholder="Ex: Comptable" />
+            @if (form.get('employee_function')?.invalid && form.get('employee_function')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Type de contrat</label>
+            <select class="pa-input" formControlName="contract_type">
+              @for (c of contractTypes; track c.value) {
+                <option [value]="c.value">{{ c.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Période <span class="req">*</span></label>
+            <div class="period-inline">
+              <select class="pa-input" formControlName="period_month">
+                @for (m of months; track m.value) {
+                  <option [value]="m.value">{{ m.label }}</option>
+                }
+              </select>
+              <select class="pa-input" formControlName="period_year">
+                @for (y of years; track y.value) {
+                  <option [value]="y.value">{{ y.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section-title">Rémunération</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Salaire de base <span class="req">*</span></label>
+            <p-inputNumber formControlName="base_salary" placeholder="150 000" [min]="1" locale="fr-SN" styleClass="w-full" />
+            @if (form.get('base_salary')?.invalid && form.get('base_salary')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Prime / Bonus</label>
+            <p-inputNumber formControlName="bonus" placeholder="0" [min]="0" locale="fr-SN" styleClass="w-full" />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Avances déduites</label>
+            <p-inputNumber formControlName="advance" placeholder="0" [min]="0" locale="fr-SN" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>Autres retenues</label>
+            <p-inputNumber formControlName="deductions" placeholder="0" [min]="0" locale="fr-SN" styleClass="w-full" />
+          </div>
+        </div>
+
+        <!-- Preview net -->
+        <div class="net-preview">
+          <span class="net-label">Net à verser</span>
+          <span class="net-value">{{ formatCurrency(previewNet) }}</span>
+        </div>
+
+        <div class="form-section-title">Paiement</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Date de versement <span class="req">*</span></label>
+            <input type="date" class="pa-input" formControlName="payment_date" />
+            @if (form.get('payment_date')?.invalid && form.get('payment_date')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Mode de paiement</label>
+            <select class="pa-input" formControlName="payment_method">
+              @for (m of paymentMethods; track m.value) {
+                <option [value]="m.value">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Référence</label>
+          <input type="text" class="pa-input" formControlName="reference" placeholder="N° de chèque, virement…" />
+        </div>
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea class="pa-input" formControlName="notes" rows="3" placeholder="Remarques…"></textarea>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> }
+            {{ editingRecord() ? 'Enregistrer' : 'Valider le salaire' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

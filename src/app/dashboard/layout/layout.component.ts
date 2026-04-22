@@ -61,6 +61,8 @@ export class LayoutComponent implements OnInit, OnDestroy {
     { label: 'Prestataires',    icon: 'pi pi-briefcase',   route: '/dashboard/prestataires',   roles: ['agency_admin', 'agency_secretary'] },
     { label: 'Travaux',         icon: 'pi pi-wrench',      route: '/dashboard/travaux',        roles: ['agency_admin', 'agency_secretary'] },
     { label: 'Relevés',         icon: 'pi pi-chart-bar',   route: '/dashboard/releves',        roles: ['agency_admin', 'agency_accountant', 'agency_secretary'] },
+    { label: 'Comptabilité',    icon: 'pi pi-calculator',  route: '/dashboard/comptabilite',   roles: ['agency_admin', 'agency_accountant', 'agency_secretary'] },
+    { label: 'Salaires',        icon: 'pi pi-id-card',     route: '/dashboard/salaires',       roles: ['agency_admin', 'agency_accountant', 'agency_secretary'] },
     { label: 'Impôts fonciers', icon: 'pi pi-percentage',  route: '/dashboard/impots',         roles: ['agency_admin', 'agency_accountant', 'agency_secretary'] },
     { label: 'Messages',        icon: 'pi pi-comments',    route: '/dashboard/messages' },
     { label: 'Support',         icon: 'pi pi-question-circle',   route: '/dashboard/support' },

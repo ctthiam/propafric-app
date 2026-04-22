@@ -33,6 +33,8 @@ export const routes: Routes = [
       { path: 'depenses',      loadComponent: () => import('./dashboard/expenses/expenses.component').then(m => m.ExpensesComponent) },
       { path: 'prestataires',  loadComponent: () => import('./dashboard/expenses/expenses.component').then(m => m.ExpensesComponent) },
       { path: 'releves',       loadComponent: () => import('./dashboard/statements/statements.component').then(m => m.StatementsComponent) },
+      { path: 'comptabilite', loadComponent: () => import('./dashboard/accounting/accounting.component').then(m => m.AccountingComponent) },
+      { path: 'salaires',     loadComponent: () => import('./dashboard/salaries/salaries.component').then(m => m.SalariesComponent) },
       { path: 'equipe',        canActivate: [adminOnlyGuard], loadComponent: () => import('./dashboard/team/team.component').then(m => m.TeamComponent) },
       { path: 'travaux',       loadComponent: () => import('./dashboard/work-orders/work-orders.component').then(m => m.WorkOrdersComponent) },
       { path: 'messages',      loadComponent: () => import('./dashboard/messages/agency-messages-page.component').then(m => m.AgencyMessagesPageComponent) },

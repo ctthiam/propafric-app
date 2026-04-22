@@ -1,0 +1,417 @@
+<p-toast position="top-right" />
+<p-confirmDialog>
+  <ng-template #message let-message>
+    <div class="confirm-msg" [innerHTML]="message.message"></div>
+  </ng-template>
+</p-confirmDialog>
+
+<!-- ─── En-tête ─── -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1 class="page-title">Comptabilité</h1>
+    <p class="page-subtitle">Grand livre et suivi financier de l'agence</p>
+  </div>
+  <div class="page-header-actions">
+    <button class="btn-secondary btn-export" (click)="exportExcel()" [disabled]="exporting()">
+      @if (exporting()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-file-excel"></i> }
+      Exporter
+    </button>
+    <button class="btn-primary" (click)="openCreate()">
+      <i class="pi pi-plus"></i> Nouvelle écriture
+    </button>
+  </div>
+</div>
+
+<!-- ─── Sélecteur de période ─── -->
+<div class="period-bar">
+  <select class="period-select" [value]="selectedMonth()" (change)="selectedMonth.set(+$any($event.target).value); onPeriodChange()">
+    @for (m of months; track m.value) {
+      <option [value]="m.value">{{ m.label }}</option>
+    }
+  </select>
+  <select class="period-select" [value]="selectedYear()" (change)="selectedYear.set(+$any($event.target).value); onPeriodChange()">
+    @for (y of years; track y.value) {
+      <option [value]="y.value">{{ y.label }}</option>
+    }
+  </select>
+</div>
+
+<!-- ─── KPI Cards ─── -->
+<div class="kpi-row">
+  <div class="kpi-card kpi-income">
+    <div class="kpi-icon"><i class="pi pi-arrow-down-left"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Entrées</div>
+      @if (loading()) {
+        <p-skeleton height="28px" width="120px" />
+      } @else {
+        <div class="kpi-value">{{ formatCurrency(summary().total_income) }}</div>
+      }
+    </div>
+  </div>
+  <div class="kpi-card kpi-expense">
+    <div class="kpi-icon"><i class="pi pi-arrow-up-right"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Sorties</div>
+      @if (loading()) {
+        <p-skeleton height="28px" width="120px" />
+      } @else {
+        <div class="kpi-value">{{ formatCurrency(summary().total_expense) }}</div>
+      }
+    </div>
+  </div>
+  <div class="kpi-card" [class.kpi-positive]="summary().balance >= 0" [class.kpi-negative]="summary().balance < 0">
+    <div class="kpi-icon"><i class="pi pi-wallet"></i></div>
+    <div class="kpi-body">
+      <div class="kpi-label">Solde net</div>
+      @if (loading()) {
+        <p-skeleton height="28px" width="120px" />
+      } @else {
+        <div class="kpi-value">{{ formatCurrency(summary().balance) }}</div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ─── Onglets ─── -->
+<div class="tabs-bar">
+  <button class="tab-btn" [class.active]="activeTab() === 'ledger'" (click)="activeTab.set('ledger'); dailyView.set(false)">
+    <i class="pi pi-book"></i> Grand livre
+    <span class="tab-count">{{ filteredEntries().length }}</span>
+  </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'income'" (click)="activeTab.set('income'); dailyView.set(false)">
+    <i class="pi pi-arrow-down-left"></i> Entrées
+  </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'expense'" (click)="activeTab.set('expense'); dailyView.set(false)">
+    <i class="pi pi-arrow-up-right"></i> Sorties
+  </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'charges'" (click)="activeTab.set('charges'); dailyView.set(false)">
+    <i class="pi pi-file-edit"></i> Charges fixes
+    <span class="tab-count">{{ filteredEntries().length }}</span>
+  </button>
+  <button class="tab-btn" [class.active]="activeTab() === 'recap'" (click)="activeTab.set('recap'); dailyView.set(false)">
+    <i class="pi pi-chart-pie"></i> Résumé
+  </button>
+</div>
+
+<!-- ─── Toolbar (masqué pour recap) ─── -->
+@if (activeTab() !== 'recap') {
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="pi pi-search"></i>
+      <input type="text" placeholder="Rechercher libellé, déposant, réf…" (input)="onSearch($event)" />
+    </div>
+    @if (activeTab() === 'ledger') {
+      <select class="filter-select" (change)="onFilterType($any($event.target).value)">
+        <option value="">Tous les types</option>
+        <option value="income">Entrées</option>
+        <option value="expense">Sorties</option>
+      </select>
+    }
+    @if (activeTab() !== 'charges') {
+      <select class="filter-select" (change)="onFilterCategory($any($event.target).value)">
+        <option value="">Toutes les catégories</option>
+        @for (cat of allCategories; track cat.value) {
+          <option [value]="cat.value">{{ cat.label }}</option>
+        }
+      </select>
+    }
+    @if (activeTab() === 'ledger') {
+      <button class="btn-view-toggle" [class.active]="dailyView()" (click)="toggleDailyView()">
+        <i class="pi pi-calendar"></i>
+        {{ dailyView() ? 'Vue détaillée' : 'Vue journalière' }}
+      </button>
+    }
+  </div>
+}
+
+<!-- ─── TABLE GRAND LIVRE / ENTRÉES / SORTIES / CHARGES ─── -->
+@if (activeTab() !== 'recap') {
+  <div class="table-card">
+    @if (loading()) {
+      <div class="skeleton-rows">
+        @for (i of [1,2,3,4,5,6]; track i) {
+          <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
+        }
+      </div>
+
+    <!-- ─── Vue journalière ─── -->
+    } @else if (activeTab() === 'ledger' && dailyView()) {
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th class="col-num">Entrées du jour</th>
+              <th class="col-num">Sorties du jour</th>
+              <th class="col-num">Solde du jour</th>
+              <th class="col-num">Solde cumulé</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (dailyTotals().length === 0) {
+              <tr>
+                <td colspan="5" class="empty-row">
+                  <div class="empty-state-inline">
+                    <i class="pi pi-calendar"></i>
+                    <span>Aucune écriture pour cette période</span>
+                  </div>
+                </td>
+              </tr>
+            }
+            @for (day of dailyTotals(); track day.date) {
+              <tr>
+                <td class="td-date td-name">{{ formatDate(day.date) }}</td>
+                <td class="col-num td-income">{{ day.income > 0 ? formatCurrency(day.income) : '—' }}</td>
+                <td class="col-num td-expense">{{ day.expense > 0 ? formatCurrency(day.expense) : '—' }}</td>
+                <td class="col-num" [class.balance-pos]="day.balance >= 0" [class.balance-neg]="day.balance < 0">
+                  {{ formatCurrency(day.balance) }}
+                </td>
+                <td class="col-num" [class.balance-pos]="day.running_balance >= 0" [class.balance-neg]="day.running_balance < 0">
+                  <strong>{{ formatCurrency(day.running_balance) }}</strong>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+    <!-- ─── Vue détaillée (défaut) ─── -->
+    } @else {
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Libellé</th>
+              <th>Catégorie</th>
+              <th>Mode</th>
+              <th class="col-num">Entrée</th>
+              <th class="col-num">Sortie</th>
+              @if (activeTab() === 'ledger') { <th class="col-num">Solde cumulé</th> }
+              <th style="width:80px; text-align:center">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (filteredEntries().length === 0) {
+              <tr>
+                <td [attr.colspan]="activeTab() === 'ledger' ? 8 : 7" class="empty-row">
+                  <div class="empty-state-inline">
+                    <i class="pi pi-book"></i>
+                    <span>Aucune écriture pour cette période</span>
+                  </div>
+                </td>
+              </tr>
+            }
+            @for (e of filteredEntries(); track e.id) {
+              <tr [class.row-income]="e.type === 'income'" [class.row-auto]="e.is_auto">
+                <td class="td-muted td-date">{{ formatDate(e.date) }}</td>
+                <td>
+                  <div class="td-label">{{ e.label }}</div>
+                  @if (e.depositor) { <div class="td-sub">{{ e.depositor }}</div> }
+                  @if (e.property) { <div class="td-sub">{{ e.property.name }}</div> }
+                  @if (e.is_auto) { <span class="badge-auto">auto</span> }
+                </td>
+                <td><span class="badge badge-cat">{{ categoryLabel(e.category) }}</span></td>
+                <td class="td-muted">{{ e.payment_method ? methodLabel(e.payment_method) : '—' }}</td>
+                <td class="col-num td-income">{{ e.type === 'income' ? formatCurrency(e.amount) : '—' }}</td>
+                <td class="col-num td-expense">{{ e.type === 'expense' ? formatCurrency(e.amount) : '—' }}</td>
+                @if (activeTab() === 'ledger') {
+                  <td class="col-num" [class.balance-pos]="(e.running_balance || 0) >= 0" [class.balance-neg]="(e.running_balance || 0) < 0">
+                    {{ formatCurrency(e.running_balance || 0) }}
+                  </td>
+                }
+                <td>
+                  <div class="actions-cell">
+                    @if (!e.is_auto) {
+                      <button class="btn-icon btn-edit" (click)="openEdit(e)" pTooltip="Modifier" tooltipPosition="top">
+                        <i class="pi pi-pencil"></i>
+                      </button>
+                      <button class="btn-icon btn-delete" (click)="confirmDelete(e)" pTooltip="Supprimer" tooltipPosition="top">
+                        <i class="pi pi-trash"></i>
+                      </button>
+                    } @else {
+                      <span class="lock-icon" pTooltip="Écriture automatique — non modifiable" tooltipPosition="top">
+                        <i class="pi pi-lock"></i>
+                      </span>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
+
+<!-- ─── ONGLET RÉSUMÉ PAR CATÉGORIE ─── -->
+@if (activeTab() === 'recap') {
+  <div class="table-card">
+    @if (loading()) {
+      <div class="skeleton-rows">
+        @for (i of [1,2,3,4]; track i) {
+          <p-skeleton height="52px" borderRadius="8px" styleClass="mb-2" />
+        }
+      </div>
+    } @else {
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Catégorie</th>
+              <th>Type</th>
+              <th class="col-num">Nb écritures</th>
+              <th class="col-num">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (recapByCategory().length === 0) {
+              <tr>
+                <td colspan="4" class="empty-row">
+                  <div class="empty-state-inline">
+                    <i class="pi pi-chart-pie"></i>
+                    <span>Aucune donnée pour cette période</span>
+                  </div>
+                </td>
+              </tr>
+            }
+            @for (row of recapByCategory(); track row.label) {
+              <tr>
+                <td class="td-name">{{ row.label }}</td>
+                <td>
+                  @if (row.type === 'income') {
+                    <span class="badge badge-income-type">Entrée</span>
+                  } @else {
+                    <span class="badge badge-expense-type">Sortie</span>
+                  }
+                </td>
+                <td class="col-num td-muted">{{ row.count }}</td>
+                <td class="col-num" [class.td-income]="row.type === 'income'" [class.td-expense]="row.type === 'expense'">
+                  {{ formatCurrency(row.total) }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+}
+
+<!-- ─── DRAWER SAISIE ─── -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ editingEntry() ? 'Modifier l\'écriture' : 'Nouvelle écriture' }}</div>
+        <div class="drawer-sub">Saisie manuelle — entrée ou sortie</div>
+      </div>
+      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="drawer-body">
+      <form [formGroup]="form" (ngSubmit)="save()" class="drawer-form">
+
+        <div class="form-section-title">Type d'écriture</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Type <span class="req">*</span></label>
+            <select class="pa-input" formControlName="type">
+              <option value="income">Entrée (revenu)</option>
+              <option value="expense">Sortie (dépense)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Catégorie <span class="req">*</span></label>
+            <select class="pa-input" formControlName="category">
+              <option value="">— Sélectionner —</option>
+              @for (cat of currentCategories; track cat.value) {
+                <option [value]="cat.value">{{ cat.label }}</option>
+              }
+            </select>
+            @if (form.get('category')?.invalid && form.get('category')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-section-title">Détails</div>
+        <div class="form-group">
+          <label>Libellé <span class="req">*</span></label>
+          <input type="text" class="pa-input" formControlName="label" placeholder="Ex: Loyer janvier — Dupont" />
+          @if (form.get('label')?.invalid && form.get('label')?.touched) {
+            <span class="form-error">Requis</span>
+          }
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Date <span class="req">*</span></label>
+            <input type="date" class="pa-input" formControlName="date" />
+            @if (form.get('date')?.invalid && form.get('date')?.touched) {
+              <span class="form-error">Requis</span>
+            }
+          </div>
+          <div class="form-group">
+            <label>Montant (F CFA) <span class="req">*</span></label>
+            <p-inputNumber formControlName="amount" placeholder="100 000" [min]="1" locale="fr-SN" styleClass="w-full" />
+            @if (form.get('amount')?.invalid && form.get('amount')?.touched) {
+              <span class="form-error">Minimum 1 F</span>
+            }
+          </div>
+        </div>
+
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Mode de paiement</label>
+            <select class="pa-input" formControlName="payment_method">
+              @for (m of paymentMethods; track m.value) {
+                <option [value]="m.value">{{ m.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Référence</label>
+            <input type="text" class="pa-input" formControlName="reference" placeholder="N° de reçu, chèque…" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Déposant / Bénéficiaire</label>
+          <input type="text" class="pa-input" formControlName="depositor" placeholder="Nom de la personne" />
+        </div>
+
+        <div class="form-section-title">Liaison (optionnel)</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Bien immobilier</label>
+            <p-dropdown formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value"
+              placeholder="Sélectionner" [filter]="true" [showClear]="true" styleClass="w-full" />
+          </div>
+          <div class="form-group">
+            <label>Locataire</label>
+            <p-dropdown formControlName="tenant_id" [options]="tenantOptions" optionLabel="label" optionValue="value"
+              placeholder="Sélectionner" [filter]="true" [showClear]="true" styleClass="w-full" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Notes</label>
+          <textarea class="pa-input" formControlName="notes" rows="3" placeholder="Remarques…"></textarea>
+        </div>
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeDrawer()">Annuler</button>
+          <button type="submit" class="btn-primary" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> }
+            {{ editingEntry() ? 'Enregistrer' : 'Créer l\'écriture' }}
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+}
