@@ -1,6 +1,6 @@
 <p-toast position="top-right" />
 <div class="page-header">
-  <div><h1 class="page-title">Baux</h1><p class="page-subtitle">{{ leases().length }} bail(s) actif(s)</p></div>
+  <div><h1 class="page-title">Baux</h1><p class="page-subtitle">{{ leases().length }} bail(s) enregistré(s)</p></div>
   <button class="btn-primary" (click)="openCreate()"><i class="pi pi-plus"></i> Nouveau bail</button>
 </div>
 
@@ -10,9 +10,9 @@
   } @else {
     <div class="data-table-wrapper">
       <table class="data-table">
-        <thead><tr><th>Référence</th><th>Locataire</th><th>Bien</th><th>Loyer total</th><th>Début</th><th>Statut</th></tr></thead>
+        <thead><tr><th>Référence</th><th>Locataire</th><th>Bien</th><th>Loyer total</th><th>Début</th><th>Statut</th><th style="text-align:center">Actions</th></tr></thead>
         <tbody>
-          @if (leases().length === 0) { <tr><td colspan="6" class="empty-row">Aucun bail enregistré</td></tr> }
+          @if (leases().length === 0) { <tr><td colspan="7" class="empty-row">Aucun bail enregistré</td></tr> }
           @for (l of leases(); track l.id) {
             <tr>
               <td><span class="badge badge-ref">{{ l.reference }}</span></td>
@@ -21,6 +21,14 @@
               <td class="td-name">{{ formatCurrency(l.total_rent) }}</td>
               <td class="td-muted">{{ l.start_date }}</td>
               <td><span class="badge {{ statusClass(l.status) }}">{{ statusLabel(l.status) }}</span></td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-view" pTooltip="Voir détails" tooltipPosition="top" (click)="viewLease(l)"><i class="pi pi-eye"></i></button>
+                  @if (l.status === 'active') {
+                    <button class="btn-icon btn-delete" pTooltip="Résilier" tooltipPosition="top" (click)="confirmTerminate(l.id)"><i class="pi pi-ban"></i></button>
+                  }
+                </div>
+              </td>
             </tr>
           }
         </tbody>
@@ -29,6 +37,80 @@
   }
 </div>
 
+<!-- Detail panel -->
+@if (viewingLease) {
+  <div class="drawer-overlay" (click)="closeDetail()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">{{ viewingLease.reference }}</div>
+        <div class="drawer-sub"><span class="badge {{ statusClass(viewingLease.status) }}">{{ statusLabel(viewingLease.status) }}</span></div>
+      </div>
+      <button class="drawer-close" (click)="closeDetail()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="detail-section">
+        <div class="detail-section-title">Parties</div>
+        <div class="detail-row"><span class="detail-lbl">Locataire</span><span class="detail-val">{{ viewingLease.tenant?.full_name ?? '—' }}</span></div>
+        <div class="detail-row"><span class="detail-lbl">Bien</span><span class="detail-val">{{ viewingLease.property?.name ?? '—' }}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Loyer mensuel</div>
+        <div class="detail-row"><span class="detail-lbl">Loyer de base</span><span class="detail-val">{{ formatCurrency(viewingLease.base_rent) }}</span></div>
+        <div class="detail-row"><span class="detail-lbl">Charges</span><span class="detail-val">{{ formatCurrency(viewingLease.charges) }}</span></div>
+        <div class="detail-row"><span class="detail-lbl">TOM (3.6%)</span><span class="detail-val">{{ formatCurrency(viewingLease.tom_amount) }}</span></div>
+        <div class="detail-row detail-row-total"><span class="detail-lbl">Total dû</span><span class="detail-val detail-val-green">{{ formatCurrency(viewingLease.total_rent) }}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Conditions</div>
+        <div class="detail-row"><span class="detail-lbl">Fréquence</span><span class="detail-val">{{ frequencyLabel(viewingLease.payment_frequency) }}</span></div>
+        <div class="detail-row"><span class="detail-lbl">Jour de paiement</span><span class="detail-val">Le {{ viewingLease.payment_day }} du mois</span></div>
+        <div class="detail-row"><span class="detail-lbl">Dépôt de garantie</span><span class="detail-val">{{ formatCurrency(viewingLease.deposit_amount) }}</span></div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-section-title">Dates</div>
+        <div class="detail-row"><span class="detail-lbl">Début</span><span class="detail-val">{{ viewingLease.start_date }}</span></div>
+        <div class="detail-row"><span class="detail-lbl">Fin</span><span class="detail-val">{{ viewingLease.end_date ?? 'Non définie' }}</span></div>
+      </div>
+
+      @if (viewingLease.notes) {
+        <div class="detail-section">
+          <div class="detail-section-title">Notes</div>
+          <p class="detail-notes">{{ viewingLease.notes }}</p>
+        </div>
+      }
+
+      <div class="detail-actions">
+        <button class="btn-pdf-outline" (click)="downloadContract(viewingLease)"><i class="pi pi-file-pdf"></i> Télécharger le contrat</button>
+        @if (viewingLease.status === 'active') {
+          <button class="btn-danger-outline" (click)="confirmTerminate(viewingLease.id)"><i class="pi pi-ban"></i> Résilier ce bail</button>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Confirm terminate modal -->
+@if (terminatingId !== null) {
+  <div class="modal-overlay" (click)="cancelTerminate()"></div>
+  <div class="modal-box">
+    <div class="modal-icon"><i class="pi pi-exclamation-triangle"></i></div>
+    <div class="modal-title">Résilier le bail ?</div>
+    <div class="modal-body">Cette action est irréversible. Les échéances futures seront annulées et le bien repassera en disponible.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="cancelTerminate()">Annuler</button>
+      <button class="btn-danger" [disabled]="terminating" (click)="doTerminate()">
+        @if (terminating) { <i class="pi pi-spin pi-spinner"></i> En cours… }
+        @else { <i class="pi pi-ban"></i> Confirmer la résiliation }
+      </button>
+    </div>
+  </div>
+}
+
+<!-- Create drawer -->
 @if (drawerOpen) {
   <div class="drawer-overlay" (click)="closeDrawer()"></div>
   <div class="drawer-panel">

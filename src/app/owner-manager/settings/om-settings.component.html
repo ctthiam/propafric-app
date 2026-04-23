@@ -1,0 +1,93 @@
+<div class="settings-page">
+  <h1 class="page-title">Paramètres</h1>
+
+  <div class="settings-grid">
+
+    <!-- Profil -->
+    <div class="settings-card">
+      <div class="card-header">
+        <i class="pi pi-user"></i>
+        <div>
+          <div class="card-title">Mon profil</div>
+          <div class="card-sub">Informations de votre compte</div>
+        </div>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="save()" class="settings-form">
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Prénom <span class="req">*</span></label>
+            <input class="pa-input" formControlName="first_name" placeholder="Votre prénom" />
+          </div>
+          <div class="form-group">
+            <label>Nom <span class="req">*</span></label>
+            <input class="pa-input" formControlName="last_name" placeholder="Votre nom" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Email <span class="req">*</span></label>
+          <input class="pa-input" formControlName="email" type="email" placeholder="votre@email.com" />
+        </div>
+        <div class="form-group">
+          <label>Téléphone</label>
+          <input class="pa-input" formControlName="phone" placeholder="+221 77 000 00 00" />
+        </div>
+
+        @if (error()) {
+          <div class="form-error-msg"><i class="pi pi-exclamation-circle"></i> {{ error() }}</div>
+        }
+        @if (success()) {
+          <div class="form-success-msg"><i class="pi pi-check-circle"></i> Profil mis à jour avec succès.</div>
+        }
+
+        <button type="submit" class="btn-save" [disabled]="saving()">
+          @if (saving()) { <i class="pi pi-spin pi-spinner"></i> Enregistrement… }
+          @else { <i class="pi pi-check"></i> Enregistrer les modifications }
+        </button>
+      </form>
+    </div>
+
+    <!-- Plan -->
+    <div class="settings-card">
+      <div class="card-header">
+        <i class="pi pi-star"></i>
+        <div>
+          <div class="card-title">Mon abonnement</div>
+          <div class="card-sub">Détails de votre plan actuel</div>
+        </div>
+      </div>
+
+      @if (plan()) {
+        <div class="plan-info">
+          <div class="plan-badge">{{ planLabel(plan().plan) }}</div>
+          <div class="plan-rows">
+            <div class="plan-row">
+              <span>Statut</span>
+              <span class="plan-val" [class.val-active]="plan().status === 'active'" [class.val-trial]="plan().status === 'trial'">
+                {{ plan().status === 'active' ? 'Actif' : plan().status === 'trial' ? 'Période d\'essai' : plan().status }}
+              </span>
+            </div>
+            @if (plan().trial_ends_at) {
+              <div class="plan-row">
+                <span>Fin d'essai</span>
+                <span class="plan-val">{{ formatDate(plan().trial_ends_at) }}</span>
+              </div>
+            }
+            <div class="plan-row">
+              <span>Biens maximum</span>
+              <span class="plan-val">{{ plan().max_properties ?? 'Illimité' }}</span>
+            </div>
+          </div>
+          <div class="plan-upgrade">
+            <p>Besoin de plus de fonctionnalités ?</p>
+            <a href="mailto:contact@propafric.com" class="btn-upgrade">
+              <i class="pi pi-envelope"></i> Contacter PropAfric
+            </a>
+          </div>
+        </div>
+      } @else {
+        <div class="plan-loading">Chargement…</div>
+      }
+    </div>
+
+  </div>
+</div>

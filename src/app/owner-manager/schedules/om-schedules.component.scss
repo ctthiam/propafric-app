@@ -1,0 +1,51 @@
+$green:  #2D6A4F;
+$gold:   #C9A84C;
+$ink:    #0d1f17;
+$ink-l:  #4a6357;
+$white:  #ffffff;
+$red:    #e57373;
+$cream:  #faf8f3;
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+:host { display:block; animation: fadeUp 0.4s ease both; }
+
+.page-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:24px;
+  .page-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:700; color:$ink; margin:0 0 4px; }
+  .page-subtitle { font-size:14px; color:$ink-l; margin:0; }
+}
+
+.filter-select { padding:9px 14px; border:1.5px solid rgba($ink,.12); border-radius:10px; font-size:13px; font-family:'DM Sans',sans-serif; color:$ink; background:$white; outline:none; cursor:pointer; }
+
+.kpi-row { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:24px; }
+.kpi-card { background:$white; border-radius:14px; border:1px solid rgba($ink,.07); padding:18px 20px;
+  .kpi-label { font-size:12px; color:$ink-l; font-weight:600; text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; }
+  .kpi-value { font-size:20px; font-weight:700; color:$ink; }
+  &.kpi-green .kpi-value { color:$green; }
+  &.kpi-red   .kpi-value { color:#c62828; }
+}
+
+.table-card { background:$white; border-radius:16px; border:1px solid rgba($ink,.07); overflow:hidden; }
+.data-table-wrapper { overflow-x:auto; }
+.skeleton-rows { padding:16px; }
+.data-table { width:100%; border-collapse:collapse;
+  th { background:$cream; color:$ink-l; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.8px; padding:12px 16px; border-bottom:1px solid rgba($ink,.07); text-align:left; }
+  td { padding:13px 16px; border-bottom:1px solid rgba($ink,.04); font-size:13px; color:$ink; vertical-align:middle; }
+  tr:last-child td { border-bottom:none; }
+  tbody tr:hover td { background:rgba($green,.025); }
+}
+.td-right { text-align:right; }
+.td-name  { font-weight:600; }
+.td-muted { color:$ink-l; }
+.td-green { color:$green; font-weight:600; }
+.td-red   { color:#c62828; font-weight:600; }
+.empty-row { text-align:center; color:$ink-l; padding:40px !important; }
+
+.row-overdue td { background:rgba($red,.04); }
+.row-paid    td { opacity:.7; }
+
+.badge { display:inline-block; padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:.4px; }
+.badge-pending  { background:rgba($gold,.12);  color:darken($gold,15%); }
+.badge-partial  { background:rgba(#7048e8,.1); color:#5f3dc4; }
+.badge-overdue  { background:rgba($red,.1);    color:#c62828; }
+.badge-paid     { background:rgba($green,.1);  color:$green; }
+.badge-cancelled{ background:rgba($ink,.08);   color:$ink-l; }

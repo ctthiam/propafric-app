@@ -26,6 +26,8 @@ export class OmPropertiesComponent implements OnInit {
   editingProp   = signal<any>(null);
   search        = signal('');
   drawerOpen    = false;
+  deletingId: number | null = null;
+  deleting = false;
 
   filteredProperties = computed(() => {
     const q = this.search().toLowerCase();
@@ -125,6 +127,24 @@ export class OmPropertiesComponent implements OnInit {
         this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
         this.saving.set(false);
       }
+    });
+  }
+
+  confirmDelete(id: number): void { this.deletingId = id; this.cdr.detectChanges(); }
+  cancelDelete(): void { this.deletingId = null; this.cdr.detectChanges(); }
+
+  doDelete(): void {
+    if (!this.deletingId) return;
+    this.deleting = true;
+    this.http.delete<any>(`${this.api}/${this.deletingId}`).subscribe({
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: res.message });
+        this.deletingId = null; this.deleting = false; this.load(); this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Impossible de supprimer.' });
+        this.deletingId = null; this.deleting = false; this.cdr.detectChanges();
+      },
     });
   }
 

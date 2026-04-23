@@ -10,16 +10,22 @@
   } @else {
     <div class="data-table-wrapper">
       <table class="data-table">
-        <thead><tr><th>Description</th><th>Bien</th><th>Catégorie</th><th>Montant</th><th>Date</th></tr></thead>
+        <thead><tr><th>Description</th><th>Bien</th><th>Catégorie</th><th>Montant</th><th>Date</th><th style="width:90px;text-align:center">Actions</th></tr></thead>
         <tbody>
-          @if (expenses().length === 0) { <tr><td colspan="5" class="empty-row">Aucune dépense enregistrée</td></tr> }
+          @if (expenses().length === 0) { <tr><td colspan="6" class="empty-row">Aucune dépense enregistrée</td></tr> }
           @for (e of expenses(); track e.id) {
             <tr>
               <td class="td-name">{{ e.description }}</td>
               <td class="td-muted">{{ e.property?.name ?? '—' }}</td>
-              <td class="td-muted">{{ e.category }}</td>
+              <td class="td-muted">{{ categoryLabel(e.category) }}</td>
               <td class="td-name">{{ formatCurrency(e.amount_ttc) }}</td>
               <td class="td-muted">{{ e.expense_date }}</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-edit" (click)="openEdit(e)" pTooltip="Modifier" tooltipPosition="top"><i class="pi pi-pencil"></i></button>
+                  <button class="btn-icon btn-delete" (click)="confirmDelete(e.id)" pTooltip="Supprimer" tooltipPosition="top"><i class="pi pi-trash"></i></button>
+                </div>
+              </td>
             </tr>
           }
         </tbody>
@@ -28,11 +34,27 @@
   }
 </div>
 
+@if (deletingId !== null) {
+  <div class="modal-overlay" (click)="cancelDelete()"></div>
+  <div class="modal-box">
+    <div class="modal-icon"><i class="pi pi-exclamation-triangle"></i></div>
+    <div class="modal-title">Supprimer cette dépense ?</div>
+    <div class="modal-body">Cette action est irréversible. La dépense sera définitivement supprimée.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="cancelDelete()">Annuler</button>
+      <button class="btn-danger" [disabled]="deleting" (click)="doDelete()">
+        @if (deleting) { <i class="pi pi-spin pi-spinner"></i> Suppression… }
+        @else { <i class="pi pi-trash"></i> Supprimer }
+      </button>
+    </div>
+  </div>
+}
+
 @if (drawerOpen) {
   <div class="drawer-overlay" (click)="closeDrawer()"></div>
   <div class="drawer-panel">
     <div class="drawer-header">
-      <div><div class="drawer-title">Nouvelle dépense</div></div>
+      <div><div class="drawer-title">{{ editingExpense() ? 'Modifier la dépense' : 'Nouvelle dépense' }}</div></div>
       <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
     </div>
     <div class="drawer-body">
@@ -61,7 +83,7 @@
           <button type="submit" class="btn-primary" [disabled]="saving()">
             @if (saving()) { <i class="pi pi-spin pi-spinner"></i> Enregistrement… }
             @else if (saveSuccess()) { <i class="pi pi-check-circle"></i> Enregistrée ✓ }
-            @else { <i class="pi pi-check"></i> Enregistrer }
+            @else { <i class="pi pi-check"></i> {{ editingExpense() ? 'Mettre à jour' : 'Enregistrer' }} }
           </button>
         </div>
       </form>

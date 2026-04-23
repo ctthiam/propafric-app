@@ -29,12 +29,14 @@ export class OmLayoutComponent {
   });
 
   navItems = [
-    { label: 'Tableau de bord', icon: 'pi pi-th-large',   route: '/gestionnaire/dashboard' },
-    { label: 'Mes biens',       icon: 'pi pi-building',    route: '/gestionnaire/biens' },
-    { label: 'Locataires',      icon: 'pi pi-user',        route: '/gestionnaire/locataires' },
-    { label: 'Baux',            icon: 'pi pi-file',        route: '/gestionnaire/baux' },
-    { label: 'Paiements',       icon: 'pi pi-credit-card', route: '/gestionnaire/paiements' },
-    { label: 'Dépenses',        icon: 'pi pi-wallet',      route: '/gestionnaire/depenses' },
+    { label: 'Tableau de bord', icon: 'pi pi-th-large',       route: '/gestionnaire/dashboard' },
+    { label: 'Mes biens',       icon: 'pi pi-building',        route: '/gestionnaire/biens' },
+    { label: 'Locataires',      icon: 'pi pi-user',            route: '/gestionnaire/locataires' },
+    { label: 'Baux',            icon: 'pi pi-file',            route: '/gestionnaire/baux' },
+    { label: 'Échéancier',      icon: 'pi pi-calendar',        route: '/gestionnaire/echeancier' },
+    { label: 'Paiements',       icon: 'pi pi-credit-card',     route: '/gestionnaire/paiements' },
+    { label: 'Dépenses',        icon: 'pi pi-wallet',          route: '/gestionnaire/depenses' },
+    { label: 'Paramètres',      icon: 'pi pi-cog',             route: '/gestionnaire/parametres' },
     { label: 'Support',         icon: 'pi pi-question-circle', route: '/gestionnaire/support' },
   ];
 

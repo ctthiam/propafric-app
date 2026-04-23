@@ -1,0 +1,56 @@
+<div class="support-page">
+  <h1 class="page-title">Aide & Support</h1>
+
+  <div class="support-grid">
+
+    <!-- Contact -->
+    <div class="contact-card">
+      <div class="contact-header">
+        <i class="pi pi-headphones"></i>
+        <div>
+          <div class="contact-title">Contacter PropAfric</div>
+          <div class="contact-sub">Notre équipe est disponible pour vous aider</div>
+        </div>
+      </div>
+
+      <div class="contact-channels">
+        <a href="https://wa.me/221783258950" target="_blank" class="channel-btn channel-whatsapp">
+          <i class="pi pi-whatsapp"></i>
+          <div>
+            <div class="channel-label">WhatsApp</div>
+            <div class="channel-value">+221 78 325 89 50</div>
+          </div>
+        </a>
+        <a href="mailto:support@propafric.com" class="channel-btn channel-email">
+          <i class="pi pi-envelope"></i>
+          <div>
+            <div class="channel-label">Email</div>
+            <div class="channel-value">support&#64;propafric.com</div>
+          </div>
+        </a>
+      </div>
+
+      <div class="hours-note">
+        <i class="pi pi-clock"></i>
+        Disponible du lundi au vendredi, 8h – 18h (GMT)
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="faq-card">
+      <div class="faq-title">Questions fréquentes</div>
+      @for (faq of faqs; track $index) {
+        <div class="faq-item" [class.open]="openedFaq === $index">
+          <button class="faq-question" (click)="toggleFaq($index)">
+            <span>{{ faq.q }}</span>
+            <i class="pi" [class.pi-chevron-down]="openedFaq !== $index" [class.pi-chevron-up]="openedFaq === $index"></i>
+          </button>
+          @if (openedFaq === $index) {
+            <div class="faq-answer">{{ faq.a }}</div>
+          }
+        </div>
+      }
+    </div>
+
+  </div>
+</div>

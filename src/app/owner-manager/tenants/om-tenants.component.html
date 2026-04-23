@@ -21,7 +21,15 @@
               <td class="td-muted">{{ t.phone }}</td>
               <td class="td-muted">{{ t.profession || '—' }}</td>
               <td><span class="badge {{ t.has_portal ? 'badge-success' : 'badge-neutral' }}">{{ t.has_portal ? 'Actif' : 'Inactif' }}</span></td>
-              <td><div class="actions-cell"><button class="btn-icon btn-edit" (click)="openEdit(t)" pTooltip="Modifier" tooltipPosition="top"><i class="pi pi-pencil"></i></button></div></td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-edit" (click)="openEdit(t)" pTooltip="Modifier" tooltipPosition="top"><i class="pi pi-pencil"></i></button>
+                  @if (!t.has_portal) {
+                    <button class="btn-icon btn-portal" (click)="openPortalInvite(t)" pTooltip="Créer accès portail" tooltipPosition="top"><i class="pi pi-key"></i></button>
+                  }
+                  <button class="btn-icon btn-delete" (click)="confirmDelete(t.id)" pTooltip="Supprimer" tooltipPosition="top"><i class="pi pi-trash"></i></button>
+                </div>
+              </td>
             </tr>
           }
         </tbody>
@@ -29,6 +37,51 @@
     </div>
   }
 </div>
+
+@if (portalTenant) {
+  <div class="modal-overlay" (click)="closePortalInvite()"></div>
+  <div class="modal-box">
+    <div class="modal-icon modal-icon-green"><i class="pi pi-key"></i></div>
+    <div class="modal-title">Accès portail locataire</div>
+    <div class="modal-body">Créer un compte pour <strong>{{ portalTenant.full_name }}</strong> afin qu'il accède au portail locataire.</div>
+    <div class="portal-form">
+      <div class="portal-field">
+        <label>Email</label>
+        <input class="pa-input" type="email" placeholder="email@example.com" [(ngModel)]="portalEmail" />
+      </div>
+      <div class="portal-field">
+        <label>Mot de passe initial</label>
+        <input class="pa-input" type="password" placeholder="Min. 6 caractères" [(ngModel)]="portalPassword" />
+      </div>
+      @if (portalMsg) {
+        <div class="portal-msg" [class.portal-msg-error]="portalIsError">{{ portalMsg }}</div>
+      }
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="closePortalInvite()">Annuler</button>
+      <button class="btn-primary" [disabled]="portalSaving || !portalEmail || !portalPassword" (click)="submitPortalInvite()">
+        @if (portalSaving) { <i class="pi pi-spin pi-spinner"></i> Création… }
+        @else { <i class="pi pi-check"></i> Créer l'accès }
+      </button>
+    </div>
+  </div>
+}
+
+@if (deletingId !== null) {
+  <div class="modal-overlay" (click)="cancelDelete()"></div>
+  <div class="modal-box">
+    <div class="modal-icon"><i class="pi pi-exclamation-triangle"></i></div>
+    <div class="modal-title">Supprimer ce locataire ?</div>
+    <div class="modal-body">Cette action est irréversible. Le locataire sera définitivement supprimé.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="cancelDelete()">Annuler</button>
+      <button class="btn-danger" [disabled]="deleting" (click)="doDelete()">
+        @if (deleting) { <i class="pi pi-spin pi-spinner"></i> Suppression… }
+        @else { <i class="pi pi-trash"></i> Supprimer }
+      </button>
+    </div>
+  </div>
+}
 
 @if (drawerOpen) {
   <div class="drawer-overlay" (click)="closeDrawer()"></div>

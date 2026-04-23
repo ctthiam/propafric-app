@@ -1,0 +1,53 @@
+$green:  #2D6A4F;
+$gold:   #C9A84C;
+$ink:    #0d1f17;
+$ink-l:  #4a6357;
+$white:  #ffffff;
+$cream:  #faf8f3;
+$wa:     #25d366;
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
+:host { display:block; animation: fadeUp 0.4s ease both; }
+
+.page-title { font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:700; color:$ink; margin:0 0 28px; }
+
+.support-grid { display:grid; grid-template-columns:1fr 1.4fr; gap:24px;
+  @media (max-width:900px) { grid-template-columns:1fr; }
+}
+
+// Contact card
+.contact-card { background:$white; border-radius:16px; border:1px solid rgba($ink,.07); padding:28px; height:fit-content; }
+.contact-header { display:flex; align-items:flex-start; gap:14px; margin-bottom:24px;
+  i { font-size:22px; color:$green; margin-top:2px; }
+  .contact-title { font-size:16px; font-weight:700; color:$ink; }
+  .contact-sub   { font-size:13px; color:$ink-l; margin-top:2px; }
+}
+
+.contact-channels { display:flex; flex-direction:column; gap:12px; margin-bottom:20px; }
+
+.channel-btn { display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:12px; text-decoration:none; transition:all .2s;
+  i { font-size:22px; }
+  .channel-label { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; opacity:.7; }
+  .channel-value { font-size:14px; font-weight:600; }
+  &.channel-whatsapp { background:rgba($wa,.08); color:darken($wa,10%); &:hover { background:rgba($wa,.15); } }
+  &.channel-email    { background:rgba($green,.06); color:$green;        &:hover { background:rgba($green,.12); } }
+}
+
+.hours-note { display:flex; align-items:center; gap:8px; font-size:12px; color:$ink-l; background:$cream; border-radius:8px; padding:10px 14px;
+  i { color:$gold; }
+}
+
+// FAQ card
+.faq-card { background:$white; border-radius:16px; border:1px solid rgba($ink,.07); padding:28px; }
+.faq-title { font-size:16px; font-weight:700; color:$ink; margin-bottom:16px; }
+
+.faq-item { border-bottom:1px solid rgba($ink,.06); &:last-child { border-bottom:none; } }
+
+.faq-question { width:100%; background:none; border:none; display:flex; align-items:center; justify-content:space-between; padding:14px 0; cursor:pointer; text-align:left; font-family:'DM Sans',sans-serif; gap:12px;
+  span { font-size:14px; font-weight:600; color:$ink; }
+  i    { font-size:12px; color:$ink-l; flex-shrink:0; transition:transform .2s; }
+}
+
+.faq-answer { padding:0 0 14px; font-size:13px; color:$ink-l; line-height:1.7; }
+
+.faq-item.open .faq-question span { color:$green; }

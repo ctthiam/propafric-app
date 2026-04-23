@@ -39,6 +39,7 @@
               <td>
                 <div class="actions-cell">
                   <button class="btn-icon btn-edit" (click)="openEdit(p)" pTooltip="Modifier" tooltipPosition="top"><i class="pi pi-pencil"></i></button>
+                  <button class="btn-icon btn-delete" (click)="confirmDelete(p.id)" pTooltip="Supprimer" tooltipPosition="top"><i class="pi pi-trash"></i></button>
                 </div>
               </td>
             </tr>
@@ -48,6 +49,22 @@
     </div>
   }
 </div>
+
+@if (deletingId !== null) {
+  <div class="modal-overlay" (click)="cancelDelete()"></div>
+  <div class="modal-box">
+    <div class="modal-icon"><i class="pi pi-exclamation-triangle"></i></div>
+    <div class="modal-title">Supprimer ce bien ?</div>
+    <div class="modal-body">Cette action est irréversible. Le bien sera définitivement supprimé.</div>
+    <div class="modal-actions">
+      <button class="btn-secondary" (click)="cancelDelete()">Annuler</button>
+      <button class="btn-danger" [disabled]="deleting" (click)="doDelete()">
+        @if (deleting) { <i class="pi pi-spin pi-spinner"></i> Suppression… }
+        @else { <i class="pi pi-trash"></i> Supprimer }
+      </button>
+    </div>
+  </div>
+}
 
 @if (drawerOpen) {
   <div class="drawer-overlay" (click)="closeDrawer()"></div>

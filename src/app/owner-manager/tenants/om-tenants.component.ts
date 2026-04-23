@@ -1,6 +1,6 @@
 import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ToastModule } from 'primeng/toast';
 import { SkeletonModule } from 'primeng/skeleton';
@@ -11,7 +11,7 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-om-tenants',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ToastModule, SkeletonModule, TooltipModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, ToastModule, SkeletonModule, TooltipModule],
   providers: [MessageService],
   templateUrl: './om-tenants.component.html',
   styleUrls: ['./om-tenants.component.scss'],
@@ -26,6 +26,15 @@ export class OmTenantsComponent implements OnInit {
   editingTenant = signal<any>(null);
   search        = signal('');
   drawerOpen    = false;
+  deletingId: number | null = null;
+  deleting = false;
+
+  portalTenant: any = null;
+  portalEmail = '';
+  portalPassword = '';
+  portalSaving = false;
+  portalMsg = '';
+  portalIsError = false;
 
   filteredTenants = computed(() => {
     const q = this.search().toLowerCase();
@@ -86,6 +95,56 @@ export class OmTenantsComponent implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err: any) => { this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' }); this.saving.set(false); }
+    });
+  }
+
+  confirmDelete(id: number): void { this.deletingId = id; this.cdr.detectChanges(); }
+  cancelDelete(): void { this.deletingId = null; this.cdr.detectChanges(); }
+
+  doDelete(): void {
+    if (!this.deletingId) return;
+    this.deleting = true;
+    this.http.delete<any>(`${this.api}/${this.deletingId}`).subscribe({
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Supprimé', detail: res.message });
+        this.deletingId = null; this.deleting = false; this.load(); this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Impossible de supprimer.' });
+        this.deletingId = null; this.deleting = false; this.cdr.detectChanges();
+      },
+    });
+  }
+
+  openPortalInvite(t: any): void {
+    this.portalTenant = t;
+    this.portalEmail = t.email ?? '';
+    this.portalPassword = '';
+    this.portalMsg = '';
+    this.portalIsError = false;
+    this.cdr.detectChanges();
+  }
+  closePortalInvite(): void { this.portalTenant = null; this.cdr.detectChanges(); }
+
+  submitPortalInvite(): void {
+    if (!this.portalEmail || !this.portalPassword) return;
+    this.portalSaving = true; this.portalMsg = ''; this.portalIsError = false;
+    this.http.post<any>(`${this.api}/${this.portalTenant.id}/portal`, {
+      email: this.portalEmail, password: this.portalPassword,
+    }).subscribe({
+      next: (res: any) => {
+        this.portalSaving = false;
+        this.portalMsg = res.message;
+        this.portalIsError = false;
+        this.cdr.detectChanges();
+        setTimeout(() => { this.closePortalInvite(); this.load(); }, 2000);
+      },
+      error: (err: any) => {
+        this.portalSaving = false;
+        this.portalMsg = err.error?.message ?? 'Erreur.';
+        this.portalIsError = true;
+        this.cdr.detectChanges();
+      },
     });
   }
 

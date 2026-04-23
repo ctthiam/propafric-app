@@ -98,5 +98,22 @@ export class OmPaymentsComponent implements OnInit {
     });
   }
 
+  downloadReceipt(payment: any): void {
+    const url = `${this.api}/payments/${payment.id}/receipt`;
+    this.http.get(url, { responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${payment.receipt_number}.pdf`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      },
+      error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de générer la quittance.' }),
+    });
+  }
+
   formatCurrency(n: any): string { return new Intl.NumberFormat('fr-SN').format(Number(n) || 0) + ' F'; }
+  methodLabel(m: string): string {
+    return ({ cash: 'Espèces', bank_transfer: 'Virement', wave_senegal: 'Wave', orange_money: 'Orange Money', cheque: 'Chèque' } as any)[m] ?? m;
+  }
 }

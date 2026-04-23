@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
@@ -25,6 +25,10 @@ export class OmLeasesComponent implements OnInit {
   saving         = signal(false);
   saveSuccess    = signal(false);
   drawerOpen     = false;
+
+  viewingLease: any = null;
+  terminatingId: number | null = null;
+  terminating = false;
 
   form: FormGroup;
 
@@ -87,6 +91,44 @@ export class OmLeasesComponent implements OnInit {
     });
   }
 
+  viewLease(lease: any): void { this.viewingLease = lease; this.cdr.detectChanges(); }
+  closeDetail(): void { this.viewingLease = null; this.cdr.detectChanges(); }
+
+  downloadContract(lease: any): void {
+    this.http.get(`${this.api}/leases/${lease.id}/contract`, { responseType: 'blob' }).subscribe({
+      next: (blob: Blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Contrat-${lease.reference}.pdf`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      },
+      error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Impossible de générer le contrat.' }),
+    });
+  }
+
+  confirmTerminate(id: number): void { this.terminatingId = id; this.cdr.detectChanges(); }
+  cancelTerminate(): void { this.terminatingId = null; this.cdr.detectChanges(); }
+
+  doTerminate(): void {
+    if (!this.terminatingId) return;
+    this.terminating = true;
+    this.http.post<any>(`${this.api}/leases/${this.terminatingId}/terminate`, {}).subscribe({
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Résilié', detail: res.message });
+        this.terminatingId = null; this.terminating = false; this.viewingLease = null;
+        this.load(); this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
+        this.terminatingId = null; this.terminating = false; this.cdr.detectChanges();
+      },
+    });
+  }
+
+  frequencyLabel(f: string): string {
+    return ({ monthly: 'Mensuel', quarterly: 'Trimestriel', biannual: 'Semestriel', annual: 'Annuel' } as any)[f] ?? f;
+  }
   formatCurrency(n: any): string { return new Intl.NumberFormat('fr-SN').format(Number(n) || 0) + ' F'; }
   statusLabel(s: string): string { return ({ active: 'Actif', terminated: 'Résilié', expired: 'Expiré' } as any)[s] ?? s; }
   statusClass(s: string): string { return ({ active: 'badge-success', terminated: 'badge-danger', expired: 'badge-neutral' } as any)[s] ?? ''; }

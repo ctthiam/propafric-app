@@ -118,8 +118,11 @@ export const routes: Routes = [
     { path: 'biens',      loadComponent: () => import('./owner-manager/properties/om-properties.component').then(m => m.OmPropertiesComponent) },
     { path: 'locataires', loadComponent: () => import('./owner-manager/tenants/om-tenants.component').then(m => m.OmTenantsComponent) },
     { path: 'baux',       loadComponent: () => import('./owner-manager/leases/om-leases.component').then(m => m.OmLeasesComponent) },
-    { path: 'paiements',  loadComponent: () => import('./owner-manager/payments/om-payments.component').then(m => m.OmPaymentsComponent) },
-    { path: 'depenses',   loadComponent: () => import('./owner-manager/expenses/om-expenses.component').then(m => m.OmExpensesComponent) },
+    { path: 'paiements',   loadComponent: () => import('./owner-manager/payments/om-payments.component').then(m => m.OmPaymentsComponent) },
+    { path: 'depenses',    loadComponent: () => import('./owner-manager/expenses/om-expenses.component').then(m => m.OmExpensesComponent) },
+    { path: 'echeancier',  loadComponent: () => import('./owner-manager/schedules/om-schedules.component').then(m => m.OmSchedulesComponent) },
+    { path: 'parametres',  loadComponent: () => import('./owner-manager/settings/om-settings.component').then(m => m.OmSettingsComponent) },
+    { path: 'support',     loadComponent: () => import('./owner-manager/support/om-support.component').then(m => m.OmSupportComponent) },
   ]
 },
 

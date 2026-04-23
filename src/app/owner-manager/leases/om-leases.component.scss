@@ -71,3 +71,31 @@ select.pa-input { cursor:pointer; }
 .form-error { font-size:11px; color:$red; }
 .req { color:$red; }
 .checkbox-label { display:flex; align-items:center; gap:8px; font-size:13px; color:$ink; cursor:pointer; }
+
+// Detail panel
+.detail-section { margin-bottom:20px; padding-bottom:20px; border-bottom:1px solid rgba($ink,.06); &:last-child { border-bottom:none; } }
+.detail-section-title { font-size:11px; font-weight:700; color:$ink-l; text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+.detail-row { display:flex; justify-content:space-between; align-items:baseline; padding:5px 0; }
+.detail-row-total { border-top:1px solid rgba($ink,.08); margin-top:4px; padding-top:8px; }
+.detail-lbl { font-size:13px; color:$ink-l; }
+.detail-val { font-size:13px; font-weight:600; color:$ink; text-align:right; }
+.detail-val-green { color:$green; font-size:15px; }
+.detail-notes { font-size:13px; color:$ink-l; line-height:1.7; white-space:pre-wrap; }
+.detail-actions { margin-top:24px; }
+
+.detail-actions { margin-top:24px; display:flex; flex-direction:column; gap:10px; }
+.btn-pdf-outline { width:100%; padding:11px 20px; border:1.5px solid rgba($green,.4); background:rgba($green,.04); color:$green; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; font-family:'DM Sans',sans-serif; transition:all .2s;
+  &:hover { background:rgba($green,.1); border-color:$green; }
+}
+.btn-danger-outline { width:100%; padding:11px 20px; border:1.5px solid rgba($red,.4); background:rgba($red,.04); color:darken($red,10%); border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:8px; font-family:'DM Sans',sans-serif; transition:all .2s;
+  &:hover { background:rgba($red,.1); border-color:$red; }
+}
+
+// Confirm modal
+.modal-overlay { position:fixed; inset:0; background:rgba($ink,.5); z-index:950; }
+.modal-box { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); background:$white; border-radius:20px; padding:32px; width:420px; max-width:90vw; z-index:951; text-align:center; box-shadow:0 20px 60px rgba($ink,.2); }
+.modal-icon { width:52px; height:52px; border-radius:50%; background:rgba($red,.1); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; i { font-size:22px; color:$red; } }
+.modal-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:700; color:$ink; margin-bottom:10px; }
+.modal-body { font-size:13px; color:$ink-l; line-height:1.7; margin-bottom:24px; }
+.modal-actions { display:flex; gap:10px; justify-content:center; }
+.btn-danger { display:inline-flex; align-items:center; gap:8px; padding:10px 20px; background:$red; color:$white; border:none; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all .2s; &:hover:not(:disabled) { background:darken($red,8%); } &:disabled { opacity:.7; cursor:not-allowed; } }

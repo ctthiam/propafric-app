@@ -10,9 +10,9 @@
   } @else {
     <div class="data-table-wrapper">
       <table class="data-table">
-        <thead><tr><th>Quittance</th><th>Locataire</th><th>Bien</th><th>Période</th><th>Montant</th><th>Date</th></tr></thead>
+        <thead><tr><th>Quittance</th><th>Locataire</th><th>Bien</th><th>Période</th><th>Montant</th><th>Mode</th><th style="text-align:center">PDF</th></tr></thead>
         <tbody>
-          @if (payments().length === 0) { <tr><td colspan="6" class="empty-row">Aucun paiement enregistré</td></tr> }
+          @if (payments().length === 0) { <tr><td colspan="7" class="empty-row">Aucun paiement enregistré</td></tr> }
           @for (p of payments(); track p.id) {
             <tr>
               <td><span class="badge badge-ref">{{ p.receipt_number }}</span></td>
@@ -20,7 +20,12 @@
               <td class="td-muted">{{ p.property?.name ?? '—' }}</td>
               <td class="td-muted">{{ p.period_label ?? '—' }}</td>
               <td class="td-name">{{ formatCurrency(p.amount) }}</td>
-              <td class="td-muted">{{ p.payment_date }}</td>
+              <td class="td-muted">{{ methodLabel(p.payment_method) }}</td>
+              <td>
+                <div class="actions-cell">
+                  <button class="btn-icon btn-pdf" title="Télécharger quittance" (click)="downloadReceipt(p)"><i class="pi pi-file-pdf"></i></button>
+                </div>
+              </td>
             </tr>
           }
         </tbody>
