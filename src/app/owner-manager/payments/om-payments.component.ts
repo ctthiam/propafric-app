@@ -61,12 +61,17 @@ export class OmPaymentsComponent implements OnInit {
   }
 
   loadSchedules(): void {
-    this.http.get<any>(`${this.api}/leases`).subscribe({
+    this.http.get<any>(`${this.api}/schedules`).subscribe({
       next: (res: any) => {
-        // Pour simplifier on liste les baux actifs
-        this.schedules.set(Array.isArray(res?.data) ? res.data.filter((l: any) => l.status === 'active') : []);
+        this.schedules.set(Array.isArray(res?.data) ? res.data : []);
+        this.cdr.detectChanges();
       }
     });
+  }
+
+  onScheduleChange(scheduleId: any): void {
+    const s = this.schedules().find((s: any) => s.id == scheduleId);
+    if (s) this.form.patchValue({ amount: s.balance });
   }
 
   openCreate(): void {
