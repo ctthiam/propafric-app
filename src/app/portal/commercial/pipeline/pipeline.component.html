@@ -1,0 +1,473 @@
+<div class="pipeline-page">
+
+  <!-- ── Header ── -->
+  <div class="page-header">
+    <div class="header-left">
+      <h1 class="page-title"><i class="pi pi-chart-bar"></i> Pipeline Commercial</h1>
+      <p class="page-sub">Suivez vos prospects et gérez votre pipeline de vente</p>
+    </div>
+    <button class="btn btn-primary" (click)="openCreate()">
+      <i class="pi pi-plus"></i> Nouveau prospect
+    </button>
+  </div>
+
+  <!-- ── KPI Cards ── -->
+  @if (stats()) {
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <span class="kpi-label">Total</span>
+        <span class="kpi-value">{{ stats().total }}</span>
+      </div>
+      <div class="kpi-card kpi-active">
+        <span class="kpi-label">En cours</span>
+        <span class="kpi-value">{{ stats().active }}</span>
+      </div>
+      <div class="kpi-card kpi-hot">
+        <span class="kpi-label">Chauds 🔥</span>
+        <span class="kpi-value">{{ stats().hot }}</span>
+      </div>
+      <div class="kpi-card kpi-won">
+        <span class="kpi-label">Gagnés</span>
+        <span class="kpi-value">{{ stats().won }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Taux conversion</span>
+        <span class="kpi-value kpi-rate">{{ stats().conversion_rate }}%</span>
+      </div>
+      <div class="kpi-card kpi-revenue">
+        <span class="kpi-label">Pipeline estimé</span>
+        <span class="kpi-value">{{ formatCurrency(stats().estimated_revenue_pipeline) }}</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Relances en retard</span>
+        <span class="kpi-value kpi-overdue">{{ stats().overdue_followups }}</span>
+      </div>
+    </div>
+  }
+
+  <!-- ── Filters ── -->
+  <div class="filter-bar">
+    <div class="search-wrap">
+      <i class="pi pi-search"></i>
+      <input
+        type="text"
+        placeholder="Rechercher agence, contact, ville..."
+        [value]="searchTerm()"
+        (input)="searchTerm.set($any($event.target).value)"
+        class="search-input"
+      />
+    </div>
+    <select class="filter-select" [value]="filterTemp()" (change)="filterTemp.set($any($event.target).value)">
+      <option value="">Toutes températures</option>
+      <option value="hot">🔥 Chaud</option>
+      <option value="warm">🌤 Tiède</option>
+      <option value="cold">❄ Froid</option>
+    </select>
+    <select class="filter-select" [value]="filterStatus()" (change)="filterStatus.set($any($event.target).value)">
+      <option value="">Tous les statuts</option>
+      <option value="new">Nouveau</option>
+      <option value="contacted">Contacté</option>
+      <option value="demo">Démo</option>
+      <option value="proposal">Proposition</option>
+      <option value="negotiation">Négociation</option>
+      <option value="won">Gagné</option>
+      <option value="lost">Perdu</option>
+    </select>
+    <span class="count-badge">{{ filteredProspects().length }} prospect(s)</span>
+  </div>
+
+  <!-- ── Loading ── -->
+  @if (loading()) {
+    <div class="loading-state">
+      <i class="pi pi-spin pi-spinner"></i> Chargement...
+    </div>
+  }
+
+  <!-- ── Kanban Board ── -->
+  @if (!loading()) {
+    <div class="kanban-board">
+      @for (col of columns; track col.key) {
+        <div class="kanban-col">
+          <div class="col-header" [style.borderColor]="col.color">
+            <span class="col-title" [style.color]="col.color">{{ col.label }}</span>
+            <span class="col-count" [style.background]="col.color">{{ columnProspects()[col.key].length }}</span>
+          </div>
+          <div class="col-cards">
+            @for (p of columnProspects()[col.key]; track p.id) {
+              <div class="prospect-card" (click)="openDetail(p)">
+                <div class="card-top">
+                  <div class="card-agency">{{ p.agency_name }}</div>
+                  <span [class]="'temp-badge ' + tempClass(p.temperature)">{{ tempLabel(p.temperature) }}</span>
+                </div>
+                <div class="card-contact">
+                  <i class="pi pi-user"></i> {{ p.contact_name }}
+                </div>
+                @if (p.city) {
+                  <div class="card-city"><i class="pi pi-map-marker"></i> {{ p.city }}</div>
+                }
+                <div class="card-meta">
+                  @if (p.estimated_properties > 0) {
+                    <span class="meta-tag"><i class="pi pi-home"></i> {{ p.estimated_properties }}</span>
+                  }
+                  @if (p.estimated_revenue > 0) {
+                    <span class="meta-tag"><i class="pi pi-dollar"></i> {{ formatCurrency(p.estimated_revenue) }}</span>
+                  }
+                  <span class="score-tag">Score: {{ p.score }}</span>
+                </div>
+                @if (p.next_followup_date) {
+                  <div [class]="'followup-tag ' + (isOverdue(p.next_followup_date) ? 'overdue' : isToday(p.next_followup_date) ? 'today' : '')">
+                    <i class="pi pi-calendar"></i>
+                    {{ isOverdue(p.next_followup_date) ? 'En retard' : isToday(p.next_followup_date) ? "Aujourd'hui" : p.next_followup_date }}
+                  </div>
+                }
+                <div class="card-actions" (click)="$event.stopPropagation()">
+                  <a [href]="'tel:' + p.phone" class="btn-action btn-call" title="Appeler">
+                    <i class="pi pi-phone"></i>
+                  </a>
+                  <a [href]="'https://wa.me/' + p.phone.replace('+','')" target="_blank" class="btn-action btn-whatsapp" title="WhatsApp">
+                    <i class="pi pi-comment"></i>
+                  </a>
+                  <button class="btn-action btn-status" (click)="openStatusChange(p)" title="Changer statut">
+                    <i class="pi pi-arrows-h"></i>
+                  </button>
+                  <button class="btn-action btn-edit" (click)="openEdit(p)" title="Modifier">
+                    <i class="pi pi-pencil"></i>
+                  </button>
+                  <button class="btn-action btn-delete" (click)="deleteProspect(p)" title="Supprimer">
+                    <i class="pi pi-trash"></i>
+                  </button>
+                </div>
+              </div>
+            }
+            @if (columnProspects()[col.key].length === 0) {
+              <div class="empty-col">Aucun prospect</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+</div>
+
+<!-- ══════════════ DETAIL SIDEBAR ══════════════ -->
+@if (detailOpen && selectedProspect()) {
+  <div class="sidebar-overlay" (click)="closeDetail()"></div>
+  <div class="detail-sidebar">
+    <div class="sidebar-header">
+      <div>
+        <h2>{{ selectedProspect()!.agency_name }}</h2>
+        <span [class]="'temp-badge ' + tempClass(selectedProspect()!.temperature)">{{ tempLabel(selectedProspect()!.temperature) }}</span>
+      </div>
+      <button class="btn-close" (click)="closeDetail()"><i class="pi pi-times"></i></button>
+    </div>
+
+    <div class="sidebar-body">
+      <!-- Info card -->
+      <div class="info-section">
+        <div class="info-row"><span class="info-label">Contact</span><span>{{ selectedProspect()!.contact_name }}</span></div>
+        <div class="info-row"><span class="info-label">Téléphone</span>
+          <a [href]="'tel:' + selectedProspect()!.phone">{{ selectedProspect()!.phone }}</a>
+        </div>
+        @if (selectedProspect()!.phone_2) {
+          <div class="info-row"><span class="info-label">Tél. 2</span><span>{{ selectedProspect()!.phone_2 }}</span></div>
+        }
+        @if (selectedProspect()!.email) {
+          <div class="info-row"><span class="info-label">Email</span>
+            <a [href]="'mailto:' + selectedProspect()!.email">{{ selectedProspect()!.email }}</a>
+          </div>
+        }
+        @if (selectedProspect()!.city) {
+          <div class="info-row"><span class="info-label">Ville</span><span>{{ selectedProspect()!.city }}</span></div>
+        }
+        @if (selectedProspect()!.zone) {
+          <div class="info-row"><span class="info-label">Zone</span><span>{{ selectedProspect()!.zone }}</span></div>
+        }
+        <div class="info-row"><span class="info-label">Statut</span>
+          <span class="status-pill status-{{ selectedProspect()!.status }}">{{ selectedProspect()!.status }}</span>
+        </div>
+        <div class="info-row"><span class="info-label">Score</span>
+          <div class="score-bar-wrap">
+            <div class="score-bar" [style.width]="selectedProspect()!.score + '%'"></div>
+            <span>{{ selectedProspect()!.score }}/100</span>
+          </div>
+        </div>
+        <div class="info-row"><span class="info-label">Biens estimés</span><span>{{ selectedProspect()!.estimated_properties }}</span></div>
+        <div class="info-row"><span class="info-label">Revenu estimé</span><span>{{ formatCurrency(selectedProspect()!.estimated_revenue) }}</span></div>
+        <div class="info-row"><span class="info-label">Source</span><span>{{ sourceLabel(selectedProspect()!.source) }}</span></div>
+        @if (selectedProspect()!.next_followup_date) {
+          <div class="info-row">
+            <span class="info-label">Prochaine relance</span>
+            <span [class]="isOverdue(selectedProspect()!.next_followup_date) ? 'text-danger' : isToday(selectedProspect()!.next_followup_date) ? 'text-warning' : ''">
+              {{ selectedProspect()!.next_followup_date }}
+            </span>
+          </div>
+        }
+        @if (selectedProspect()!.notes) {
+          <div class="info-notes"><span class="info-label">Notes</span><p>{{ selectedProspect()!.notes }}</p></div>
+        }
+      </div>
+
+      <!-- Actions rapides -->
+      <div class="sidebar-actions">
+        <button class="btn btn-secondary btn-sm" (click)="openEdit(selectedProspect()!)">
+          <i class="pi pi-pencil"></i> Modifier
+        </button>
+        <button class="btn btn-primary btn-sm" (click)="openStatusChange(selectedProspect()!)">
+          <i class="pi pi-arrows-h"></i> Changer statut
+        </button>
+        <button class="btn btn-gold btn-sm" (click)="openActivityDrawer()">
+          <i class="pi pi-plus"></i> Activité
+        </button>
+      </div>
+
+      <!-- Timeline activités -->
+      <div class="activity-section">
+        <h3 class="section-title">Historique des activités</h3>
+        @if (loadingActivities()) {
+          <div class="loading-sm"><i class="pi pi-spin pi-spinner"></i></div>
+        }
+        @if (!loadingActivities() && activities().length === 0) {
+          <p class="no-activities">Aucune activité enregistrée.</p>
+        }
+        @for (act of activities(); track act.id) {
+          <div class="activity-item">
+            <div class="act-icon"><i [class]="activityTypeIcon(act.type)"></i></div>
+            <div class="act-body">
+              <div class="act-title">{{ act.title }}</div>
+              @if (act.description) {
+                <div class="act-desc">{{ act.description }}</div>
+              }
+              <div class="act-meta">
+                {{ activityTypeLabel(act.type) }}
+                @if (act.outcome) {
+                  · <span [class]="'outcome outcome-' + act.outcome">{{ act.outcome }}</span>
+                }
+                · {{ act.activity_date | date:'dd/MM/yyyy HH:mm' }}
+                @if (act.user) {
+                  · {{ act.user.first_name }} {{ act.user.last_name }}
+                }
+              </div>
+              @if (act.next_action_date) {
+                <div class="act-next">
+                  <i class="pi pi-calendar"></i> Prochaine action: {{ act.next_action_date }}
+                  @if (act.next_action_note) { — {{ act.next_action_note }} }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══════════════ CREATE/EDIT DRAWER ══════════════ -->
+@if (drawerOpen) {
+  <div class="drawer-overlay" (click)="closeDrawer()"></div>
+  <div class="drawer">
+    <div class="drawer-header">
+      <h2>{{ isEdit ? 'Modifier le prospect' : 'Nouveau prospect' }}</h2>
+      <button class="btn-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="form-section-title">Informations agence</div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Nom agence <span class="req">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="form['agency_name']" placeholder="Ex: Immo Dakar" />
+        </div>
+        <div class="form-group">
+          <label>Contact principal <span class="req">*</span></label>
+          <input type="text" class="form-control" [(ngModel)]="form['contact_name']" placeholder="Nom & Prénom" />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Téléphone <span class="req">*</span></label>
+          <input type="tel" class="form-control" [(ngModel)]="form['phone']" placeholder="+221 7X XXX XX XX" />
+        </div>
+        <div class="form-group">
+          <label>Téléphone 2</label>
+          <input type="tel" class="form-control" [(ngModel)]="form['phone_2']" placeholder="+221 7X XXX XX XX" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" class="form-control" [(ngModel)]="form['email']" placeholder="contact@agence.sn" />
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Ville</label>
+          <input type="text" class="form-control" [(ngModel)]="form['city']" placeholder="Dakar" />
+        </div>
+        <div class="form-group">
+          <label>Zone / Quartier</label>
+          <input type="text" class="form-control" [(ngModel)]="form['zone']" placeholder="Plateau, Mermoz..." />
+        </div>
+      </div>
+
+      <div class="form-section-title">Estimation</div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Biens estimés</label>
+          <p-inputNumber
+            [(ngModel)]="form['estimated_properties']"
+            [min]="0" [showButtons]="false"
+            inputStyleClass="form-control"
+            placeholder="0"
+          />
+        </div>
+        <div class="form-group">
+          <label>Revenu mensuel estimé (FCFA)</label>
+          <p-inputNumber
+            [(ngModel)]="form['estimated_revenue']"
+            [min]="0" [showButtons]="false"
+            inputStyleClass="form-control"
+            placeholder="0"
+          />
+        </div>
+      </div>
+
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Source</label>
+          <select class="form-control" [(ngModel)]="form['source']">
+            <option value="">Sélectionner...</option>
+            <option value="referral">Référence</option>
+            <option value="linkedin">LinkedIn</option>
+            <option value="cold_call">Appel direct</option>
+            <option value="event">Événement</option>
+            <option value="other">Autre</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Prochaine relance</label>
+          <input type="date" class="form-control" [(ngModel)]="form['next_followup_date']" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Notes</label>
+        <textarea class="form-control" [(ngModel)]="form['notes']" rows="3" placeholder="Contexte, observations..."></textarea>
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-secondary" (click)="closeDrawer()">Annuler</button>
+      <button class="btn btn-primary" (click)="save()" [disabled]="saving()">
+        <i [class]="saving() ? 'pi pi-spin pi-spinner' : 'pi pi-check'"></i>
+        {{ saving() ? 'Enregistrement...' : (isEdit ? 'Mettre à jour' : 'Ajouter au pipeline') }}
+      </button>
+    </div>
+  </div>
+}
+
+<!-- ══════════════ STATUS CHANGE MODAL ══════════════ -->
+@if (statusChangeProspect()) {
+  <div class="modal-overlay" (click)="closeStatusChange()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h3>Changer le statut</h3>
+        <button class="btn-close" (click)="closeStatusChange()"><i class="pi pi-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <p class="modal-prospect-name">{{ statusChangeProspect()!.agency_name }}</p>
+        <div class="form-group">
+          <label>Nouveau statut</label>
+          <select class="form-control" [(ngModel)]="statusChangeForm.status">
+            <option value="new">Nouveau</option>
+            <option value="contacted">Contacté</option>
+            <option value="demo">Démo planifiée</option>
+            <option value="proposal">Proposition envoyée</option>
+            <option value="negotiation">En négociation</option>
+            <option value="won">Gagné ✓</option>
+            <option value="lost">Perdu ✗</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Note (optionnel)</label>
+          <textarea class="form-control" [(ngModel)]="statusChangeForm.note" rows="2" placeholder="Contexte du changement..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Prochaine relance</label>
+          <input type="date" class="form-control" [(ngModel)]="statusChangeForm.next_followup_date" />
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeStatusChange()">Annuler</button>
+        <button class="btn btn-primary" (click)="confirmStatusChange()">
+          <i class="pi pi-check"></i> Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ══════════════ ACTIVITY DRAWER ══════════════ -->
+@if (activityDrawerOpen) {
+  <div class="drawer-overlay" (click)="closeActivityDrawer()"></div>
+  <div class="drawer drawer-sm">
+    <div class="drawer-header">
+      <h2>Enregistrer une activité</h2>
+      <button class="btn-close" (click)="closeActivityDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Type d'activité <span class="req">*</span></label>
+          <select class="form-control" [(ngModel)]="activityForm.type">
+            <option value="call">Appel</option>
+            <option value="email">Email</option>
+            <option value="meeting">Réunion</option>
+            <option value="demo">Démo</option>
+            <option value="proposal">Proposition</option>
+            <option value="note">Note</option>
+            <option value="followup">Relance</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Résultat</label>
+          <select class="form-control" [(ngModel)]="activityForm.outcome">
+            <option value="">—</option>
+            <option value="positive">Positif</option>
+            <option value="neutral">Neutre</option>
+            <option value="negative">Négatif</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Titre <span class="req">*</span></label>
+        <input type="text" class="form-control" [(ngModel)]="activityForm.title" placeholder="Ex: Appel de qualification" />
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea class="form-control" [(ngModel)]="activityForm.description" rows="3" placeholder="Détails de l'échange..."></textarea>
+      </div>
+      <div class="form-row-2">
+        <div class="form-group">
+          <label>Date & heure</label>
+          <input type="datetime-local" class="form-control" [(ngModel)]="activityForm.activity_date" />
+        </div>
+        <div class="form-group">
+          <label>Prochaine action</label>
+          <input type="date" class="form-control" [(ngModel)]="activityForm.next_action_date" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Note prochaine action</label>
+        <input type="text" class="form-control" [(ngModel)]="activityForm.next_action_note" placeholder="Que faire lors du prochain contact ?" />
+      </div>
+    </div>
+    <div class="drawer-footer">
+      <button class="btn btn-secondary" (click)="closeActivityDrawer()">Annuler</button>
+      <button class="btn btn-primary" (click)="saveActivity()">
+        <i class="pi pi-check"></i> Enregistrer
+      </button>
+    </div>
+  </div>
+}

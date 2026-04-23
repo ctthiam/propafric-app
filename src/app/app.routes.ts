@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard }  from './core/guards/auth.guard';
 import { guestGuard } from './core/guards/guest.guard';
-import { ownerManagerGuard } from './core/guards/role.guard';
+import { ownerManagerGuard, commercialGuard } from './core/guards/role.guard';
 import { agencyGuard, adminOnlyGuard, tenantGuard, ownerGuard, superAdminGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
@@ -65,10 +65,12 @@ export const routes: Routes = [
     // ── Portail Commercial ──────────────────────────────────────────────
   {
     path: 'commercial',
+    canActivate: [authGuard, commercialGuard],
     loadComponent: () => import('./portal/commercial/layout/commercial-layout.component').then(m => m.CommercialLayoutComponent),
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      { path: '', redirectTo: 'pipeline', pathMatch: 'full' },
       { path: 'dashboard', loadComponent: () => import('./portal/commercial/dashboard/commercial-dashboard.component').then(m => m.CommercialDashboardComponent) },
+      { path: 'pipeline',  loadComponent: () => import('./portal/commercial/pipeline/pipeline.component').then(m => m.PipelineComponent) },
       { path: 'agencies',  loadComponent: () => import('./portal/commercial/agencies/commercial-agencies.component').then(m => m.CommercialAgenciesComponent) },
     ],
   },

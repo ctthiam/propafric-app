@@ -18,8 +18,9 @@ export class CommercialLayoutComponent {
   user = signal<any>(null);
 
   navItems = [
-    { label: 'Tableau de bord', icon: 'pi pi-home',    route: '/commercial/dashboard' },
-    { label: 'Mes agences',     icon: 'pi pi-building', route: '/commercial/agencies' },
+    { label: 'Tableau de bord', icon: 'pi pi-home',       route: '/commercial/dashboard' },
+    { label: 'Pipeline CRM',    icon: 'pi pi-chart-bar',  route: '/commercial/pipeline' },
+    { label: 'Mes agences',     icon: 'pi pi-building',   route: '/commercial/agencies' },
   ];
 
   constructor(

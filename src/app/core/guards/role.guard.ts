@@ -89,3 +89,18 @@ export const ownerManagerGuard: CanActivateFn = () => {
   if (role === 'owner')       return router.createUrlTree(['/portail-proprietaire']);
   return router.createUrlTree(['/auth/login']);
 };
+
+/**
+ * commercialGuard — pipeline commercial (commercial + super_admin)
+ */
+export const commercialGuard: CanActivateFn = () => {
+  const auth   = inject(AuthService);
+  const router = inject(Router);
+  const role   = auth.user()?.role;
+
+  if (role === 'commercial' || role === 'super_admin') return true;
+  if (role && AGENCY_ROLES.includes(role)) return router.createUrlTree(['/dashboard']);
+  if (role === 'owner')  return router.createUrlTree(['/portail-proprietaire']);
+  if (role === 'tenant') return router.createUrlTree(['/portail-locataire']);
+  return router.createUrlTree(['/auth/login']);
+};

@@ -131,7 +131,7 @@ private redirectAfterLogin(user: User): void {
       this.router.navigate(['/portail-locataire']);
       break;
     case 'commercial':
-      this.router.navigate(['/commercial/dashboard']);
+      this.router.navigate(['/commercial/pipeline']);
       break;
     case 'owner_manager':
       this.router.navigate(['/gestionnaire']);
