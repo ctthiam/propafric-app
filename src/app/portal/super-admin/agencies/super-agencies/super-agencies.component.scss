@@ -72,6 +72,10 @@ $red:         #e57373;
 
 .extend-row { display: flex; gap: 10px; align-items: center; }
 .btn-extend { display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; background: $purple; color: $white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; &:hover:not(:disabled) { background: darken($purple, 8%); } &:disabled { opacity: 0.5; cursor: not-allowed; } }
+.reset-pwd-row { display: flex; gap: 10px; align-items: center; }
+.filter-input { flex: 1; padding: 10px 12px; border: 1.5px solid rgba($ink,.12); border-radius: 8px; font-size: 13px; font-family: 'DM Sans',sans-serif; color: $ink; outline: none; &:focus { border-color: $green-main; } }
+.btn-reset-pwd { display: inline-flex; align-items: center; gap: 6px; padding: 10px 16px; background: $gold-main; color: $white; border: none; border-radius: 10px; font-size: 13px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: 'DM Sans',sans-serif; transition: all .2s; &:hover:not(:disabled) { background: darken($gold-main, 8%); } &:disabled { opacity: 0.5; cursor: not-allowed; } }
+.reset-pwd-msg { font-size: 12px; font-weight: 600; padding: 8px 12px; border-radius: 6px; background: rgba($green-light, .12); color: $green-main; &.is-error { background: rgba($red,.1); color: $red; } }
 
 :host ::ng-deep .p-toast { top: 80px !important; }
 /* ── Drawer création agence ── */

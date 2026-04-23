@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/rou
 import { NavigationStart, NavigationEnd, NavigationCancel, NavigationError } from '@angular/router';
 
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 import { environment } from '../../../environments/environment';
@@ -28,7 +29,7 @@ interface Notification {
 @Component({
   selector: 'app-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, ReactiveFormsModule, RouterOutlet, RouterLink, RouterLinkActive],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.scss'],
 })
@@ -44,6 +45,17 @@ export class LayoutComponent implements OnInit, OnDestroy {
   unreadCount      = signal(0);
   notifOpen        = false;
   loadingNotifs    = false;
+
+  // ── Changer mot de passe ──
+  pwdDrawerOpen = false;
+  pwdSaving     = false;
+  pwdError      = '';
+  pwdSuccess    = false;
+  pwdForm = this.fb.group({
+    current_password:      ['', [Validators.required]],
+    password:              ['', [Validators.required, Validators.minLength(8)]],
+    password_confirmation: ['', [Validators.required]],
+  });
 
   readonly user = this.auth.user;
 
@@ -82,6 +94,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     private http: HttpClient,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private fb: FormBuilder,
   ) {
      this.router.events.subscribe(event => {
       if (event instanceof NavigationStart) this.navigating = true;
@@ -219,6 +232,43 @@ export class LayoutComponent implements OnInit, OnDestroy {
   toggleMobile():  void { this.mobileOpen.update(v => !v); }
   closeMobile():   void { this.mobileOpen.set(false); }
   logout():        void { this.auth.logout(); }
+
+  openPwdDrawer(): void {
+    this.pwdForm.reset();
+    this.pwdError   = '';
+    this.pwdSuccess = false;
+    this.pwdDrawerOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closePwdDrawer(): void {
+    this.pwdDrawerOpen = false;
+    this.cdr.detectChanges();
+  }
+
+  submitPassword(): void {
+    if (this.pwdForm.invalid) { this.pwdForm.markAllAsTouched(); return; }
+    const v = this.pwdForm.value;
+    if (v.password !== v.password_confirmation) {
+      this.pwdError = 'Les mots de passe ne correspondent pas.';
+      return;
+    }
+    this.pwdSaving = true;
+    this.pwdError  = '';
+    this.http.post<any>(`${this.api}/auth/change-password`, v).subscribe({
+      next: (res) => {
+        this.pwdSaving  = false;
+        this.pwdSuccess = true;
+        this.cdr.detectChanges();
+        setTimeout(() => this.closePwdDrawer(), 1800);
+      },
+      error: (err) => {
+        this.pwdSaving = false;
+        this.pwdError  = err?.error?.message ?? 'Erreur lors du changement.';
+        this.cdr.detectChanges();
+      },
+    });
+  }
 
   get roleLabel(): string {
     const labels: Record<string, string> = {

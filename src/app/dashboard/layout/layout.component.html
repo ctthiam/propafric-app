@@ -54,6 +54,10 @@
       @if (collapsed()) {
         <div class="sidebar-avatar sidebar-avatar-solo">{{ userInitials }}</div>
       }
+      <button class="sidebar-pwd-btn" (click)="openPwdDrawer()" [title]="collapsed() ? 'Changer mot de passe' : ''">
+        <i class="pi pi-lock"></i>
+        @if (!collapsed()) { <span>Mot de passe</span> }
+      </button>
       <button class="sidebar-logout" (click)="logout()" [title]="collapsed() ? 'Déconnexion' : ''">
         <i class="pi pi-sign-out"></i>
         @if (!collapsed()) { <span>Déconnexion</span> }
@@ -161,3 +165,45 @@
   </div>
 
 </div>
+
+<!-- ── Drawer Changer mot de passe ───────────────────────── -->
+@if (pwdDrawerOpen) {
+  <div class="pwd-overlay" (click)="closePwdDrawer()"></div>
+  <div class="pwd-drawer">
+    <div class="pwd-drawer-header">
+      <h3 class="pwd-drawer-title"><i class="pi pi-lock"></i> Changer mon mot de passe</h3>
+      <button class="pwd-close" (click)="closePwdDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+
+    @if (pwdSuccess) {
+      <div class="pwd-success">
+        <i class="pi pi-check-circle"></i> Mot de passe modifié avec succès !
+      </div>
+    } @else {
+      <form [formGroup]="pwdForm" (ngSubmit)="submitPassword()" class="pwd-form">
+        <div class="pwd-field">
+          <label>Mot de passe actuel</label>
+          <input type="password" formControlName="current_password" class="pwd-input" placeholder="Votre mot de passe actuel" autocomplete="current-password" />
+        </div>
+        <div class="pwd-field">
+          <label>Nouveau mot de passe</label>
+          <input type="password" formControlName="password" class="pwd-input" placeholder="Minimum 8 caractères" autocomplete="new-password" />
+        </div>
+        <div class="pwd-field">
+          <label>Confirmer le nouveau mot de passe</label>
+          <input type="password" formControlName="password_confirmation" class="pwd-input" placeholder="Répéter le nouveau mot de passe" autocomplete="new-password" />
+        </div>
+        @if (pwdError) {
+          <div class="pwd-error"><i class="pi pi-exclamation-circle"></i> {{ pwdError }}</div>
+        }
+        <div class="pwd-actions">
+          <button type="button" class="pwd-btn-cancel" (click)="closePwdDrawer()">Annuler</button>
+          <button type="submit" class="pwd-btn-submit" [disabled]="pwdSaving">
+            @if (pwdSaving) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-check"></i> }
+            {{ pwdSaving ? 'Enregistrement...' : 'Confirmer' }}
+          </button>
+        </div>
+      </form>
+    }
+  </div>
+}

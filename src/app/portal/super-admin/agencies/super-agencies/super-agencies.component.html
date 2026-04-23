@@ -151,6 +151,21 @@
         </div>
       </div>
 
+      <!-- Réinitialiser mot de passe admin -->
+      <div class="action-section">
+        <div class="action-title">Réinitialiser le mot de passe admin</div>
+        <div class="reset-pwd-row">
+          <input type="password" class="filter-input" [(ngModel)]="resetPwdValue" placeholder="Nouveau mot de passe (min. 8 car.)" />
+          <button class="btn-reset-pwd" (click)="resetAgencyAdminPassword(selectedAgency()!)" [disabled]="resetPwdSaving || resetPwdValue.length < 8">
+            @if (resetPwdSaving) { <i class="pi pi-spin pi-spinner"></i> }
+            @else { <i class="pi pi-lock"></i> Réinitialiser }
+          </button>
+        </div>
+        @if (resetPwdMsg) {
+          <div class="reset-pwd-msg" [class.is-error]="resetPwdIsError">{{ resetPwdMsg }}</div>
+        }
+      </div>
+
     </div>
   </div>}
   <!-- ─── DRAWER CRÉER AGENCE ─── -->

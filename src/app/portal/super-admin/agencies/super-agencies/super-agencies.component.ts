@@ -44,8 +44,12 @@ export class SuperAgenciesComponent implements OnInit {
   actionLoading = signal<number | null>(null);
   drawerOpen    = false;
   selectedAgency = signal<Agency | null>(null);
-  extendDays    = 30;
-  createOpen    = false;
+  extendDays      = 30;
+  resetPwdValue   = '';
+  resetPwdSaving  = false;
+  resetPwdMsg     = '';
+  resetPwdIsError = false;
+  createOpen      = false;
   createSaving  = signal(false);
   createForm:   FormGroup;
 
@@ -122,8 +126,10 @@ export class SuperAgenciesComponent implements OnInit {
 
   openDetail(agency: Agency): void {
     this.selectedAgency.set(agency);
-    this.extendDays = 30;
-    this.drawerOpen = true;
+    this.extendDays     = 30;
+    this.resetPwdValue  = '';
+    this.resetPwdMsg    = '';
+    this.drawerOpen     = true;
     this.cdr.detectChanges();
   }
 
@@ -131,6 +137,27 @@ export class SuperAgenciesComponent implements OnInit {
     this.drawerOpen = false;
     this.selectedAgency.set(null);
     this.cdr.detectChanges();
+  }
+
+  resetAgencyAdminPassword(agency: Agency): void {
+    if (this.resetPwdValue.length < 8) return;
+    this.resetPwdSaving  = true;
+    this.resetPwdMsg     = '';
+    this.http.post<any>(`${this.apiUrl}/agencies/${agency.id}/reset-password`, { password: this.resetPwdValue }).subscribe({
+      next: (res) => {
+        this.resetPwdSaving  = false;
+        this.resetPwdIsError = false;
+        this.resetPwdMsg     = res?.message ?? 'Mot de passe réinitialisé.';
+        this.resetPwdValue   = '';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.resetPwdSaving  = false;
+        this.resetPwdIsError = true;
+        this.resetPwdMsg     = err?.error?.message ?? 'Erreur lors de la réinitialisation.';
+        this.cdr.detectChanges();
+      },
+    });
   }
 
   updateStatus(agency: Agency, status: string): void {

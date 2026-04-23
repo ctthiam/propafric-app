@@ -243,6 +243,127 @@ $transition:          0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+.sidebar-pwd-btn {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: transparent;
+  border: none;
+  color: rgba($white, 0.5);
+  font-size: 13px; font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  width: 100%;
+  text-align: left;
+  font-family: 'DM Sans', sans-serif;
+
+  i { font-size: 14px; flex-shrink: 0; width: 20px; text-align: center; }
+  &:hover { background: rgba($gold-main, 0.12); color: $gold-main; }
+
+  .dashboard-shell.sidebar-collapsed & { justify-content: center; padding: 10px 0; }
+}
+
+// ── Drawer mot de passe ──────────────────────────────────────
+.pwd-overlay {
+  position: fixed; inset: 0;
+  background: rgba($ink, 0.45);
+  z-index: 1100;
+}
+
+.pwd-drawer {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: 400px; max-width: 100vw;
+  background: $white;
+  z-index: 1101;
+  display: flex; flex-direction: column;
+  box-shadow: -4px 0 32px rgba($ink, 0.15);
+
+  @media (max-width: 480px) { width: 100vw; }
+}
+
+.pwd-drawer-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid rgba($ink, 0.08);
+}
+
+.pwd-drawer-title {
+  font-size: 16px; font-weight: 700; color: $ink;
+  display: flex; align-items: center; gap: 8px;
+  margin: 0;
+  i { color: $green-main; }
+}
+
+.pwd-close {
+  background: none; border: none; cursor: pointer;
+  color: $ink-light; font-size: 16px; padding: 4px;
+  border-radius: 6px;
+  &:hover { background: rgba($ink, 0.06); }
+}
+
+.pwd-form { padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+
+.pwd-field {
+  display: flex; flex-direction: column; gap: 6px;
+  label { font-size: 13px; font-weight: 600; color: $ink; }
+}
+
+.pwd-input {
+  padding: 10px 12px;
+  border: 1.5px solid rgba($ink, .12);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  color: $ink;
+  outline: none;
+  transition: border-color .2s;
+  &:focus { border-color: $green-main; box-shadow: 0 0 0 2px rgba($green-main, .1); }
+}
+
+.pwd-error {
+  background: rgba(#e57373, 0.08);
+  color: #c62828;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.pwd-success {
+  margin: 40px 24px;
+  background: rgba($green-main, 0.08);
+  color: $green-main;
+  border-radius: 10px;
+  padding: 20px;
+  font-size: 15px; font-weight: 600;
+  display: flex; align-items: center; gap: 10px;
+  i { font-size: 20px; }
+}
+
+.pwd-actions {
+  display: flex; gap: 10px; justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.pwd-btn-cancel {
+  padding: 10px 18px; border-radius: 8px;
+  border: 1.5px solid rgba($ink, .15);
+  background: $white; color: $ink;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  &:hover { background: rgba($ink, .04); }
+}
+
+.pwd-btn-submit {
+  padding: 10px 20px; border-radius: 8px;
+  background: $green-main; color: $white;
+  border: none; font-size: 13px; font-weight: 600;
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  display: flex; align-items: center; gap: 7px;
+  &:hover { background: $green-mid; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+
 // Overlay mobile
 .sidebar-overlay {
   display: none;
