@@ -27,8 +27,11 @@ import { MessageModule } from 'primeng/message';
 })
 export class LoginComponent {
   form: FormGroup;
-  errorMessage = signal<string | null>(null);
-  isLoading = signal(false);
+  errorMessage  = signal<string | null>(null);
+  isLoading     = signal(false);
+  showForgotMsg = false;
+
+  toggleForgotMsg(): void { this.showForgotMsg = !this.showForgotMsg; }
 
   constructor(
     private fb: FormBuilder,

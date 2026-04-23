@@ -174,7 +174,8 @@ $red:         #e57373;
   }
 }
 .label-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.forgot-link { font-size: 13px; color: $green-main; font-weight: 500; cursor: default; }
+.forgot-link { font-size: 13px; color: $green-main; font-weight: 500; cursor: pointer; &:hover { text-decoration: underline; } }
+.forgot-msg { margin-top: 8px; padding: 10px 14px; background: rgba($green-main, .07); border-radius: 8px; font-size: 13px; color: $green-main; display: flex; align-items: flex-start; gap: 8px; i { flex-shrink: 0; margin-top: 1px; } }
 
 // Input wrapper
 .input-wrapper {

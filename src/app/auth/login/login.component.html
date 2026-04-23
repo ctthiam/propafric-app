@@ -107,7 +107,7 @@
         <div class="form-group">
           <div class="label-row">
             <label for="password">Mot de passe</label>
-            <span class="forgot-link" title="Contactez votre administrateur d'agence pour réinitialiser votre mot de passe">Mot de passe oublié ?</span>
+            <span class="forgot-link" (click)="toggleForgotMsg()">Mot de passe oublié ?</span>
           </div>
           <div class="input-wrapper" [class.input-error]="password.invalid && password.touched">
             <svg class="input-icon" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -123,6 +123,12 @@
           </div>
           @if (password.invalid && password.touched) {
             <span class="form-error">Le mot de passe est requis.</span>
+          }
+          @if (showForgotMsg) {
+            <div class="forgot-msg">
+              <i class="pi pi-info-circle"></i>
+              Contactez votre administrateur d'agence pour réinitialiser votre mot de passe.
+            </div>
           }
         </div>
 
