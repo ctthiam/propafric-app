@@ -77,14 +77,16 @@
 
           <button
             class="btn-subscribe"
-            [class.btn-current]="plan.key === currentPlan"
-            [disabled]="paying() || (plan.key === currentPlan && data().agency.status === 'active')"
+            [class.btn-current]="plan.key === currentPlan && !isExpired"
+            [disabled]="payingPlan() !== '' || (plan.key === currentPlan && !isExpired && data().agency.status === 'active')"
             (click)="subscribe(plan.key)"
           >
-            @if (paying() && selectedPlan() === plan.key) {
+            @if (payingPlan() === plan.key) {
               <i class="pi pi-spin pi-spinner"></i> Redirection…
-            } @else if (plan.key === currentPlan && data().agency.status === 'active') {
-              Plan actuel
+            } @else if (plan.key === currentPlan && !isExpired && data().agency.status === 'active') {
+              Plan actuel ✓
+            } @else if (plan.key === currentPlan && isExpired) {
+              <i class="pi pi-refresh"></i> Renouveler
             } @else {
               Choisir ce plan
             }

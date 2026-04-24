@@ -15,14 +15,15 @@ import { environment } from '../../../environments/environment';
 export class OmSchedulesComponent implements OnInit {
   private api = `${environment.apiUrl}/owner-manager`;
 
-  schedules = signal<any[]>([]);
-  loading   = signal(true);
-  filterStatus = '';
+  schedules    = signal<any[]>([]);
+  loading      = signal(true);
+  filterStatus = signal('');
 
   filteredSchedules = computed(() => {
     const list = this.schedules();
-    if (!this.filterStatus) return list;
-    return list.filter((s: any) => s.status === this.filterStatus);
+    const f    = this.filterStatus();
+    if (!f) return list;
+    return list.filter((s: any) => s.status === f);
   });
 
   totals = computed(() => {

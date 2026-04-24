@@ -28,11 +28,10 @@ interface PlanOption {
 export class SubscriptionComponent implements OnInit {
   private api = `${environment.apiUrl}/agency/subscription`;
 
-  data     = signal<any>(null);
-  loading  = signal(true);
-  paying   = signal(false);
-  period   = signal<'monthly' | 'yearly'>('monthly');
-  selectedPlan = signal<string>('');
+  data      = signal<any>(null);
+  loading   = signal(true);
+  payingPlan = signal<string>('');   // plan clé en cours de paiement, '' = aucun
+  period    = signal<'monthly' | 'yearly'>('monthly');
 
   plans: PlanOption[] = [
     {
@@ -96,33 +95,31 @@ export class SubscriptionComponent implements OnInit {
   }
 
   subscribe(planKey: string): void {
-    this.paying.set(true);
-    this.selectedPlan.set(planKey);
+    if (this.payingPlan()) return;
+    this.payingPlan.set(planKey);
 
     this.http.post<any>(`${this.api}/initiate`, {
       plan:   planKey,
       period: this.period(),
     }).subscribe({
       next: (res: any) => {
-        this.paying.set(false);
+        this.payingPlan.set('');
         if (res?.data?.test_mode) {
-          // Mode test — simuler l'activation
           this.toast.add({
             severity: 'info',
             summary:  'Mode test',
-            detail:   'Pas de clé NabooPay configurée. Paiement simulé.',
+            detail:   'Pas de clé PayDunya configurée. Paiement simulé.',
           });
           setTimeout(() => this.load(), 1000);
           return;
         }
-        // Rediriger vers NabooPay
         if (res?.data?.checkout_url) {
           window.location.href = res.data.checkout_url;
         }
       },
       error: (err: any) => {
         this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Erreur.' });
-        this.paying.set(false);
+        this.payingPlan.set('');
       }
     });
   }
