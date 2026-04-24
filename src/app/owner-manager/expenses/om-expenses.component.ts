@@ -32,11 +32,13 @@ export class OmExpensesComponent implements OnInit {
   form: FormGroup;
 
   categories = [
-    { label: 'Réparation',    value: 'reparation' },
-    { label: 'Entretien',     value: 'entretien' },
-    { label: 'Gardiennage',   value: 'gardiennage' },
-    { label: 'Taxe foncière', value: 'taxe' },
-    { label: 'Autre',         value: 'autre' },
+    { label: 'Travaux / Réparation', value: 'travaux' },
+    { label: 'Entretien',            value: 'entretien' },
+    { label: 'Gardiennage',          value: 'gardiennage' },
+    { label: 'Taxe foncière',        value: 'taxe' },
+    { label: 'Assurance',            value: 'assurance' },
+    { label: 'Charges communes',     value: 'charges_communes' },
+    { label: 'Autre',                value: 'autre' },
   ];
 
   constructor(
