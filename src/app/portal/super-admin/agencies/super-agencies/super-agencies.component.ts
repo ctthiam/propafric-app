@@ -1,6 +1,7 @@
 import { Component, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { environment } from '../../../../../environments/environment';
 import { SkeletonModule } from 'primeng/skeleton';
 import { FormsModule } from '@angular/forms';
@@ -22,6 +23,9 @@ export interface Agency {
   max_properties: number | null;
   users_count: number;
   properties_count: number;
+  active_leases_count: number;
+  last_activity: string | null;
+  health_score: number;
   created_at: string;
 }
 
@@ -74,10 +78,11 @@ export class SuperAgenciesComponent implements OnInit {
 
   statusOptions = [
     { label: 'Tous les statuts', value: '' },
-    { label: 'Actif',    value: 'active' },
-    { label: 'Essai',    value: 'trial' },
-    { label: 'Suspendu', value: 'suspended' },
-    { label: 'Annulé',   value: 'cancelled' },
+    { label: 'Actif',       value: 'active' },
+    { label: 'Essai',       value: 'trial' },
+    { label: 'En attente',  value: 'pending' },
+    { label: 'Suspendu',    value: 'suspended' },
+    { label: 'Annulé',      value: 'cancelled' },
   ];
 
   planOptions = [
@@ -90,10 +95,11 @@ export class SuperAgenciesComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
+    private router: Router,
     private toast: MessageService,
     private confirm: ConfirmationService,
     private cdr: ChangeDetectorRef,
-    private fb: FormBuilder,          // ✅ FIX 1 — injecter FormBuilder
+    private fb: FormBuilder,
   ) {
     this.createForm = this.fb.group({
       name:             ['', Validators.required],
@@ -220,14 +226,39 @@ export class SuperAgenciesComponent implements OnInit {
     });
   }
 
+  goToDetail(agency: Agency): void { this.router.navigate(['/super-admin/agences', agency.id]); }
+
   onSearch(e: Event): void { this.search.set((e.target as HTMLInputElement).value); }
   onFilterStatus(v: string): void { this.filterStatus.set(v); }
   onFilterPlan(v: string): void { this.filterPlan.set(v); }
   isLoading(id: number): boolean { return this.actionLoading() === id; }
 
   formatDate(d: string): string { return d ? new Date(d).toLocaleDateString('fr-SN', { day: '2-digit', month: 'short', year: 'numeric' }) : '—'; }
-  planLabel(p: string): string { return ({ starter: 'Starter', pro: 'Pro', partner: 'Partenaire', enterprise: 'Entreprise' } as any)[p] ?? p; }
-  planClass(p: string): string { return ({ starter: 'badge-neutral', pro: 'badge-blue', partner: 'badge-gold', enterprise: 'badge-purple' } as any)[p] ?? 'badge-neutral'; }
-  statusLabel(s: string): string { return ({ active: 'Actif', trial: 'Essai', suspended: 'Suspendu', cancelled: 'Annulé' } as any)[s] ?? s; }
-  statusClass(s: string): string { return ({ active: 'badge-success', trial: 'badge-warning', suspended: 'badge-danger', cancelled: 'badge-neutral' } as any)[s] ?? 'badge-neutral'; }
+  planLabel(p: string): string { return ({ starter: 'Starter', pro: 'Pro', partner: 'Partenaire', premium: 'Premium', enterprise: 'Entreprise' } as any)[p] ?? p; }
+  planClass(p: string): string { return ({ starter: 'badge-neutral', pro: 'badge-blue', partner: 'badge-gold', premium: 'badge-purple', enterprise: 'badge-purple' } as any)[p] ?? 'badge-neutral'; }
+  statusLabel(s: string): string { return ({ active: 'Actif', trial: 'Essai', suspended: 'Suspendu', cancelled: 'Annulé', pending: 'En attente' } as any)[s] ?? s; }
+  statusClass(s: string): string { return ({ active: 'badge-success', trial: 'badge-warning', suspended: 'badge-danger', cancelled: 'badge-neutral', pending: 'badge-pending' } as any)[s] ?? 'badge-neutral'; }
+
+  healthClass(score: number): string {
+    if (score >= 70) return 'health-good';
+    if (score >= 40) return 'health-medium';
+    return 'health-low';
+  }
+
+  healthLabel(score: number): string {
+    if (score >= 70) return 'Actif';
+    if (score >= 40) return 'Moyen';
+    return 'Faible';
+  }
+
+  relativeTime(d: string | null): string {
+    if (!d) return 'Jamais';
+    const days = Math.floor((Date.now() - new Date(d).getTime()) / 86400000);
+    if (days === 0)    return "Aujourd'hui";
+    if (days === 1)    return 'Hier';
+    if (days < 7)     return `Il y a ${days}j`;
+    if (days < 30)    return `Il y a ${Math.floor(days / 7)} sem.`;
+    if (days < 365)   return `Il y a ${Math.floor(days / 30)} mois`;
+    return `Il y a ${Math.floor(days / 365)} an(s)`;
+  }
 }

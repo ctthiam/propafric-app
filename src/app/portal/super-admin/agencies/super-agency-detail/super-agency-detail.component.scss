@@ -1,0 +1,123 @@
+$purple:      #7048e8;
+$green-main:  #2D6A4F;
+$green-light: #52b788;
+$gold-main:   #C9A84C;
+$cream:       #faf8f3;
+$ink:         #0d1f17;
+$ink-light:   #4a6357;
+$white:       #ffffff;
+$red:         #e57373;
+
+@keyframes fadeUp { from { opacity:0; transform:translateY(12px) } to { opacity:1; transform:translateY(0) } }
+:host { display: block; animation: fadeUp 0.35s ease both; }
+
+.detail-page { display: flex; flex-direction: column; gap: 20px; }
+
+// ── Back ──
+.back-row { margin-bottom: 4px; }
+.back-btn { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: $ink-light; text-decoration: none; padding: 6px 0; transition: color 0.2s;
+  &:hover { color: $ink; }
+}
+
+// ── Skeletons ──
+.skeleton-wrap { display: flex; flex-direction: column; gap: 16px; }
+.skeleton-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+
+// ── Error ──
+.error-card { background: rgba($red, 0.08); color: $red; border-radius: 12px; padding: 20px; text-align: center; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+// ── Header card ──
+.header-card { background: $white; border-radius: 20px; border: 1px solid rgba($ink, 0.06); padding: 24px 28px; display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.header-left { display: flex; align-items: flex-start; gap: 16px; flex: 1; min-width: 0; }
+.agency-avatar { width: 60px; height: 60px; border-radius: 16px; background: $purple; color: $white; display: flex; align-items: center; justify-content: center; font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; flex-shrink: 0; }
+.header-info { flex: 1; min-width: 0; }
+.agency-name { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; color: $ink; margin: 0 0 6px; }
+.header-meta { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 10px;
+  span { display: flex; align-items: center; gap: 5px; font-size: 13px; color: $ink-light; i { font-size: 12px; } }
+}
+.header-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.header-stats { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; flex-shrink: 0; }
+.hstat { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.hstat-val   { font-size: 20px; font-weight: 700; color: $ink; font-family: 'DM Sans', sans-serif; }
+.hstat-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.7px; color: $ink-light; white-space: nowrap; }
+
+// ── KPI grid ──
+.kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.kpi-card { background: $white; border-radius: 16px; border: 1px solid rgba($ink, 0.06); padding: 20px; display: flex; align-items: flex-start; gap: 14px; }
+.kpi-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0;
+  &.green  { background: rgba($green-main, 0.1); color: $green-main; }
+  &.purple { background: rgba($purple, 0.12); color: $purple; }
+  &.gold   { background: rgba($gold-main, 0.12); color: darken($gold-main, 10%); }
+  &.red    { background: rgba($red, 0.1); color: $red; }
+}
+.kpi-body  { flex: 1; min-width: 0; }
+.kpi-value { font-size: 20px; font-weight: 700; color: $ink; margin-bottom: 4px; font-family: 'DM Sans', sans-serif; }
+.kpi-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: $ink-light; margin-bottom: 4px; }
+.kpi-sub   { font-size: 11px; color: $ink-light; }
+
+// ── Section card ──
+.section-card { background: $white; border-radius: 16px; border: 1px solid rgba($ink, 0.06); padding: 20px 24px; }
+.section-title { font-family: 'Cormorant Garamond', serif; font-size: 19px; font-weight: 700; color: $ink; margin-bottom: 16px; }
+
+// ── Bar chart ──
+.bar-chart { display: flex; align-items: flex-end; gap: 6px; min-height: 180px; padding-bottom: 4px; overflow-x: auto; }
+.bar-col   { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 52px; }
+.bar-label-top { font-size: 9px; color: $ink-light; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 80px; }
+.bar-wrap  { width: 100%; display: flex; align-items: flex-end; height: 120px; }
+.bar       { width: 100%; background: $green-main; border-radius: 5px 5px 0 0; min-height: 4px; transition: height 0.3s ease; }
+.bar-label-bot { font-size: 10px; color: $ink-light; white-space: nowrap; }
+.bar-count { font-size: 10px; color: $ink-light; }
+
+// ── Two columns ──
+.two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+
+// ── Inner table ──
+.scroll-table { overflow-x: auto; }
+.inner-table { width: 100%; border-collapse: collapse;
+  th { background: $cream; color: $ink-light; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 12px; border-bottom: 1px solid rgba($ink, 0.07); text-align: left; }
+  td { padding: 10px 12px; border-bottom: 1px solid rgba($ink, 0.04); font-size: 13px; color: $ink; vertical-align: middle; }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba($purple, 0.025); }
+}
+.td-muted  { color: $ink-light; }
+.td-ref    { font-family: monospace; font-size: 12px; }
+.td-amount { font-weight: 700; color: $green-main; }
+.num       { text-align: right; }
+
+// ── Team ──
+.team-list { display: flex; flex-direction: column; }
+.team-row  { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid rgba($ink, 0.04);
+  &:last-child { border-bottom: none; }
+}
+.team-avatar { width: 36px; height: 36px; border-radius: 10px; background: $purple; color: $white; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; font-family: 'Cormorant Garamond', serif; }
+.team-info   { flex: 1; min-width: 0; }
+.team-name   { font-size: 13px; font-weight: 600; color: $ink; }
+.team-meta   { font-size: 12px; color: $ink-light; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.team-right  { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.team-login  { font-size: 11px; color: $ink-light; }
+
+// ── Legal ──
+.legal-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.legal-item { display: flex; flex-direction: column; gap: 4px; }
+.legal-lbl  { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: $ink-light; }
+.legal-val  { font-size: 14px; font-weight: 600; color: $ink; }
+
+// ── Empty state ──
+.empty-state { padding: 20px 0; text-align: center; color: $ink-light; font-size: 13px; }
+
+// ── Badges ──
+.badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
+.badge-success  { background: rgba($green-light, 0.15); color: darken($green-light, 20%); }
+.badge-warning  { background: rgba($gold-main, 0.15); color: darken($gold-main, 15%); }
+.badge-danger   { background: rgba($red, 0.12); color: darken($red, 15%); }
+.badge-neutral  { background: rgba($ink, 0.07); color: $ink-light; }
+.badge-pending  { background: rgba(#868e96, 0.12); color: #495057; }
+.badge-blue     { background: rgba(#4dabf7, 0.15); color: #1971c2; }
+.badge-gold     { background: rgba($gold-main, 0.15); color: darken($gold-main, 15%); }
+.badge-purple   { background: rgba($purple, 0.12); color: $purple; }
+
+// ── Responsive ──
+@media (max-width: 1200px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px)  { .two-cols { grid-template-columns: 1fr; } .header-stats { gap: 16px; } .legal-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 640px)  { .kpi-grid { grid-template-columns: 1fr; } .skeleton-grid { grid-template-columns: repeat(2, 1fr); } }

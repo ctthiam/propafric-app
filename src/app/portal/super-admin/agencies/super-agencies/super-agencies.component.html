@@ -37,16 +37,17 @@
             <th>Agence</th>
             <th>Plan</th>
             <th>Statut</th>
-            <th>Biens</th>
-            <th>Utilisateurs</th>
+            <th>Santé</th>
+            <th>Biens / Baux</th>
+            <th>Dernière activité</th>
             <th>Fin abonnement</th>
             <th>Inscription</th>
-            <th style="width:100px; text-align:center">Actions</th>
+            <th style="width:60px; text-align:center">Actions</th>
           </tr>
         </thead>
         <tbody>
           @if (filteredAgencies().length === 0) {
-            <tr><td colspan="8" class="empty-row">Aucune agence trouvée</td></tr>
+            <tr><td colspan="9" class="empty-row">Aucune agence trouvée</td></tr>
           }
           @for (a of filteredAgencies(); track a.id) {
             <tr>
@@ -61,8 +62,20 @@
               </td>
               <td><span class="badge {{ planClass(a.plan) }}">{{ planLabel(a.plan) }}</span></td>
               <td><span class="badge {{ statusClass(a.status) }}">{{ statusLabel(a.status) }}</span></td>
-              <td class="td-center">{{ a.properties_count }}</td>
-              <td class="td-center">{{ a.users_count }}</td>
+              <td>
+                <div class="health-cell">
+                  <span class="health-badge {{ healthClass(a.health_score) }}">{{ healthLabel(a.health_score) }}</span>
+                  <div class="health-bar-wrap">
+                    <div class="health-bar {{ healthClass(a.health_score) }}" [style.width]="a.health_score + '%'"></div>
+                  </div>
+                </div>
+              </td>
+              <td class="td-center">
+                <span class="count-pill">{{ a.properties_count }}</span> bien(s)
+                <br>
+                <span class="count-pill count-lease">{{ a.active_leases_count }}</span> bail/baux
+              </td>
+              <td class="td-muted">{{ relativeTime(a.last_activity) }}</td>
               <td class="td-muted">
                 @if (a.subscription_ends_at) { {{ formatDate(a.subscription_ends_at) }} }
                 @else if (a.trial_ends_at) { <span class="trial-date">Essai → {{ formatDate(a.trial_ends_at) }}</span> }
@@ -70,8 +83,11 @@
               </td>
               <td class="td-muted">{{ formatDate(a.created_at) }}</td>
               <td>
-                <div class="actions-cell">
-                  <button class="btn-icon btn-detail" (click)="openDetail(a)" pTooltip="Gérer" tooltipPosition="top">
+                <div class="actions-cell" style="gap:6px">
+                  <button class="btn-icon btn-detail" (click)="goToDetail(a)" title="Voir détail complet">
+                    <i class="pi pi-external-link"></i>
+                  </button>
+                  <button class="btn-icon btn-detail" (click)="openDetail(a)" title="Gérer">
                     <i class="pi pi-cog"></i>
                   </button>
                 </div>
@@ -93,7 +109,12 @@
         <div class="drawer-title">{{ selectedAgency()!.name }}</div>
         <div class="drawer-sub">{{ selectedAgency()!.email }}</div>
       </div>
-      <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn-status btn-activate" style="font-size:12px;padding:7px 12px" (click)="goToDetail(selectedAgency()!)">
+          <i class="pi pi-external-link"></i> Voir détail
+        </button>
+        <button class="drawer-close" (click)="closeDrawer()"><i class="pi pi-times"></i></button>
+      </div>
     </div>
   
     <div class="drawer-body">
@@ -102,8 +123,17 @@
       <div class="info-section">
         <div class="info-row"><span>Plan</span><span class="badge {{ planClass(selectedAgency()!.plan) }}">{{ planLabel(selectedAgency()!.plan) }}</span></div>
         <div class="info-row"><span>Statut</span><span class="badge {{ statusClass(selectedAgency()!.status) }}">{{ statusLabel(selectedAgency()!.status) }}</span></div>
+        <div class="info-row">
+          <span>Santé</span>
+          <span class="health-badge {{ healthClass(selectedAgency()!.health_score) }}">
+            {{ healthLabel(selectedAgency()!.health_score) }} — {{ selectedAgency()!.health_score }}/100
+          </span>
+        </div>
         <div class="info-row"><span>Biens</span><strong>{{ selectedAgency()!.properties_count }}</strong></div>
+        <div class="info-row"><span>Baux actifs</span><strong>{{ selectedAgency()!.active_leases_count }}</strong></div>
         <div class="info-row"><span>Utilisateurs</span><strong>{{ selectedAgency()!.users_count }}</strong></div>
+        <div class="info-row"><span>Dernière activité</span><strong>{{ relativeTime(selectedAgency()!.last_activity) }}</strong></div>
+        <div class="info-row"><span>Ville</span><strong>{{ selectedAgency()!.city ?? '—' }}</strong></div>
         <div class="info-row"><span>Inscrit le</span><strong>{{ formatDate(selectedAgency()!.created_at) }}</strong></div>
         @if (selectedAgency()!.trial_ends_at) {
           <div class="info-row"><span>Fin essai</span><strong>{{ formatDate(selectedAgency()!.trial_ends_at!) }}</strong></div>

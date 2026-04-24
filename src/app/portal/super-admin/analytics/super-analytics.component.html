@@ -1,0 +1,151 @@
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Analytiques</h1>
+    <p class="page-subtitle">Croissance, revenus et adoption des fonctionnalités</p>
+  </div>
+</div>
+
+@if (loading()) {
+  <div class="skeleton-grid">
+    @for (i of [1,2,3,4]; track i) { <p-skeleton height="160px" borderRadius="16px" /> }
+  </div>
+} @else if (data()) {
+
+<!-- ── Adoption fonctionnalités ── -->
+<div class="section-header"><h2 class="section-title">Adoption & Activité</h2></div>
+
+<div class="adoption-grid">
+  <div class="adoption-card">
+    <div class="adp-icon blue"><i class="pi pi-credit-card"></i></div>
+    <div class="adp-body">
+      <div class="adp-value">{{ data().feature_adoption.total_payments | number }}</div>
+      <div class="adp-label">Paiements enregistrés</div>
+      <div class="adp-sub">{{ data().feature_adoption.payments_this_month }} ce mois · {{ formatPct(data().feature_adoption.agencies_with_payments, data().feature_adoption.agencies_total) }} des agences</div>
+    </div>
+  </div>
+  <div class="adoption-card">
+    <div class="adp-icon green"><i class="pi pi-file-pdf"></i></div>
+    <div class="adp-body">
+      <div class="adp-value">{{ data().feature_adoption.total_statements | number }}</div>
+      <div class="adp-label">Relevés générés</div>
+      <div class="adp-sub">{{ data().feature_adoption.statements_this_month }} ce mois · {{ formatPct(data().feature_adoption.agencies_with_statements, data().feature_adoption.agencies_total) }} des agences</div>
+    </div>
+  </div>
+  <div class="adoption-card">
+    <div class="adp-icon gold"><i class="pi pi-file-edit"></i></div>
+    <div class="adp-body">
+      <div class="adp-value">{{ data().feature_adoption.total_leases | number }}</div>
+      <div class="adp-label">Baux créés</div>
+      <div class="adp-sub">{{ data().feature_adoption.total_active_leases }} actifs · {{ formatPct(data().feature_adoption.agencies_with_leases, data().feature_adoption.agencies_total) }} des agences</div>
+    </div>
+  </div>
+  <div class="adoption-card">
+    <div class="adp-icon purple"><i class="pi pi-calculator"></i></div>
+    <div class="adp-body">
+      <div class="adp-value">{{ formatCurrency(data().ltv) }}</div>
+      <div class="adp-label">LTV estimé</div>
+      <div class="adp-sub">Lifetime Value moyen par agence</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Graphique : Paiements mensuels ── -->
+@if (data().monthly_payments.length > 0) {
+  <div class="section-header" style="margin-top:28px"><h2 class="section-title">Volume de paiements mensuel</h2></div>
+  <div class="chart-card">
+    <div class="bar-chart">
+      @for (m of data().monthly_payments; track m.month) {
+        <div class="bar-col">
+          <div class="bar-label-top">{{ m.count }}</div>
+          <div class="bar-wrap">
+            <div class="bar payments" [style.height]="barH(m.count, maxOf(data().monthly_payments, 'count'))"></div>
+          </div>
+          <div class="bar-label-bot">{{ m.month.slice(5) }}/{{ m.month.slice(2,4) }}</div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ── Graphique : Revenus mensuels ── -->
+@if (data().growth.monthly_revenue.length > 0) {
+  <div class="section-header" style="margin-top:28px"><h2 class="section-title">Revenus mensuels (18 mois)</h2></div>
+  <div class="chart-card">
+    <div class="bar-chart">
+      @for (m of data().growth.monthly_revenue; track m.month) {
+        <div class="bar-col">
+          <div class="bar-label-top">{{ formatCurrency(m.total) }}</div>
+          <div class="bar-wrap">
+            <div class="bar revenue" [style.height]="barH(m.total, maxOf(data().growth.monthly_revenue, 'total'))"></div>
+          </div>
+          <div class="bar-label-bot">{{ m.month.slice(5) }}/{{ m.month.slice(2,4) }}</div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ── Répartition par plan + Top agences ── -->
+<div class="two-cols" style="margin-top:28px">
+
+  <!-- Plan distribution -->
+  <div>
+    <div class="section-header"><h2 class="section-title">Répartition par plan</h2></div>
+    <div class="plan-card">
+      @for (p of planDistList(); track p.plan) {
+        <div class="plan-row">
+          <div class="plan-dot" [style.background]="planColor(p.plan)"></div>
+          <div class="plan-name">{{ planLabel(p.plan) }}</div>
+          <div class="plan-bar-wrap">
+            <div class="plan-bar" [style.width]="formatPct(p.total, totalAgencies())" [style.background]="planColor(p.plan)"></div>
+          </div>
+          <div class="plan-count">
+            <strong>{{ p.total }}</strong>
+            <span class="plan-sub">{{ p.active }}a · {{ p.trial }}e</span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Top agences actives (30j) -->
+  @if (data().top_agencies.length > 0) {
+    <div>
+      <div class="section-header"><h2 class="section-title">Top agences actives (30 jours)</h2></div>
+      <div class="top-card">
+        @for (a of data().top_agencies; track a.id; let i = $index) {
+          <div class="top-row">
+            <div class="top-rank">{{ i + 1 }}</div>
+            <div class="top-avatar">{{ a.name[0] }}</div>
+            <div class="top-info">
+              <div class="top-name">{{ a.name }}</div>
+              <div class="top-meta">{{ a.payments_count }} paiements</div>
+            </div>
+            <div class="top-amount">{{ formatCurrency(a.payments_amount) }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>
+
+<!-- ── Croissance inscriptions ── -->
+@if (data().growth.monthly_signups.length > 0) {
+  <div class="section-header" style="margin-top:28px"><h2 class="section-title">Croissance des inscriptions (18 mois)</h2></div>
+  <div class="chart-card">
+    <div class="bar-chart">
+      @for (m of data().growth.monthly_signups; track m.month) {
+        <div class="bar-col">
+          <div class="bar-label-top">{{ m.count }}</div>
+          <div class="bar-wrap">
+            <div class="bar signups" [style.height]="barH(m.count, maxOf(data().growth.monthly_signups, 'count'))"></div>
+          </div>
+          <div class="bar-label-bot">{{ m.month.slice(5) }}/{{ m.month.slice(2,4) }}</div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+}

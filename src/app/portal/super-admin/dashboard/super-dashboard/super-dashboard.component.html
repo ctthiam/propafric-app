@@ -12,7 +12,7 @@
   <div class="period-badge"><i class="pi pi-calendar"></i> Ce mois-ci</div>
 </div>
 
-<!-- KPIs -->
+<!-- KPIs principaux -->
 <div class="kpi-grid">
   <div class="kpi-card">
     <div class="kpi-icon purple"><i class="pi pi-building"></i></div>
@@ -23,6 +23,9 @@
         <span class="dot green"></span>{{ data().agencies.active }} actives
         &nbsp;·&nbsp;
         <span class="dot orange"></span>{{ data().agencies.trial }} en essai
+        @if (data().agencies.pending > 0) {
+          &nbsp;·&nbsp; <span class="dot grey"></span>{{ data().agencies.pending }} en attente
+        }
       </div>
     </div>
   </div>
@@ -73,8 +76,132 @@
   </div>
 </div>
 
-<!-- Agences récentes -->
-<div class="section-header">
+<!-- ── Métriques SaaS ── -->
+<div class="section-header" style="margin-top:28px">
+  <h2 class="section-title">Métriques SaaS</h2>
+</div>
+
+<div class="saas-grid">
+  <div class="saas-card">
+    <div class="saas-label">MRR</div>
+    <div class="saas-value">{{ formatCurrency(data().saas_metrics.mrr) }}</div>
+    <div class="saas-sub">Revenus 30 derniers jours</div>
+  </div>
+  <div class="saas-card">
+    <div class="saas-label">ARR</div>
+    <div class="saas-value">{{ formatCurrency(data().saas_metrics.arr) }}</div>
+    <div class="saas-sub">Revenus 12 derniers mois</div>
+  </div>
+  <div class="saas-card">
+    <div class="saas-label">ARPU</div>
+    <div class="saas-value">{{ formatCurrency(data().saas_metrics.arpu) }}</div>
+    <div class="saas-sub">Revenu moyen / agence active</div>
+  </div>
+  <div class="saas-card" [class.saas-danger]="data().saas_metrics.churn_rate > 20">
+    <div class="saas-label">Taux de churn</div>
+    <div class="saas-value">{{ data().saas_metrics.churn_rate }}%</div>
+    <div class="saas-sub">Suspendues + résiliées / total</div>
+  </div>
+  <div class="saas-card" [class.saas-success]="data().saas_metrics.trial_conversion_rate >= 50">
+    <div class="saas-label">Conversion essai</div>
+    <div class="saas-value">{{ data().saas_metrics.trial_conversion_rate }}%</div>
+    <div class="saas-sub">Trial → Actif</div>
+  </div>
+</div>
+
+<!-- ── Alertes ── -->
+@if (data().alerts.expiring_30days > 0 || data().alerts.inactive_agencies > 0 || data().alerts.ghost_agencies > 0) {
+  <div class="section-header" style="margin-top:28px">
+    <h2 class="section-title">Alertes</h2>
+    <a routerLink="/super-admin/agences" class="link-btn">Gérer les agences →</a>
+  </div>
+
+  <div class="alerts-grid">
+    @if (data().alerts.expiring_7days > 0) {
+      <div class="alert-card alert-danger">
+        <i class="pi pi-exclamation-triangle alert-icon"></i>
+        <div class="alert-body">
+          <div class="alert-count">{{ data().alerts.expiring_7days }}</div>
+          <div class="alert-label">Agence(s) expirant dans 7 jours</div>
+        </div>
+      </div>
+    }
+    @if (data().alerts.expiring_14days > 0) {
+      <div class="alert-card alert-warning">
+        <i class="pi pi-clock alert-icon"></i>
+        <div class="alert-body">
+          <div class="alert-count">{{ data().alerts.expiring_14days }}</div>
+          <div class="alert-label">Agence(s) expirant dans 14 jours</div>
+        </div>
+      </div>
+    }
+    @if (data().alerts.expiring_30days > 0) {
+      <div class="alert-card alert-info">
+        <i class="pi pi-calendar alert-icon"></i>
+        <div class="alert-body">
+          <div class="alert-count">{{ data().alerts.expiring_30days }}</div>
+          <div class="alert-label">Agence(s) expirant dans 30 jours</div>
+        </div>
+      </div>
+    }
+    @if (data().alerts.inactive_agencies > 0) {
+      <div class="alert-card alert-warning">
+        <i class="pi pi-eye-slash alert-icon"></i>
+        <div class="alert-body">
+          <div class="alert-count">{{ data().alerts.inactive_agencies }}</div>
+          <div class="alert-label">Agence(s) sans connexion (30j)</div>
+        </div>
+      </div>
+    }
+    @if (data().alerts.ghost_agencies > 0) {
+      <div class="alert-card alert-neutral">
+        <i class="pi pi-ghost alert-icon"></i>
+        <div class="alert-body">
+          <div class="alert-count">{{ data().alerts.ghost_agencies }}</div>
+          <div class="alert-label">Agence(s) sans aucun bien</div>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Liste agences expirant bientôt -->
+  @if (data().alerts.expiring_soon.length > 0) {
+    <div class="table-card" style="margin-top:12px">
+      <div class="table-card-header">
+        <span class="table-card-title">Abonnements arrivant à échéance</span>
+      </div>
+      <div class="data-table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Agence</th>
+              <th>Plan</th>
+              <th>Expiration</th>
+              <th>Jours restants</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (a of data().alerts.expiring_soon; track a.id) {
+              <tr>
+                <td class="td-name">{{ a.name }}</td>
+                <td><span class="badge {{ planClass(a.plan) }}">{{ planLabel(a.plan) }}</span></td>
+                <td class="td-muted">{{ formatDate(a.subscription_ends_at) }}</td>
+                <td>
+                  <span class="days-badge {{ alertLevel(a.days_left) }}">
+                    {{ a.days_left }} j
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+}
+
+<!-- ── Agences récentes ── -->
+<div class="section-header" style="margin-top:28px">
   <h2 class="section-title">Agences récentes</h2>
   <a routerLink="/super-admin/agences" class="link-btn">Voir toutes →</a>
 </div>
@@ -112,20 +239,45 @@
   </div>
 </div>
 
-<!-- Inscriptions mensuelles -->
-@if (data().monthly_signups.length > 0) {
-  <div class="section-header" style="margin-top:24px">
-    <h2 class="section-title">Inscriptions mensuelles</h2>
-  </div>
-  <div class="signups-grid">
-    @for (m of data().monthly_signups; track m.month) {
-      <div class="signup-card">
-        <div class="signup-month">{{ m.month }}</div>
-        <div class="signup-count">{{ m.count }}</div>
-        <div class="signup-label">agence(s)</div>
+<!-- ── Répartition géographique + Inscriptions mensuelles ── -->
+<div class="two-cols" style="margin-top:28px">
+
+  @if (data().geographic.length > 0) {
+    <div>
+      <div class="section-header">
+        <h2 class="section-title">Répartition géographique</h2>
       </div>
-    }
-  </div>
-}
+      <div class="geo-card">
+        @for (g of data().geographic; track g.city) {
+          <div class="geo-row">
+            <div class="geo-city">{{ g.city }}</div>
+            <div class="geo-bar-wrap">
+              <div class="geo-bar" [style.width]="geoBarWidth(g.count, geoMax(data().geographic))"></div>
+            </div>
+            <div class="geo-count">{{ g.count }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  @if (data().monthly_signups.length > 0) {
+    <div>
+      <div class="section-header">
+        <h2 class="section-title">Inscriptions mensuelles</h2>
+      </div>
+      <div class="signups-grid">
+        @for (m of data().monthly_signups; track m.month) {
+          <div class="signup-card">
+            <div class="signup-month">{{ m.month }}</div>
+            <div class="signup-count">{{ m.count }}</div>
+            <div class="signup-label">agence(s)</div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</div>
 
 }

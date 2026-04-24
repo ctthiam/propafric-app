@@ -1,0 +1,130 @@
+<p-toast position="top-right" />
+
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Alertes</h1>
+    <p class="page-subtitle">Situations nécessitant une action</p>
+  </div>
+  <button class="btn-refresh" (click)="load()"><i class="pi pi-refresh"></i> Actualiser</button>
+</div>
+
+@if (loading()) {
+  <div class="skeleton-rows">
+    @for (i of [1,2,3]; track i) { <p-skeleton height="60px" borderRadius="10px" styleClass="mb-2" /> }
+  </div>
+} @else if (data()) {
+
+<!-- Onglets avec compteurs -->
+<div class="tabs-bar">
+  @for (t of tabs(); track t.key) {
+    <button class="tab-btn {{ t.level }}" [class.active]="activeTab() === t.key" (click)="setTab(t.key)">
+      <i class="pi {{ t.icon }}"></i>
+      <span>{{ t.label }}</span>
+      @if (t.count > 0) {
+        <span class="tab-count {{ t.level }}">{{ t.count }}</span>
+      }
+    </button>
+  }
+</div>
+
+<!-- Contenu de l'onglet actif -->
+<div class="table-card">
+  @if (currentList().length === 0) {
+    <div class="empty-state">
+      <i class="pi pi-check-circle empty-icon"></i>
+      <div class="empty-title">Aucune alerte dans cette catégorie</div>
+      <div class="empty-sub">Tout est en ordre.</div>
+    </div>
+  } @else {
+    <div class="data-table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Agence</th>
+            <th>Plan</th>
+            @if (activeTab() === 'overdue') { <th>Expiré depuis</th><th>Jours</th> }
+            @if (activeTab() === 'expiring') { <th>Expire le</th><th>Jours restants</th> }
+            @if (activeTab() === 'pending') { <th>Créé le</th><th>Il y a</th> }
+            @if (activeTab() === 'inactive' || activeTab() === 'ghost') { <th>Statut</th><th>Inscrit le</th> }
+            @if (activeTab() === 'near_limit') { <th>Biens / Limite</th><th>Utilisation</th> }
+            <th style="text-align:center; width:180px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (a of currentList(); track a.id) {
+            <tr>
+              <td>
+                <div class="agency-cell">
+                  <div class="agency-avatar">{{ a.name[0] }}</div>
+                  <div>
+                    <div class="td-name">{{ a.name }}</div>
+                    <div class="td-muted-sm">{{ a.email }}@if(a.city){ · {{ a.city }}}</div>
+                  </div>
+                </div>
+              </td>
+              <td><span class="badge {{ planClass(a.plan) }}">{{ planLabel(a.plan) }}</span></td>
+
+              @if (activeTab() === 'overdue') {
+                <td class="td-muted">{{ formatDate(a.subscription_ends_at) }}</td>
+                <td><span class="days-chip danger">{{ a.days_overdue }}j</span></td>
+              }
+              @if (activeTab() === 'expiring') {
+                <td class="td-muted">{{ formatDate(a.subscription_ends_at) }}</td>
+                <td>
+                  <span class="days-chip {{ a.days_left <= 7 ? 'danger' : a.days_left <= 14 ? 'warning' : 'info' }}">
+                    {{ a.days_left }}j
+                  </span>
+                </td>
+              }
+              @if (activeTab() === 'pending') {
+                <td class="td-muted">{{ formatDate(a.created_at) }}</td>
+                <td class="td-muted">{{ a.days_ago }} jour(s)</td>
+              }
+              @if (activeTab() === 'inactive' || activeTab() === 'ghost') {
+                <td><span class="badge {{ statusClass(a.status) }}">{{ statusLabel(a.status) }}</span></td>
+                <td class="td-muted">{{ formatDate(a.created_at) }}</td>
+              }
+              @if (activeTab() === 'near_limit') {
+                <td class="td-muted">{{ a.properties_count }} / {{ a.max_properties }}</td>
+                <td>
+                  <div class="limit-bar-wrap">
+                    <div class="limit-bar" [style.width]="a.usage_percent + '%'" [class.limit-critical]="a.usage_percent >= 100" [class.limit-warning]="a.usage_percent >= 80 && a.usage_percent < 100"></div>
+                  </div>
+                  <span class="limit-pct {{ a.usage_percent >= 100 ? 'text-danger' : 'text-warning' }}">{{ a.usage_percent }}%</span>
+                </td>
+              }
+
+              <td>
+                <div class="actions-row">
+                  @if (activeTab() === 'overdue' || activeTab() === 'expiring') {
+                    <button class="btn-action btn-extend" (click)="extend(a.id, 30)" [disabled]="isLoading(a.id)">
+                      @if (isLoading(a.id)) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-calendar-plus"></i> }
+                      +30j
+                    </button>
+                    <button class="btn-action btn-extend" (click)="extend(a.id, 90)" [disabled]="isLoading(a.id)">
+                      +90j
+                    </button>
+                  }
+                  @if (activeTab() === 'pending') {
+                    <button class="btn-action btn-activate" (click)="activate(a.id)" [disabled]="isLoading(a.id)">
+                      @if (isLoading(a.id)) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-check-circle"></i> }
+                      Activer
+                    </button>
+                  }
+                  @if (activeTab() === 'inactive' || activeTab() === 'ghost') {
+                    <span class="td-muted" style="font-size:12px; font-style:italic">Aucune action rapide</span>
+                  }
+                  @if (activeTab() === 'near_limit') {
+                    <span class="td-muted" style="font-size:12px">Upgrade plan</span>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+}

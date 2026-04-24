@@ -17,7 +17,8 @@ $red:         #e57373;
 .page-subtitle { font-size: 14px; color: $ink-light; margin: 0; }
 .period-badge { display: flex; align-items: center; gap: 6px; padding: 8px 16px; background: rgba($purple, 0.08); border: 1px solid rgba($purple, 0.2); border-radius: 10px; font-size: 13px; font-weight: 600; color: $purple; }
 
-.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 28px; }
+// ── KPIs ──
+.kpi-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 0; }
 .kpi-card { background: $white; border-radius: 16px; border: 1px solid rgba($ink, 0.06); padding: 20px; display: flex; align-items: flex-start; gap: 14px; transition: box-shadow 0.2s; &:hover { box-shadow: 0 4px 20px rgba($ink, 0.06); } }
 .kpi-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
   &.purple { background: rgba($purple, 0.12); color: $purple; }
@@ -31,13 +32,49 @@ $red:         #e57373;
 .kpi-label { font-size: 11px; font-weight: 700; color: $ink-light; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
 .kpi-value { font-size: 26px; font-weight: 700; color: $ink; margin-bottom: 4px; font-family: 'DM Sans', sans-serif; }
 .kpi-sub   { font-size: 12px; color: $ink-light; display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
-.dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; &.green { background: $green-light; } &.orange { background: $gold-main; } }
+.dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block;
+  &.green  { background: $green-light; }
+  &.orange { background: $gold-main; }
+  &.grey   { background: #bbb; }
+}
 
+// ── Métriques SaaS ──
+.saas-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+.saas-card { background: $white; border-radius: 14px; border: 1px solid rgba($ink, 0.06); padding: 16px 18px;
+  &.saas-danger { border-color: rgba($red, 0.3); background: rgba($red, 0.03); }
+  &.saas-success { border-color: rgba($green-light, 0.3); background: rgba($green-light, 0.04); }
+}
+.saas-label { font-size: 10px; font-weight: 700; color: $ink-light; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+.saas-value { font-size: 22px; font-weight: 700; color: $ink; margin-bottom: 4px; font-family: 'DM Sans', sans-serif; }
+.saas-sub   { font-size: 11px; color: $ink-light; }
+
+// ── Alertes ──
+.alerts-grid { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 0; }
+.alert-card { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-radius: 12px; border: 1px solid transparent; min-width: 200px; flex: 1;
+  &.alert-danger  { background: rgba($red, 0.06); border-color: rgba($red, 0.2); .alert-icon { color: $red; } .alert-count { color: $red; } }
+  &.alert-warning { background: rgba($gold-main, 0.06); border-color: rgba($gold-main, 0.25); .alert-icon { color: darken($gold-main, 10%); } .alert-count { color: darken($gold-main, 10%); } }
+  &.alert-info    { background: rgba(#4dabf7, 0.06); border-color: rgba(#4dabf7, 0.2); .alert-icon { color: #1971c2; } .alert-count { color: #1971c2; } }
+  &.alert-neutral { background: rgba($ink, 0.04); border-color: rgba($ink, 0.1); .alert-icon { color: $ink-light; } .alert-count { color: $ink; } }
+}
+.alert-icon  { font-size: 20px; flex-shrink: 0; }
+.alert-body  { flex: 1; }
+.alert-count { font-size: 24px; font-weight: 700; line-height: 1.1; }
+.alert-label { font-size: 12px; color: $ink-light; margin-top: 2px; }
+
+.days-badge { display: inline-block; padding: 3px 10px; border-radius: 100px; font-size: 12px; font-weight: 700;
+  &.alert-danger  { background: rgba($red, 0.12); color: $red; }
+  &.alert-warning { background: rgba($gold-main, 0.15); color: darken($gold-main, 12%); }
+  &.alert-info    { background: rgba(#4dabf7, 0.12); color: #1971c2; }
+}
+
+// ── Table card ──
 .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-.section-title { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: $ink; margin: 0; }
-.link-btn { font-size: 13px; font-weight: 600; color: $purple; text-decoration: none; &:hover { text-decoration: underline; } }
+.section-title  { font-family: 'Cormorant Garamond', serif; font-size: 20px; font-weight: 700; color: $ink; margin: 0; }
+.link-btn       { font-size: 13px; font-weight: 600; color: $purple; text-decoration: none; &:hover { text-decoration: underline; } }
 
 .table-card { background: $white; border-radius: 16px; border: 1px solid rgba($ink, 0.06); overflow: hidden; }
+.table-card-header { padding: 14px 20px; border-bottom: 1px solid rgba($ink, 0.06); }
+.table-card-title  { font-size: 13px; font-weight: 700; color: $ink; }
 .data-table-wrapper { overflow-x: auto; }
 .data-table { width: 100%; border-collapse: collapse;
   th { background: $cream; color: $ink-light; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; padding: 12px 16px; border-bottom: 1px solid rgba($ink, 0.07); text-align: left; }
@@ -52,19 +89,33 @@ $red:         #e57373;
 .td-muted-sm { font-size: 12px; color: $ink-light; }
 
 .badge { display: inline-flex; align-items: center; padding: 3px 10px; border-radius: 100px; font-size: 11px; font-weight: 700; }
-.badge-success { background: rgba($green-light, 0.15); color: darken($green-light, 20%); }
-.badge-warning { background: rgba($gold-main, 0.15); color: darken($gold-main, 15%); }
-.badge-danger  { background: rgba($red, 0.12); color: darken($red, 15%); }
-.badge-neutral { background: rgba($ink, 0.07); color: $ink-light; }
-.badge-blue    { background: rgba(#4dabf7, 0.15); color: #1971c2; }
-.badge-gold    { background: rgba($gold-main, 0.15); color: darken($gold-main, 15%); }
-.badge-purple  { background: rgba($purple, 0.12); color: $purple; }
+.badge-success  { background: rgba($green-light, 0.15); color: darken($green-light, 20%); }
+.badge-warning  { background: rgba($gold-main, 0.15); color: darken($gold-main, 15%); }
+.badge-danger   { background: rgba($red, 0.12); color: darken($red, 15%); }
+.badge-neutral  { background: rgba($ink, 0.07); color: $ink-light; }
+.badge-pending  { background: rgba(#868e96, 0.12); color: #495057; }
+.badge-blue     { background: rgba(#4dabf7, 0.15); color: #1971c2; }
+.badge-gold     { background: rgba($gold-main, 0.15); color: darken($gold-main, 15%); }
+.badge-purple   { background: rgba($purple, 0.12); color: $purple; }
 
-.signups-grid { display: flex; gap: 12px; flex-wrap: wrap; }
-.signup-card { background: $white; border-radius: 12px; border: 1px solid rgba($ink, 0.06); padding: 16px 20px; min-width: 120px; text-align: center; }
-.signup-month { font-size: 12px; color: $ink-light; margin-bottom: 6px; }
-.signup-count { font-size: 28px; font-weight: 700; color: $purple; }
-.signup-label { font-size: 11px; color: $ink-light; }
+// ── Deux colonnes ──
+.two-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
 
-@media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 640px)  { .kpi-grid { grid-template-columns: 1fr; } }
+// ── Géographie ──
+.geo-card { background: $white; border-radius: 16px; border: 1px solid rgba($ink, 0.06); padding: 16px 20px; display: flex; flex-direction: column; gap: 10px; }
+.geo-row  { display: flex; align-items: center; gap: 10px; }
+.geo-city { font-size: 12px; font-weight: 600; color: $ink; width: 120px; flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.geo-bar-wrap { flex: 1; height: 8px; background: rgba($ink, 0.07); border-radius: 4px; overflow: hidden; }
+.geo-bar  { height: 100%; background: $purple; border-radius: 4px; transition: width 0.4s ease; }
+.geo-count { font-size: 12px; font-weight: 700; color: $ink-light; width: 28px; text-align: right; }
+
+// ── Inscriptions ──
+.signups-grid { display: flex; gap: 10px; flex-wrap: wrap; }
+.signup-card  { background: $white; border-radius: 12px; border: 1px solid rgba($ink, 0.06); padding: 14px 18px; min-width: 100px; text-align: center; }
+.signup-month { font-size: 11px; color: $ink-light; margin-bottom: 4px; }
+.signup-count { font-size: 26px; font-weight: 700; color: $purple; }
+.signup-label { font-size: 10px; color: $ink-light; }
+
+@media (max-width: 1200px) { .saas-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2, 1fr); } .two-cols { grid-template-columns: 1fr; } }
+@media (max-width: 640px)  { .kpi-grid { grid-template-columns: 1fr; } .saas-grid { grid-template-columns: repeat(2, 1fr); } }

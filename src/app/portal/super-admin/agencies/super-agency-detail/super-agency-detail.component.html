@@ -1,0 +1,323 @@
+<div class="detail-page">
+
+  <!-- ── Back ── -->
+  <div class="back-row">
+    <a routerLink="/super-admin/agences" class="back-btn">
+      <i class="pi pi-arrow-left"></i> Retour aux agences
+    </a>
+  </div>
+
+  <!-- ── Loading ── -->
+  @if (loading()) {
+    <div class="skeleton-wrap">
+      <p-skeleton height="120px" borderRadius="16px" styleClass="mb-3" />
+      <div class="skeleton-grid">
+        @for (i of [1,2,3,4]; track i) { <p-skeleton height="100px" borderRadius="12px" /> }
+      </div>
+      <p-skeleton height="220px" borderRadius="16px" styleClass="mt-3" />
+    </div>
+  }
+
+  @if (!loading() && error()) {
+    <div class="error-card"><i class="pi pi-exclamation-triangle"></i> {{ error() }}</div>
+  }
+
+  @if (!loading() && data()) {
+
+    <!-- ── Header card ── -->
+    <div class="header-card">
+      <div class="header-left">
+        <div class="agency-avatar">{{ initials }}</div>
+        <div class="header-info">
+          <h1 class="agency-name">{{ data()!.agency.name }}</h1>
+          <div class="header-meta">
+            <span><i class="pi pi-envelope"></i> {{ data()!.agency.email }}</span>
+            @if (data()!.agency.phone) { <span><i class="pi pi-phone"></i> {{ data()!.agency.phone }}</span> }
+            @if (data()!.agency.city)  { <span><i class="pi pi-map-marker"></i> {{ data()!.agency.city }}</span> }
+          </div>
+          <div class="header-badges">
+            <span class="badge {{ planClass(data()!.agency.plan) }}">{{ planLabel(data()!.agency.plan) }}</span>
+            <span class="badge {{ statusClass(data()!.agency.status) }}">{{ statusLabel(data()!.agency.status) }}</span>
+            @if (data()!.agency.subscription_ends_at) {
+              <span class="badge badge-neutral"><i class="pi pi-calendar"></i> Fin : {{ formatDate(data()!.agency.subscription_ends_at) }}</span>
+            }
+          </div>
+        </div>
+      </div>
+      <div class="header-stats">
+        <div class="hstat"><span class="hstat-val">{{ data()!.stats.owners }}</span><span class="hstat-label">Propriétaires</span></div>
+        <div class="hstat"><span class="hstat-val">{{ data()!.stats.tenants }}</span><span class="hstat-label">Locataires</span></div>
+        <div class="hstat"><span class="hstat-val">{{ data()!.agency.properties_count }}</span><span class="hstat-label">Biens</span></div>
+        <div class="hstat"><span class="hstat-val">{{ data()!.stats.active_leases }}</span><span class="hstat-label">Baux actifs</span></div>
+        <div class="hstat"><span class="hstat-val">{{ relativeTime(data()!.stats.last_login) }}</span><span class="hstat-label">Dernière connexion</span></div>
+      </div>
+    </div>
+
+    <!-- ── KPI financiers ── -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon green"><i class="pi pi-wallet"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ formatCurrency(data()!.financials.total_rent_collected) }}</div>
+          <div class="kpi-label">Loyers encaissés</div>
+          <div class="kpi-sub">{{ data()!.stats.payments }} paiement(s)</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon purple"><i class="pi pi-percentage"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ formatCurrency(data()!.financials.total_management_fees) }}</div>
+          <div class="kpi-label">Honoraires de gestion</div>
+          <div class="kpi-sub">{{ data()!.stats.statements }} relevé(s)</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon gold"><i class="pi pi-chart-line"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ data()!.financials.recovery_rate }}%</div>
+          <div class="kpi-label">Taux de recouvrement</div>
+          <div class="kpi-sub">{{ formatCurrency(data()!.financials.total_paid) }} / {{ formatCurrency(data()!.financials.total_expected) }}</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon red"><i class="pi pi-credit-card"></i></div>
+        <div class="kpi-body">
+          <div class="kpi-value">{{ formatCurrency(data()!.financials.total_expenses) }}</div>
+          <div class="kpi-label">Dépenses</div>
+          <div class="kpi-sub">Total comptabilisé</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Activité mensuelle (chart) ── -->
+    @if (data()!.monthly_payments.length > 0) {
+      <div class="section-card">
+        <div class="section-title">Activité mensuelle — Loyers (12 derniers mois)</div>
+        <div class="bar-chart">
+          @for (m of data()!.monthly_payments; track m.month) {
+            <div class="bar-col">
+              <div class="bar-label-top">{{ formatCurrency(+m.total) }}</div>
+              <div class="bar-wrap">
+                <div class="bar" [style.height.px]="barH(+m.total)"></div>
+              </div>
+              <div class="bar-label-bot">{{ monthLabel(m.month) }}</div>
+              <div class="bar-count">{{ m.count }}×</div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- ── Two-col: paiements récents + relevés récents ── -->
+    <div class="two-cols">
+
+      <!-- Paiements récents -->
+      <div class="section-card">
+        <div class="section-title">Derniers paiements</div>
+        @if (data()!.recent_payments.length === 0) {
+          <div class="empty-state">Aucun paiement enregistré</div>
+        } @else {
+          <div class="scroll-table">
+            <table class="inner-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Locataire</th>
+                  <th>Bien</th>
+                  <th class="num">Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (p of data()!.recent_payments; track p.id) {
+                  <tr>
+                    <td class="td-muted">{{ formatDate(p.payment_date) }}</td>
+                    <td>{{ p.tenant_name ?? '—' }}</td>
+                    <td class="td-muted">{{ p.property_name ?? '—' }}</td>
+                    <td class="num td-amount">{{ formatCurrency(p.amount) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      <!-- Relevés récents -->
+      <div class="section-card">
+        <div class="section-title">Derniers relevés propriétaires</div>
+        @if (data()!.recent_statements.length === 0) {
+          <div class="empty-state">Aucun relevé généré</div>
+        } @else {
+          <div class="scroll-table">
+            <table class="inner-table">
+              <thead>
+                <tr>
+                  <th>Période</th>
+                  <th>Propriétaire</th>
+                  <th>Statut</th>
+                  <th class="num">Net</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of data()!.recent_statements; track s.id) {
+                  <tr>
+                    <td class="td-muted">{{ s.period_label }}</td>
+                    <td>{{ s.owner_name ?? '—' }}</td>
+                    <td><span class="badge {{ stmtStatusClass(s.status) }}">{{ stmtStatusLabel(s.status) }}</span></td>
+                    <td class="num td-amount">{{ formatCurrency(s.final_net_amount) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── Biens ── -->
+    <div class="section-card">
+      <div class="section-title">Portefeuille immobilier ({{ data()!.properties.length }} bien(s))</div>
+      @if (data()!.properties.length === 0) {
+        <div class="empty-state">Aucun bien enregistré</div>
+      } @else {
+        <div class="scroll-table">
+          <table class="inner-table">
+            <thead>
+              <tr>
+                <th>Réf.</th>
+                <th>Nom</th>
+                <th>Type</th>
+                <th>Ville</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (p of data()!.properties; track p.id) {
+                <tr>
+                  <td class="td-ref">{{ p.reference }}</td>
+                  <td>{{ p.name ?? '—' }}</td>
+                  <td class="td-muted">{{ p.type }}</td>
+                  <td class="td-muted">{{ p.city ?? '—' }}</td>
+                  <td><span class="badge {{ propStatusClass(p.status) }}">{{ propStatusLabel(p.status) }}</span></td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+
+    <!-- ── Baux actifs ── -->
+    @if (data()!.active_leases.length > 0) {
+      <div class="section-card">
+        <div class="section-title">Baux actifs ({{ data()!.active_leases.length }})</div>
+        <div class="scroll-table">
+          <table class="inner-table">
+            <thead>
+              <tr>
+                <th>Locataire</th>
+                <th>Bien</th>
+                <th>Début</th>
+                <th>Fin</th>
+                <th class="num">Loyer</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (l of data()!.active_leases; track l.id) {
+                <tr>
+                  <td>{{ l.tenant_name ?? '—' }}</td>
+                  <td class="td-ref">{{ l.property_reference }} — {{ l.property_name }}</td>
+                  <td class="td-muted">{{ formatDate(l.start_date) }}</td>
+                  <td class="td-muted">{{ l.end_date ? formatDate(l.end_date) : 'Indéfini' }}</td>
+                  <td class="num td-amount">{{ formatCurrency(l.total_rent) }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+
+    <!-- ── Two-col: équipe + abonnements PropAfric ── -->
+    <div class="two-cols">
+
+      <!-- Équipe -->
+      <div class="section-card">
+        <div class="section-title">Équipe ({{ data()!.team.length }} membre(s))</div>
+        @if (data()!.team.length === 0) {
+          <div class="empty-state">Aucun membre</div>
+        } @else {
+          <div class="team-list">
+            @for (u of data()!.team; track u.id) {
+              <div class="team-row">
+                <div class="team-avatar">{{ u.first_name[0] }}{{ u.last_name[0] }}</div>
+                <div class="team-info">
+                  <div class="team-name">{{ u.first_name }} {{ u.last_name }}</div>
+                  <div class="team-meta">{{ u.email }}</div>
+                </div>
+                <div class="team-right">
+                  <span class="badge {{ u.role === 'agency_admin' ? 'badge-purple' : 'badge-neutral' }}">{{ roleLabel(u.role) }}</span>
+                  <div class="team-login">{{ relativeTime(u.last_login_at) }}</div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Abonnements PropAfric -->
+      <div class="section-card">
+        <div class="section-title">Historique abonnements</div>
+        @if (data()!.subscriptions.length === 0) {
+          <div class="empty-state">Aucun abonnement enregistré</div>
+        } @else {
+          <div class="scroll-table">
+            <table class="inner-table">
+              <thead>
+                <tr>
+                  <th>Plan</th>
+                  <th>Statut</th>
+                  <th>Payé le</th>
+                  <th class="num">Montant</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of data()!.subscriptions; track s.id) {
+                  <tr>
+                    <td><span class="badge {{ planClass(s.plan) }}">{{ planLabel(s.plan) }}</span></td>
+                    <td><span class="badge {{ subStatusClass(s.status) }}">{{ s.status }}</span></td>
+                    <td class="td-muted">{{ formatDate(s.paid_at) }}</td>
+                    <td class="num td-amount">{{ formatCurrency(s.amount) }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── Infos légales ── -->
+    @if (data()!.agency.ninea || data()!.agency.rc_number || data()!.agency.address) {
+      <div class="section-card">
+        <div class="section-title">Informations légales &amp; siège</div>
+        <div class="legal-grid">
+          @if (data()!.agency.ninea) {
+            <div class="legal-item"><span class="legal-lbl">NINEA</span><span class="legal-val">{{ data()!.agency.ninea }}</span></div>
+          }
+          @if (data()!.agency.rc_number) {
+            <div class="legal-item"><span class="legal-lbl">N° RC</span><span class="legal-val">{{ data()!.agency.rc_number }}</span></div>
+          }
+          @if (data()!.agency.address) {
+            <div class="legal-item"><span class="legal-lbl">Adresse</span><span class="legal-val">{{ data()!.agency.address }}</span></div>
+          }
+          <div class="legal-item"><span class="legal-lbl">Membre depuis</span><span class="legal-val">{{ formatDate(data()!.agency.created_at) }}</span></div>
+          @if (data()!.agency.max_properties) {
+            <div class="legal-item"><span class="legal-lbl">Limite biens</span><span class="legal-val">{{ data()!.agency.max_properties }}</span></div>
+          }
+        </div>
+      </div>
+    }
+
+  }
+</div>

@@ -14,11 +14,13 @@ export class SuperLayoutComponent {
   sidebarCollapsed = signal(false);
 
   navItems = [
-    { label: 'Dashboard',  icon: 'pi pi-home',       route: '/super-admin/dashboard' },
-    { label: 'Agences',    icon: 'pi pi-building',    route: '/super-admin/agences' },
-    { label: 'Revenus',    icon: 'pi pi-chart-bar',   route: '/super-admin/revenus' },
-    { label: 'Commerciaux',  icon: 'pi pi-users',       route: '/super-admin/commerciaux' },
-    { label: 'Support', icon: 'pi pi-question-circle', route: '/super-admin/support' },
+    { label: 'Dashboard',    icon: 'pi pi-home',              route: '/super-admin/dashboard'   },
+    { label: 'Agences',      icon: 'pi pi-building',          route: '/super-admin/agences'     },
+    { label: 'Revenus',      icon: 'pi pi-chart-bar',         route: '/super-admin/revenus'     },
+    { label: 'Analytiques',  icon: 'pi pi-chart-line',        route: '/super-admin/analytiques' },
+    { label: 'Alertes',      icon: 'pi pi-bell',              route: '/super-admin/alertes'     },
+    { label: 'Commerciaux',  icon: 'pi pi-users',             route: '/super-admin/commerciaux' },
+    { label: 'Support',      icon: 'pi pi-question-circle',   route: '/super-admin/support'     },
   ];
 
   constructor(public auth: AuthService) {}

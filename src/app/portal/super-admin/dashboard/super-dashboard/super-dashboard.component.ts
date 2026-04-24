@@ -37,18 +37,33 @@ export class SuperDashboardComponent implements OnInit {
   }
 
   planLabel(p: string): string {
-    return ({ starter: 'Starter', pro: 'Pro', partner: 'Partenaire', enterprise: 'Entreprise' } as any)[p] ?? p;
+    return ({ starter: 'Starter', pro: 'Pro', partner: 'Partenaire', premium: 'Premium', enterprise: 'Entreprise' } as any)[p] ?? p;
   }
 
   planClass(p: string): string {
-    return ({ starter: 'badge-neutral', pro: 'badge-blue', partner: 'badge-gold', enterprise: 'badge-purple' } as any)[p] ?? 'badge-neutral';
+    return ({ starter: 'badge-neutral', pro: 'badge-blue', partner: 'badge-gold', premium: 'badge-purple', enterprise: 'badge-purple' } as any)[p] ?? 'badge-neutral';
   }
 
   statusLabel(s: string): string {
-    return ({ active: 'Actif', trial: 'Essai', suspended: 'Suspendu', cancelled: 'Annulé' } as any)[s] ?? s;
+    return ({ active: 'Actif', trial: 'Essai', suspended: 'Suspendu', cancelled: 'Annulé', pending: 'En attente' } as any)[s] ?? s;
   }
 
   statusClass(s: string): string {
-    return ({ active: 'badge-success', trial: 'badge-warning', suspended: 'badge-danger', cancelled: 'badge-neutral' } as any)[s] ?? 'badge-neutral';
+    return ({ active: 'badge-success', trial: 'badge-warning', suspended: 'badge-danger', cancelled: 'badge-neutral', pending: 'badge-pending' } as any)[s] ?? 'badge-neutral';
+  }
+
+  alertLevel(days: number): string {
+    if (days <= 7)  return 'alert-danger';
+    if (days <= 14) return 'alert-warning';
+    return 'alert-info';
+  }
+
+  geoBarWidth(count: number, max: number): string {
+    return max > 0 ? `${Math.round((count / max) * 100)}%` : '0%';
+  }
+
+  geoMax(list: any[]): number {
+    if (!list?.length) return 1;
+    return Math.max(...list.map((g: any) => g.count));
   }
 }
