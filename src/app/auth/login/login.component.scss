@@ -266,9 +266,73 @@ $red:         #e57373;
 }
 .demo-email { font-size: 12px; color: $ink-light; font-family: 'DM Mono', monospace; }
 
+// ─── Mobile brand (caché sur desktop) ────────────────────────
+.login-mobile-brand { display: none; }
+
 // ─── Responsive ───────────────────────────────────────────────
 @media (max-width: 900px) {
-  .login-page { grid-template-columns: 1fr; }
+  .login-page {
+    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+  }
+
   .login-visual { display: none; }
-  .login-form-panel { padding: 40px 24px; min-height: 100vh; }
+
+  .login-form-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding: 0;
+    min-height: 100dvh;
+    overflow-y: auto;
+  }
+
+  .login-mobile-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: calc(env(safe-area-inset-top, 0px) + 20px) 24px 24px;
+    background: $green-deep;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(white, 0.08);
+
+    .login-logo-mark {
+      width: 40px; height: 40px; background: $green-main; border-radius: 10px;
+      position: relative; overflow: hidden; flex-shrink: 0;
+      &::after { content: ''; position: absolute; width: 18px; height: 18px; border: 2px solid $gold-main; border-radius: 3px; transform: rotate(45deg); top: 50%; left: 50%; margin: -9px 0 0 -9px; }
+    }
+
+    .login-logo-text {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 22px; font-weight: 700; color: $white;
+      display: block; line-height: 1.2;
+      span { color: $green-light; }
+    }
+  }
+
+  .login-mobile-tagline {
+    font-size: 12px; color: rgba(white, 0.45); margin: 3px 0 0;
+  }
+
+  .login-form-wrapper {
+    width: 100%;
+    max-width: none;
+    padding: 28px 24px calc(env(safe-area-inset-bottom, 0px) + 28px);
+    animation: none;
+  }
+
+  .login-form-header {
+    margin-bottom: 24px;
+    h1 { font-size: 30px; }
+  }
+}
+
+@media (max-width: 400px) {
+  .login-mobile-brand { padding-left: 20px; padding-right: 20px; }
+  .login-form-wrapper { padding-left: 20px; padding-right: 20px; }
+  .btn-submit { padding: 13px 20px; font-size: 14px; }
 }

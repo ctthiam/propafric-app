@@ -25,3 +25,36 @@
 
 * { box-sizing: border-box; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); margin: 0; }
+
+// ── Responsive global ─────────────────────────────────────────
+@media (max-width: 768px) {
+  // Drawers : toujours pleine largeur sur mobile
+  .drawer-panel,
+  .drawer-panel-wide,
+  .drawer-panel-sm {
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+
+  // Formulaires en 2 ou 3 colonnes → 1 colonne
+  .form-row-2,
+  .form-row-3 {
+    grid-template-columns: 1fr !important;
+  }
+
+  // Onglets : permettre retour à la ligne
+  .tabs-bar {
+    flex-wrap: wrap;
+  }
+
+  // Filtres : pleine largeur
+  .filter-select {
+    min-width: unset !important;
+    width: 100%;
+  }
+
+  // Titres de page
+  .page-title {
+    font-size: 26px !important;
+  }
+}

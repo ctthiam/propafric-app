@@ -12,6 +12,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class SuperLayoutComponent {
   sidebarCollapsed = signal(false);
+  mobileOpen = signal(false);
 
   navItems = [
     { label: 'Dashboard',    icon: 'pi pi-home',              route: '/super-admin/dashboard'   },
@@ -23,9 +24,15 @@ export class SuperLayoutComponent {
     { label: 'Support',      icon: 'pi pi-question-circle',   route: '/super-admin/support'     },
   ];
 
+  readonly bottomNavItems = this.navItems.filter(item =>
+    ['/super-admin/dashboard', '/super-admin/agences', '/super-admin/revenus', '/super-admin/alertes'].includes(item.route)
+  );
+
   constructor(public auth: AuthService) {}
 
   toggleSidebar(): void { this.sidebarCollapsed.set(!this.sidebarCollapsed()); }
+  toggleMobile():  void { this.mobileOpen.update(v => !v); }
+  closeMobile():   void { this.mobileOpen.set(false); }
   logout(): void { this.auth.logout(); }
 
   get userInitials(): string {

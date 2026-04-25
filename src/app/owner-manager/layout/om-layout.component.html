@@ -2,7 +2,7 @@
   <div class="nav-progress"></div>
 }
 
-<div class="om-shell">
+<div class="om-shell" [class.mobile-open]="mobileOpen()">
   <!-- Sidebar -->
   <aside class="om-sidebar">
     <div class="om-logo">
@@ -12,7 +12,7 @@
 
     <nav class="om-nav">
       @for (item of navItems; track item.route) {
-        <a class="om-nav-item" [routerLink]="item.route" routerLinkActive="active">
+        <a class="om-nav-item" [routerLink]="item.route" routerLinkActive="active" (click)="closeMobile()">
           <i class="{{ item.icon }}"></i>
           <span>{{ item.label }}</span>
         </a>
@@ -41,6 +41,23 @@
     <router-outlet />
   </main>
 </div>
+
+@if (mobileOpen()) {
+  <div class="om-mobile-overlay" (click)="closeMobile()"></div>
+}
+
+<nav class="om-bottom-nav">
+  @for (item of bottomNavItems; track item.route) {
+    <a [routerLink]="item.route" routerLinkActive="active" class="om-bottom-nav-item" (click)="closeMobile()">
+      <i [class]="item.icon"></i>
+      <span>{{ item.label }}</span>
+    </a>
+  }
+  <button class="om-bottom-nav-item om-bottom-nav-more" (click)="toggleMobile()">
+    <i [class]="mobileOpen() ? 'pi pi-times' : 'pi pi-th-large'"></i>
+    <span>Plus</span>
+  </button>
+</nav>
 
 @if (pwdDrawerOpen) {
   <div class="pwd-overlay" (click)="closePwdDrawer()"></div>

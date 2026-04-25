@@ -17,6 +17,7 @@ import { environment } from '../../../environments/environment';
 export class OmLayoutComponent {
   private api = `${environment.apiUrl}/auth`;
   navigating = false;
+  mobileOpen = signal(false);
 
   pwdDrawerOpen = false;
   pwdSaving     = false;
@@ -55,6 +56,12 @@ export class OmLayoutComponent {
     });
   }
 
+  readonly bottomNavItems = this.navItems.filter(item =>
+    ['/gestionnaire/dashboard', '/gestionnaire/paiements', '/gestionnaire/locataires', '/gestionnaire/biens'].includes(item.route)
+  );
+
+  toggleMobile(): void { this.mobileOpen.update(v => !v); }
+  closeMobile():  void { this.mobileOpen.set(false); }
   logout(): void { this.auth.logout(); }
 
   openPwdDrawer(): void {

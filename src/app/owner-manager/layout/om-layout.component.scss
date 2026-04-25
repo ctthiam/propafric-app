@@ -44,6 +44,61 @@ $sidebar-w: 240px;
 
 .om-main { margin-left:$sidebar-w; flex:1; padding:32px; min-height:100vh; }
 
+// ── Mobile ───────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .om-shell { display: block; }
+
+  .om-sidebar {
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    width: $sidebar-w;
+    .om-shell.mobile-open & { transform: translateX(0); }
+  }
+
+  .om-main {
+    margin-left: 0 !important;
+    padding: 16px;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
+    min-height: 100vh;
+  }
+}
+
+.om-mobile-overlay {
+  display: none;
+  @media (max-width: 768px) {
+    display: block; position: fixed; inset: 0;
+    background: rgba($ink, 0.5); z-index: 199; backdrop-filter: blur(2px);
+  }
+}
+
+.om-bottom-nav {
+  display: none;
+  @media (max-width: 768px) {
+    display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+    height: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: $ink; border-top: 1px solid rgba($gold, 0.4);
+    z-index: 300; box-shadow: 0 -2px 20px rgba($ink, 0.2);
+  }
+}
+
+.om-bottom-nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; text-decoration: none; color: rgba(white, 0.4); font-size: 9px;
+  font-family: 'DM Sans', sans-serif; font-weight: 500; border: none; background: transparent;
+  cursor: pointer; padding: 8px 2px 6px; transition: color 0.2s; position: relative;
+
+  i { font-size: 18px; }
+  span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; padding: 0 2px; line-height: 1.1; }
+
+  &.active {
+    color: $gold;
+    &::after { content: ''; position: absolute; top: 0; left: 20%; right: 20%; height: 2px; background: $gold; border-radius: 0 0 3px 3px; }
+  }
+  &:not(.active):hover { color: rgba(white, 0.75); }
+}
+.om-bottom-nav-more { color: rgba(white, 0.4); }
+
 // ── Drawer mot de passe ──────────────────────────────────────
 .pwd-overlay { position:fixed; inset:0; background:rgba($ink,.45); z-index:1100; }
 .pwd-drawer { position:fixed; top:0; right:0; bottom:0; width:400px; max-width:100vw; background:$white; z-index:1101; display:flex; flex-direction:column; box-shadow:-4px 0 32px rgba($ink,.15); }

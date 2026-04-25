@@ -1,4 +1,4 @@
-<div class="portal-shell" [class.collapsed]="sidebarCollapsed()">
+<div class="portal-shell" [class.collapsed]="sidebarCollapsed()" [class.mobile-open]="mobileOpen()">
   <aside class="sidebar">
     <div class="sidebar-brand">
       <div class="brand-logo">
@@ -20,7 +20,7 @@
 
     <nav class="sidebar-nav">
       @for (item of navItems; track item.route) {
-        <a [routerLink]="item.route" routerLinkActive="active" class="nav-item" [title]="sidebarCollapsed() ? item.label : ''">
+        <a [routerLink]="item.route" routerLinkActive="active" class="nav-item" [title]="sidebarCollapsed() ? item.label : ''" (click)="closeMobile()">
           <i [class]="item.icon"></i>
           @if (!sidebarCollapsed()) { <span>{{ item.label }}</span> }
         </a>
@@ -49,4 +49,22 @@
       <router-outlet />
     </div>
   </main>
+
 </div>
+
+@if (mobileOpen()) {
+  <div class="mobile-overlay" (click)="closeMobile()"></div>
+}
+
+<nav class="bottom-nav">
+  @for (item of bottomNavItems; track item.route) {
+    <a [routerLink]="item.route" routerLinkActive="active" class="bottom-nav-item" (click)="closeMobile()">
+      <i [class]="item.icon"></i>
+      <span>{{ item.label }}</span>
+    </a>
+  }
+  <button class="bottom-nav-item bottom-nav-more" (click)="toggleMobile()">
+    <i [class]="mobileOpen() ? 'pi pi-times' : 'pi pi-th-large'"></i>
+    <span>Plus</span>
+  </button>
+</nav>
