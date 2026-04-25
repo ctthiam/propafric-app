@@ -1,0 +1,119 @@
+$green:  #2D6A4F;
+$gold:   #C9A84C;
+$ink:    #0d1f17;
+$white:  #ffffff;
+
+.install-banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 9999;
+  padding: 0 16px env(safe-area-inset-bottom, 12px);
+  padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px));
+  animation: slideUp 0.3s ease both;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+.banner-inner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: $green;
+  border-radius: 16px 16px 0 0;
+  padding: 14px 16px;
+  box-shadow: 0 -4px 24px rgba($ink, 0.18);
+  border-top: 2px solid rgba($gold, 0.5);
+}
+
+.banner-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+.banner-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  strong {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: $white;
+    line-height: 1.2;
+  }
+
+  span {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: rgba($white, 0.8);
+    line-height: 1.4;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+
+    em {
+      font-style: normal;
+      font-weight: 600;
+      color: $gold;
+    }
+  }
+}
+
+.share-icon {
+  width: 14px;
+  height: 14px;
+  color: $gold;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+.btn-install {
+  flex-shrink: 0;
+  background: $gold;
+  color: $ink;
+  border: none;
+  border-radius: 10px;
+  padding: 9px 16px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+
+  &:active { opacity: 0.8; }
+}
+
+.btn-dismiss {
+  flex-shrink: 0;
+  background: rgba($white, 0.12);
+  border: none;
+  border-radius: 8px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s;
+
+  svg {
+    width: 14px;
+    height: 14px;
+    color: rgba($white, 0.7);
+  }
+
+  &:active { background: rgba($white, 0.2); }
+}
