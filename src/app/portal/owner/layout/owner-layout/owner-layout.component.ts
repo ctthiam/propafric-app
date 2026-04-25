@@ -12,6 +12,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class OwnerLayoutComponent {
   sidebarCollapsed = signal(false);
+  mobileOpen = signal(false);
 
   navItems = [
     { label: 'Tableau de bord', icon: 'pi pi-home',      route: '/portail-proprietaire/dashboard' },
@@ -24,9 +25,21 @@ export class OwnerLayoutComponent {
     { label: 'Messages',        icon: 'pi pi-comments',   route: '/portail-proprietaire/messages' },
   ];
 
+  readonly bottomNavItems = this.navItems.filter(item =>
+    [
+      '/portail-proprietaire/dashboard',
+      '/portail-proprietaire/biens',
+      '/portail-proprietaire/echeances',
+      '/portail-proprietaire/releves',
+      '/portail-proprietaire/messages',
+    ].includes(item.route)
+  );
+
   constructor(public auth: AuthService) {}
 
   toggleSidebar(): void { this.sidebarCollapsed.set(!this.sidebarCollapsed()); }
+  toggleMobile():  void { this.mobileOpen.update(v => !v); }
+  closeMobile():   void { this.mobileOpen.set(false); }
   logout(): void { this.auth.logout(); }
 
   get userName(): string {

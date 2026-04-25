@@ -89,6 +89,21 @@ export class LayoutComponent implements OnInit, OnDestroy {
     return this.allNavItems.filter(item => !item.roles || item.roles.includes(role));
   });
 
+  readonly bottomNavItems = computed(() => {
+    const priority = [
+      '/dashboard',
+      '/dashboard/paiements',
+      '/dashboard/locataires',
+      '/dashboard/biens',
+      '/dashboard/messages',
+    ];
+    const filtered = this.filteredNavItems();
+    return priority
+      .map(route => filtered.find(item => item.route === route))
+      .filter((item): item is NavItem => item !== undefined)
+      .slice(0, 4);
+  });
+
   constructor(
     private auth: AuthService,
     private http: HttpClient,

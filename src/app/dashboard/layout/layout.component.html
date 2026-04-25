@@ -166,6 +166,26 @@
 
 </div>
 
+<!-- ─── BOTTOM NAV (mobile) ───────────────────────────────── -->
+<nav class="bottom-nav">
+  @for (item of bottomNavItems(); track item.route) {
+    <a
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
+      class="bottom-nav-item"
+      (click)="closeMobile()"
+    >
+      <i [class]="item.icon"></i>
+      <span>{{ item.label }}</span>
+    </a>
+  }
+  <button class="bottom-nav-item bottom-nav-more" (click)="toggleMobile()">
+    <i [class]="mobileOpen() ? 'pi pi-times' : 'pi pi-th-large'"></i>
+    <span>Plus</span>
+  </button>
+</nav>
+
 <!-- ── Drawer Changer mot de passe ───────────────────────── -->
 @if (pwdDrawerOpen) {
   <div class="pwd-overlay" (click)="closePwdDrawer()"></div>

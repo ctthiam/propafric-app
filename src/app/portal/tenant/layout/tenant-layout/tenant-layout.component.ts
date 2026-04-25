@@ -12,6 +12,7 @@ import { AuthService } from '../../../../core/services/auth.service';
 })
 export class TenantLayoutComponent implements OnInit {
   sidebarCollapsed = signal(false);
+  mobileOpen = signal(false);
 
   navItems = [
   { label: 'Tableau de bord', icon: 'pi pi-home',        route: '/portail-locataire/dashboard' },
@@ -29,9 +30,9 @@ export class TenantLayoutComponent implements OnInit {
 
   ngOnInit(): void {}
 
-  toggleSidebar(): void {
-    this.sidebarCollapsed.set(!this.sidebarCollapsed());
-  }
+  toggleSidebar(): void { this.sidebarCollapsed.set(!this.sidebarCollapsed()); }
+  toggleMobile():  void { this.mobileOpen.update(v => !v); }
+  closeMobile():   void { this.mobileOpen.set(false); }
 
   logout(): void {
     this.auth.logout();
