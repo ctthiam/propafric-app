@@ -202,6 +202,20 @@ textarea.pa-input { resize: vertical; }
 .calc-divider { height: 1px; background: rgba($ink, 0.1); margin: 8px 0; }
 .calc-total { font-size: 14px; font-weight: 700; color: $ink; strong { color: $green-main; font-size: 16px; } }
 
+// ─── ENTRY-MONTH BOX ────────────────────────────────────────
+.entry-month-box {
+  background: rgba($gold-main, 0.06); border: 1.5px solid rgba($gold-main, 0.25);
+  border-radius: 12px; padding: 16px; margin: 8px 0 16px;
+}
+.entry-month-title { font-size: 11px; font-weight: 700; color: darken($gold-main, 15%); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+.entry-month-row {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; color: $ink-mid; padding: 4px 0;
+  strong { font-weight: 600; color: $ink; }
+}
+.entry-month-divider { height: 1px; background: rgba($gold-main, 0.3); margin: 8px 0; }
+.entry-month-total { font-size: 14px; font-weight: 700; strong { color: $gold-main; font-size: 16px; } }
+
 .drawer-actions {
   position: sticky; bottom: 0;
   display: flex; align-items: center; justify-content: flex-end; gap: 10px;

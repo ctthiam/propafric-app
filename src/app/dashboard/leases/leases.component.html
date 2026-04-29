@@ -326,8 +326,9 @@
             <p-inputNumber formControlName="tom_rate" [minFractionDigits]="1" [min]="0" [max]="100" styleClass="w-full" />
           </div>
           <div class="form-group">
-            <label>TVA frais gestion (%)</label>
+            <label>TVA (%)</label>
             <p-inputNumber formControlName="management_fee_vat_rate" [min]="0" [max]="100" styleClass="w-full" />
+            <span class="form-hint">Sur le loyer de base</span>
           </div>
         </div>
 
@@ -338,8 +339,10 @@
             <div class="calc-row"><span>Loyer de base</span><strong>{{ formatCurrency(totalBaseRent) }}</strong></div>
             <div class="calc-row"><span>Charges</span><strong>{{ formatCurrency(totalCharges) }}</strong></div>
             <div class="calc-row"><span>TOM ({{ calcTomRate() }}%)</span><strong>{{ formatCurrency(calcTom()) }}</strong></div>
-            <div class="calc-row"><span>Frais gestion HT</span><strong>{{ formatCurrency(calcFeeHt()) }}</strong></div>
-            <div class="calc-row"><span>TVA frais gestion ({{ calcVatRate() }}%)</span><strong>{{ formatCurrency(calcFeeVat()) }}</strong></div>
+            <div class="calc-row"><span>Frais de gestion</span><strong>{{ formatCurrency(calcFeeHt()) }}</strong></div>
+            @if (calcVatRate() > 0) {
+              <div class="calc-row"><span>TVA ({{ calcVatRate() }}%)</span><strong>{{ formatCurrency(calcTax()) }}</strong></div>
+            }
             <div class="calc-divider"></div>
             @if (agencyFeeModel === 'deducted') {
               <div class="recap-note">
@@ -352,17 +355,39 @@
         }
 
         <!-- ── CAUTION ── -->
-        <div class="form-section-title">Caution & avances</div>
+        <div class="form-section-title">Caution & commission</div>
         <div class="form-row-2">
           <div class="form-group">
             <label>Dépôt de garantie (F CFA)</label>
             <p-inputNumber formControlName="deposit_amount" [min]="0" locale="fr-SN" styleClass="w-full" />
           </div>
           <div class="form-group">
+            <label>Commission d'agence — mois d'entrée (F CFA)</label>
+            <p-inputNumber formControlName="agency_commission_amount" [min]="0" locale="fr-SN" styleClass="w-full" />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="form-group">
             <label>Mois d'avance</label>
             <p-inputNumber formControlName="advance_months" [min]="0" [max]="12" styleClass="w-full" />
           </div>
         </div>
+
+        <!-- Box total mois d'entrée -->
+        @if (calcDeposit() > 0 || calcCommission() > 0) {
+          <div class="entry-month-box">
+            <div class="entry-month-title">Total mois d'entrée</div>
+            <div class="entry-month-row"><span>Loyer mensuel</span><strong>{{ formatCurrency(calcTotal()) }}</strong></div>
+            @if (calcDeposit() > 0) {
+              <div class="entry-month-row"><span>Dépôt de garantie</span><strong>{{ formatCurrency(calcDeposit()) }}</strong></div>
+            }
+            @if (calcCommission() > 0) {
+              <div class="entry-month-row"><span>Commission d'agence</span><strong>{{ formatCurrency(calcCommission()) }}</strong></div>
+            }
+            <div class="entry-month-divider"></div>
+            <div class="entry-month-row entry-month-total"><span>Total à régler à l'entrée</span><strong>{{ formatCurrency(calcEntryTotal()) }}</strong></div>
+          </div>
+        }
 
         <!-- ── NOTES ── -->
         <div class="form-section-title">Notes</div>
@@ -466,9 +491,23 @@
         <div class="detail-row"><span class="detail-label">Loyer de base</span><span class="detail-value">{{ formatCurrency(viewingLease()!.base_rent) }}</span></div>
         <div class="detail-row"><span class="detail-label">Charges</span><span class="detail-value">{{ formatCurrency(viewingLease()!.charges) }}</span></div>
         <div class="detail-row"><span class="detail-label">TOM</span><span class="detail-value">{{ formatCurrency(viewingLease()!.tom_amount) }}</span></div>
-        <div class="detail-row"><span class="detail-label">Frais gestion TTC</span><span class="detail-value">{{ formatCurrency(viewingLease()!.management_fee_ttc) }}</span></div>
-        <div class="detail-row"><span class="detail-label">Total TTC</span><span class="detail-value" style="color:#2D6A4F; font-weight:700">{{ formatCurrency(viewingLease()!.total_rent) }}</span></div>
+        @if (viewingLease()!.tax_amount) {
+          <div class="detail-row"><span class="detail-label">TVA</span><span class="detail-value">{{ formatCurrency(viewingLease()!.tax_amount) }}</span></div>
+        }
+        <div class="detail-row"><span class="detail-label">Frais de gestion</span><span class="detail-value">{{ formatCurrency(viewingLease()!.management_fee_ttc) }}</span></div>
+        <div class="detail-row"><span class="detail-label">Total TTC / mois</span><span class="detail-value" style="color:#2D6A4F; font-weight:700">{{ formatCurrency(viewingLease()!.total_rent) }}</span></div>
         <div class="detail-row"><span class="detail-label">Dépôt de garantie</span><span class="detail-value">{{ formatCurrency(viewingLease()!.deposit_amount) }}</span></div>
+        @if (viewingLease()!.agency_commission_amount) {
+          <div class="detail-row"><span class="detail-label">Commission d'agence</span><span class="detail-value">{{ formatCurrency(viewingLease()!.agency_commission_amount) }}</span></div>
+        }
+        @if (viewingLease()!.deposit_amount || viewingLease()!.agency_commission_amount) {
+          <div class="detail-row">
+            <span class="detail-label" style="font-weight:700">Total mois d'entrée</span>
+            <span class="detail-value" style="color:#C9A84C; font-weight:700">
+              {{ formatCurrency((+viewingLease()!.total_rent) + (viewingLease()!.deposit_amount ?? 0) + (viewingLease()!.agency_commission_amount ?? 0)) }}
+            </span>
+          </div>
+        }
 
         <div class="detail-section-title">Paiement</div>
         <div class="detail-row"><span class="detail-label">Fréquence</span><span class="detail-value">{{ viewingLease()!.payment_frequency }}</span></div>

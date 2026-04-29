@@ -138,13 +138,15 @@ export class LeasesComponent implements OnInit {
     if (feeType === 'fixed') return feeValue;
     if (feeType === 'percent_ht') return Math.round((base + charges) * feeValue / 100);
     if (feeType === 'percent_ttc') {
-      const tom = Math.round(base * this.calcTomRate() / 100);
-      const tax = Math.round((base + charges) * this.calcTaxRate() / 100);
-      const baseWithoutFee = base + charges + tom + tax;
+      // Même formule que le backend calculateFromBase :
+      // baseContrib = base × (1 + TOM/100 + TVA/100) + charges
+      const tomAmount = Math.round(base * this.calcTomRate() / 100);
+      const taxAmount = Math.round(base * vatRate / 100); // TVA sur loyer de base
+      const baseContrib = base + tomAmount + taxAmount + charges;
       const denominator = 1 - (feeValue / 100);
-      const totalTtc = Math.round(baseWithoutFee / denominator);
-      const feeTtc = Math.round(totalTtc * feeValue / 100);
-      return Math.round(feeTtc / (1 + vatRate / 100));
+      if (denominator <= 0) return 0;
+      const totalTtc = Math.round(baseContrib / denominator);
+      return Math.round(totalTtc * feeValue / 100); // feeHt = feeTtc (pas de TVA sur frais)
     }
     return 0;
   });
@@ -429,8 +431,10 @@ export class LeasesComponent implements OnInit {
     this.calcVatRate.set(lease.management_fee_vat_rate ?? 18);
     this.calcFeeType.set(lease.management_fee_type ?? 'percent_ht');
     this.calcFeeValue.set(lease.management_fee_value ?? 0);
-    this.calcCharges.set(lease.charges ?? 0);           // ← charges
+    this.calcCharges.set(lease.charges ?? 0);
     this.calcBaseRent.set(lease.base_rent ?? 0);
+    this.calcDeposit.set(lease.deposit_amount ?? 0);
+    this.calcCommission.set(lease.agency_commission_amount ?? 0);
 
     if (lease.property?.id) {
       this.loadingUnits.set(true);
