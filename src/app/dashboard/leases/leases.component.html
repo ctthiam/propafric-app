@@ -141,7 +141,12 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Bien <span class="req">*</span></label>
-            <p-dropdown appendTo="body" formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" [filter]="true" styleClass="w-full" (onChange)="onPropertyChange($event.value)" />
+            <select class="pa-input" formControlName="property_id" (change)="onPropertyChange(+$any($event.target).value)">
+              <option [ngValue]="null">— Sélectionner un bien —</option>
+              @for (o of propertyOptions; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
             @if (form.get('property_id')?.invalid && form.get('property_id')?.touched) { <span class="form-error">Requis</span> }
             @if (propertyUnits().length > 0) {
               <div class="form-group">
@@ -162,18 +167,30 @@
           </div>
           <div class="form-group">
             <label>Locataire <span class="req">*</span></label>
-            <p-dropdown appendTo="body" formControlName="tenant_id" [options]="tenantOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un locataire" [filter]="true" styleClass="w-full" />
+            <select class="pa-input" formControlName="tenant_id">
+              <option [ngValue]="null">— Sélectionner un locataire —</option>
+              @for (o of tenantOptions; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
             @if (form.get('tenant_id')?.invalid && form.get('tenant_id')?.touched) { <span class="form-error">Requis</span> }
           </div>
         </div>
         <div class="form-row-2">
           <div class="form-group">
             <label>Type de contrat <span class="req">*</span></label>
-            <p-dropdown appendTo="body" formControlName="contract_type" [options]="contractTypeOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <select class="pa-input" formControlName="contract_type">
+              @for (o of contractTypeOptions; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
           </div>
           <div class="form-group">
             <label>Mode de calcul <span class="req">*</span></label>
-            <p-dropdown appendTo="body" formControlName="calculation_mode" [options]="[{label:'À partir du loyer de base → TTC', value:'from_base'},{label:'À partir du loyer TTC → base', value:'from_total'}]" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <select class="pa-input" formControlName="calculation_mode">
+              <option value="from_base">À partir du loyer de base → TTC</option>
+              <option value="from_total">À partir du loyer TTC → base</option>
+            </select>
           </div>
         </div>
 
@@ -199,11 +216,20 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Fréquence de paiement</label>
-            <p-dropdown appendTo="body" formControlName="payment_frequency" [options]="paymentFrequencyOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <select class="pa-input" formControlName="payment_frequency">
+              @for (o of paymentFrequencyOptions; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
           </div>
           <div class="form-group">
             <label>Jour de paiement</label>
-            <p-dropdown appendTo="body" formControlName="payment_day" [options]="paymentDayOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <select class="pa-input" formControlName="payment_day">
+              <option [ngValue]="null">—</option>
+              @for (o of paymentDayOptions; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
           </div>
         </div>
 
@@ -276,7 +302,11 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Modalité <span class="req">*</span></label>
-            <p-dropdown appendTo="body" formControlName="management_fee_type" [options]="feeTypeOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <select class="pa-input" formControlName="management_fee_type">
+              @for (o of feeTypeOptions; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
           </div>
           <div class="form-group">
             <label>

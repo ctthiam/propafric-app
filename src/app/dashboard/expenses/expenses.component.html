@@ -180,7 +180,12 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Catégorie <span class="req">*</span></label>
-            <p-dropdown appendTo="body" formControlName="category" [options]="categories" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <select class="pa-input" formControlName="category">
+              <option value="">— Catégorie —</option>
+              @for (o of categories; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
           </div>
           <div class="form-group">
             <label>Date <span class="req">*</span></label>
@@ -208,11 +213,21 @@
         <div class="form-section-title">Liens</div>
         <div class="form-group">
           <label>Bien concerné</label>
-          <p-dropdown appendTo="body" formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" [showClear]="true" styleClass="w-full" />
+          <select class="pa-input" formControlName="property_id">
+            <option [ngValue]="null">— Aucun bien —</option>
+            @for (o of propertyOptions; track o.value) {
+              <option [value]="o.value">{{ o.label }}</option>
+            }
+          </select>
         </div>
         <div class="form-group">
           <label>Prestataire</label>
-          <p-dropdown appendTo="body" formControlName="contractor_id" [options]="contractorOptions" optionLabel="label" optionValue="value" [showClear]="true" styleClass="w-full" />
+          <select class="pa-input" formControlName="contractor_id">
+            <option [ngValue]="null">— Aucun prestataire —</option>
+            @for (o of contractorOptions; track o.value) {
+              <option [value]="o.value">{{ o.label }}</option>
+            }
+          </select>
         </div>
 
         <div class="form-section-title">Notes</div>

@@ -121,7 +121,12 @@
         <div class="form-section-title">Paramètres</div>
         <div class="form-group">
           <label>Propriétaire <span class="req">*</span></label>
-          <p-dropdown appendTo="body" formControlName="owner_id" [options]="ownerOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un propriétaire" [filter]="true" styleClass="w-full" />
+          <select class="pa-input" formControlName="owner_id">
+            <option [ngValue]="null">— Sélectionner un propriétaire —</option>
+            @for (o of ownerOptions; track o.value) {
+              <option [value]="o.value">{{ o.label }}</option>
+            }
+          </select>
           @if (generateForm.get('owner_id')?.invalid && generateForm.get('owner_id')?.touched) {
             <span class="form-error">Requis</span>
           }

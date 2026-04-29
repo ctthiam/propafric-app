@@ -204,14 +204,24 @@
         <div class="form-section-title">Bail concerné</div>
         <div class="form-group">
           <label>Bail <span class="req">*</span></label>
-          <p-dropdown appendTo="body" formControlName="lease_id" [options]="leaseOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bail" [filter]="true" styleClass="w-full" />
+          <select class="pa-input" formControlName="lease_id">
+            <option [ngValue]="null">— Sélectionner un bail —</option>
+            @for (o of leaseOptions; track o.value) {
+              <option [value]="o.value">{{ o.label }}</option>
+            }
+          </select>
           @if (form.get('lease_id')?.invalid && form.get('lease_id')?.touched) {
             <span class="form-error">Requis</span>
           }
         </div>
         <div class="form-group">
           <label>Échéance (optionnel)</label>
-          <p-dropdown appendTo="body" formControlName="schedule_id" [options]="scheduleOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner une échéance" styleClass="w-full" />
+          <select class="pa-input" formControlName="schedule_id">
+            <option [ngValue]="null">— Sélectionner une échéance —</option>
+            @for (o of scheduleOptions; track o.value) {
+              <option [value]="o.value">{{ o.label }}</option>
+            }
+          </select>
           @if (form.get('schedule_id')?.invalid && form.get('schedule_id')?.touched) {
             <span class="form-error">Requis</span>
           }
@@ -233,7 +243,11 @@
         </div>
         <div class="form-group">
           <label>Mode de paiement <span class="req">*</span></label>
-          <p-dropdown appendTo="body" formControlName="payment_method" [options]="paymentMethods" optionLabel="label" optionValue="value" styleClass="w-full" />
+          <select class="pa-input" formControlName="payment_method">
+            @for (o of paymentMethods; track o.value) {
+              <option [value]="o.value">{{ o.label }}</option>
+            }
+          </select>
         </div>
         <div class="form-group">
           <label>Référence / N° transaction</label>

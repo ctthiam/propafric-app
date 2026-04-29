@@ -146,7 +146,12 @@
 
         <div class="form-group">
           <label>Bien concerné <span class="req">*</span></label>
-          <p-dropdown appendTo="body" formControlName="property_id" [options]="propertyOptions()" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" styleClass="w-full" />
+          <select class="pa-input" formControlName="property_id">
+            <option [ngValue]="null">— Sélectionner un bien —</option>
+            @for (o of propertyOptions(); track o.value) {
+              <option [value]="o.value">{{ o.label }}</option>
+            }
+          </select>
           @if (form.get('property_id')?.invalid && form.get('property_id')?.touched) {
             <span class="form-error">Requis</span>
           }
@@ -168,11 +173,19 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Catégorie <span class="req">*</span></label>
-            <p-dropdown appendTo="body" formControlName="category" [options]="categoryOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <select class="pa-input" formControlName="category">
+              @for (o of categoryOptions; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
           </div>
           <div class="form-group">
             <label>Priorité <span class="req">*</span></label>
-            <p-dropdown appendTo="body" formControlName="priority" [options]="priorityOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <select class="pa-input" formControlName="priority">
+              @for (o of priorityOptions; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
           </div>
         </div>
 
@@ -396,7 +409,12 @@
       <form [formGroup]="assignForm" (ngSubmit)="saveAssign()" class="drawer-form">
         <div class="form-group">
           <label>Prestataire <span class="req">*</span></label>
-          <p-dropdown appendTo="body" formControlName="contractor_id" [options]="contractorOptions()" optionLabel="label" optionValue="value" placeholder="Sélectionner" styleClass="w-full" />
+          <select class="pa-input" formControlName="contractor_id">
+            <option [ngValue]="null">— Sélectionner —</option>
+            @for (o of contractorOptions(); track o.value) {
+              <option [value]="o.value">{{ o.label }}</option>
+            }
+          </select>
           @if (assignForm.get('contractor_id')?.invalid && assignForm.get('contractor_id')?.touched) {
             <span class="form-error">Requis</span>
           }

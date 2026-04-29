@@ -172,7 +172,12 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Type</label>
-            <p-dropdown appendTo="body" formControlName="id_type" [options]="idTypes" optionLabel="label" optionValue="value" placeholder="Sélectionner" />
+            <select class="pa-input" formControlName="id_type">
+              <option [ngValue]="null">— Sélectionner —</option>
+              @for (o of idTypes; track o.value) {
+                <option [value]="o.value">{{ o.label }}</option>
+              }
+            </select>
           </div>
           <div class="form-group">
             <label>Numéro</label>
