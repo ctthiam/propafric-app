@@ -26,6 +26,92 @@
 * { box-sizing: border-box; }
 body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); margin: 0; }
 
+// ── Drawers globaux ───────────────────────────────────────────
+// Dimensions standard pour tous les composants
+// Les composants définissent leurs propres dimensions mais ces valeurs
+// servent de référence cohérente à travers toute l'application.
+.drawer-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0, 0, 0, 0.4) !important;
+  z-index: 1050 !important;
+  backdrop-filter: blur(2px);
+}
+
+.drawer-panel {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 540px !important;
+  min-height: 100dvh !important;
+  z-index: 1051 !important;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -12px 0 48px rgba(0, 0, 0, 0.15) !important;
+  overflow: hidden;
+}
+
+.drawer-panel-wide {
+  width: 720px !important;
+}
+
+.drawer-panel-sm {
+  width: 420px !important;
+}
+
+// En-tête drawer : plus de lisibilité et de hiérarchie visuelle
+.drawer-header {
+  padding: 24px 28px 18px !important;
+  border-bottom: 1.5px solid rgba(13, 31, 23, 0.09) !important;
+  background: linear-gradient(135deg, #f8f6f1 0%, #ffffff 100%) !important;
+}
+
+.drawer-title {
+  font-size: 24px !important;
+  line-height: 1.2 !important;
+}
+
+.drawer-body {
+  padding: 20px 28px 0 !important;
+}
+
+.drawer-form {
+  padding-bottom: 100px !important;
+}
+
+.drawer-actions {
+  position: sticky !important;
+  bottom: 0 !important;
+  background: white !important;
+  padding: 16px 0 20px !important;
+  border-top: 1px solid rgba(13, 31, 23, 0.07) !important;
+  display: flex !important;
+  gap: 12px !important;
+  justify-content: flex-end !important;
+  z-index: 2 !important;
+}
+
+// Formulaires : espacement amélioré
+.form-group {
+  margin-bottom: 14px !important;
+}
+
+.form-hint {
+  font-size: 11.5px;
+  color: #4a6357;
+  margin-top: 2px;
+  display: block;
+}
+
+// PrimeNG overlays (dropdowns, calendars) : z-index au-dessus des drawers
+.p-dropdown-panel,
+.p-calendar-panel,
+.p-overlay-panel,
+.p-multiselect-panel {
+  z-index: 1100 !important;
+}
+
 // ── Responsive global ─────────────────────────────────────────
 @media (max-width: 768px) {
   // Drawers : toujours pleine largeur sur mobile

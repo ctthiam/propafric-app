@@ -1,4 +1,4 @@
-$green-main:  #2D6A4F;
+﻿$green-main:  #2D6A4F;
 $green-light: #52b788;
 $gold-main:   #C9A84C;
 $cream:       #faf8f3;
@@ -9,7 +9,7 @@ $white:       #ffffff;
 $red:         #e57373;
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-:host { display: block; animation: fadeUp 0.4s ease both; }
+:host { display: block; animation: fadeUp 0.4s ease backwards; }
 
 .page-header {
   display: flex; align-items: flex-start; justify-content: space-between;
@@ -96,7 +96,7 @@ $red:         #e57373;
 .empty-row { text-align: center; padding: 40px !important; }
 .empty-state-inline { display: inline-flex; align-items: center; gap: 10px; color: $ink-light; font-size: 14px; i { font-size: 20px; } }
 
-// ─── DRAWER ──────────────────────────────────────────────────────────────────
+// â”€â”€â”€ DRAWER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 1000; }
 .drawer-panel {
   position: fixed; top: 0; right: 0; bottom: 0; width: 560px;
@@ -117,7 +117,7 @@ $red:         #e57373;
   &:hover { background: rgba($ink, 0.06); color: $ink; }
 }
 
-// ─── ONGLETS ─────────────────────────────────────────────────────────────────
+// â”€â”€â”€ ONGLETS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .drawer-tabs {
   display: flex; gap: 0; border-bottom: 1px solid rgba($ink, 0.08); flex-shrink: 0;
   padding: 0 24px;
@@ -204,7 +204,7 @@ textarea.pa-input { resize: vertical; }
   .selected & { border-color: $green-main; background: $green-main; color: $white; }
 }
 
-// ─── ONGLET PHOTOS ────────────────────────────────────────────────────────────
+// â”€â”€â”€ ONGLET PHOTOS â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .photos-tab {
   padding: 20px 0 80px;
   display: flex; flex-direction: column; gap: 20px;

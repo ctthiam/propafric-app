@@ -204,14 +204,14 @@
         <div class="form-section-title">Bail concerné</div>
         <div class="form-group">
           <label>Bail <span class="req">*</span></label>
-          <p-dropdown formControlName="lease_id" [options]="leaseOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bail" [filter]="true" styleClass="w-full" />
+          <p-dropdown appendTo="body" formControlName="lease_id" [options]="leaseOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bail" [filter]="true" styleClass="w-full" />
           @if (form.get('lease_id')?.invalid && form.get('lease_id')?.touched) {
             <span class="form-error">Requis</span>
           }
         </div>
         <div class="form-group">
           <label>Échéance (optionnel)</label>
-          <p-dropdown formControlName="schedule_id" [options]="scheduleOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner une échéance" styleClass="w-full" />
+          <p-dropdown appendTo="body" formControlName="schedule_id" [options]="scheduleOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner une échéance" styleClass="w-full" />
           @if (form.get('schedule_id')?.invalid && form.get('schedule_id')?.touched) {
             <span class="form-error">Requis</span>
           }
@@ -233,7 +233,7 @@
         </div>
         <div class="form-group">
           <label>Mode de paiement <span class="req">*</span></label>
-          <p-dropdown formControlName="payment_method" [options]="paymentMethods" optionLabel="label" optionValue="value" styleClass="w-full" />
+          <p-dropdown appendTo="body" formControlName="payment_method" [options]="paymentMethods" optionLabel="label" optionValue="value" styleClass="w-full" />
         </div>
         <div class="form-group">
           <label>Référence / N° transaction</label>

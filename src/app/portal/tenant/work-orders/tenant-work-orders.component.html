@@ -122,12 +122,12 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Catégorie <span class="req">*</span></label>
-            <p-dropdown formControlName="category" [options]="categoryOptions"
+            <p-dropdown appendTo="body" formControlName="category" [options]="categoryOptions"
               optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
           <div class="form-group">
             <label>Urgence <span class="req">*</span></label>
-            <p-dropdown formControlName="priority" [options]="priorityOptions"
+            <p-dropdown appendTo="body" formControlName="priority" [options]="priorityOptions"
               optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
         </div>

@@ -1,4 +1,4 @@
-$green-main:  #2D6A4F;
+﻿$green-main:  #2D6A4F;
 $green-light: #52b788;
 $gold-main:   #C9A84C;
 $cream:       #faf8f3;
@@ -9,7 +9,7 @@ $white:       #ffffff;
 $red:         #e57373;
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-:host { display: block; animation: fadeUp 0.4s ease both; }
+:host { display: block; animation: fadeUp 0.4s ease backwards; }
 
 .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
 .page-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 700; color: $ink; margin: 0 0 4px; }
@@ -87,14 +87,14 @@ $red:         #e57373;
 .empty-row { text-align: center; padding: 40px !important; }
 .empty-state-inline { display: inline-flex; align-items: center; gap: 10px; color: $ink-light; font-size: 14px; i { font-size: 20px; } }
 
-// ─── DRAWER ──────────────────────────────────────────────────
+// â”€â”€â”€ DRAWER â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 1000; }
 .drawer-panel {
   position: fixed; top: 0; right: 0; bottom: 0; width: 520px;
   background: $white; z-index: 1001; display: flex; flex-direction: column;
   box-shadow: -8px 0 32px rgba(0,0,0,0.12);
 }
-.drawer-panel-wide { width: 620px; }
+.drawer-panel-wide { width: 720px; }
 
 .drawer-header {
   display: flex; align-items: flex-start; justify-content: space-between;
@@ -151,7 +151,7 @@ textarea.pa-input { resize: vertical; }
 :host ::ng-deep .p-calendar { width: 100%; }
 :host ::ng-deep .w-full { width: 100% !important; }
 
-// ─── POSTES DYNAMIQUES (loyer + charges) ─────────────────────
+// â”€â”€â”€ POSTES DYNAMIQUES (loyer + charges) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .items-list {
   display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;
 }
@@ -187,7 +187,7 @@ textarea.pa-input { resize: vertical; }
   i { color: $green-main; flex-shrink: 0; margin-top: 1px; }
 }
 
-// ─── CALC BOX ────────────────────────────────────────────────
+// â”€â”€â”€ CALC BOX â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .calc-box {
   background: $cream; border-radius: 12px; padding: 16px;
   margin: 8px 0 16px; border: 1px solid rgba($ink, 0.07);
@@ -214,7 +214,7 @@ textarea.pa-input { resize: vertical; }
 }
 :host ::ng-deep .p-toast { top: 80px !important; }
 
-// ─── RÉVISION TRIENNALE ──────────────────────────────────────
+// â”€â”€â”€ RÃ‰VISION TRIENNALE â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .revision-alert {
   display: flex; align-items: center; gap: 10px;
   padding: 12px 16px; background: rgba(25, 113, 194, 0.07);
@@ -259,3 +259,31 @@ textarea.pa-input { resize: vertical; }
 .detail-label { font-size:13px; color:#4a6357; min-width:140px; }
 .detail-value { font-size:13px; color:#0d1f17; font-weight:500; text-align:right; }
 .recap-note { font-size:12px; color:#C9A84C; background:rgba(#C9A84C,.08); border:1px solid rgba(#C9A84C,.2); border-radius:8px; padding:8px 12px; display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+
+.entry-month-box {
+  margin-top: 12px; border-radius: 12px; overflow: hidden;
+  border: 1.5px solid rgba($gold-main, 0.35);
+  background: linear-gradient(135deg, rgba($gold-main, 0.06) 0%, rgba($cream, 1) 100%);
+}
+.entry-month-title {
+  display: flex; align-items: center; gap: 8px;
+  padding: 10px 16px; font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px;
+  color: $gold-main; background: rgba($gold-main, 0.08);
+  border-bottom: 1px solid rgba($gold-main, 0.2);
+}
+.entry-month-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 16px; font-size: 13px; color: $ink-light;
+  border-bottom: 1px solid rgba($gold-main, 0.1);
+  &:last-child { border-bottom: none; }
+  strong { color: $ink; font-weight: 600; }
+}
+.entry-month-divider { height: 0; border-bottom: 1.5px solid rgba($gold-main, 0.25); }
+.entry-month-total {
+  font-weight: 700;
+  span { color: $ink; font-size: 14px; }
+  strong { color: $gold-main; font-size: 16px; }
+}
+.entry-total-row { background: rgba($gold-main, 0.06); border-radius: 6px; padding: 6px 0; }
+.entry-total-value { color: $gold-main !important; font-size: 15px !important; font-weight: 700 !important; }

@@ -180,7 +180,7 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Catégorie <span class="req">*</span></label>
-            <p-dropdown formControlName="category" [options]="categories" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <p-dropdown appendTo="body" formControlName="category" [options]="categories" optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
           <div class="form-group">
             <label>Date <span class="req">*</span></label>
@@ -208,11 +208,11 @@
         <div class="form-section-title">Liens</div>
         <div class="form-group">
           <label>Bien concerné</label>
-          <p-dropdown formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" [showClear]="true" styleClass="w-full" />
+          <p-dropdown appendTo="body" formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" [showClear]="true" styleClass="w-full" />
         </div>
         <div class="form-group">
           <label>Prestataire</label>
-          <p-dropdown formControlName="contractor_id" [options]="contractorOptions" optionLabel="label" optionValue="value" [showClear]="true" styleClass="w-full" />
+          <p-dropdown appendTo="body" formControlName="contractor_id" [options]="contractorOptions" optionLabel="label" optionValue="value" [showClear]="true" styleClass="w-full" />
         </div>
 
         <div class="form-section-title">Notes</div>

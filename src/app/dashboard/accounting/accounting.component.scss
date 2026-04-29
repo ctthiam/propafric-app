@@ -1,4 +1,4 @@
-$green-main:  #2D6A4F;
+﻿$green-main:  #2D6A4F;
 $green-light: #52b788;
 $gold-main:   #C9A84C;
 $cream:       #faf8f3;
@@ -10,16 +10,16 @@ $red:         #e57373;
 $blue:        #3B82F6;
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-:host { display: block; animation: fadeUp 0.4s ease both; }
+:host { display: block; animation: fadeUp 0.4s ease backwards; }
 
-// ── Page header ──────────────────────────────────────────────
+// â”€â”€ Page header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .page-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; flex-wrap: wrap; gap: 16px; }
 .page-header-left {}
 .page-title { font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 700; color: $ink; margin: 0 0 4px; }
 .page-subtitle { font-size: 14px; color: $ink-light; margin: 0; }
 .page-header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 
-// ── Buttons ───────────────────────────────────────────────────
+// â”€â”€ Buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .btn-primary {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 10px 20px; background: $green-main; color: $white;
@@ -36,7 +36,7 @@ $blue:        #3B82F6;
   &:hover { border-color: $green-main; color: $green-main; }
 }
 
-// ── Period bar ────────────────────────────────────────────────
+// â”€â”€ Period bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .period-bar {
   display: flex; align-items: center; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;
 }
@@ -47,7 +47,7 @@ $blue:        #3B82F6;
   &:focus { border-color: $green-main; }
 }
 
-// ── KPI cards ─────────────────────────────────────────────────
+// â”€â”€ KPI cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .kpi-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-bottom: 24px; }
 .kpi-card {
   background: $white; border-radius: 14px; border: 1px solid rgba($ink, 0.07);
@@ -69,7 +69,7 @@ $blue:        #3B82F6;
 .kpi-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; color: $ink-light; }
 .kpi-value { font-size: 22px; font-weight: 700; color: $ink; white-space: nowrap; .kpi-income & { color: $green-main; } .kpi-negative & { color: darken($red, 10%); } }
 
-// ── Tabs ──────────────────────────────────────────────────────
+// â”€â”€ Tabs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .tabs-bar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
 .tab-btn {
   display: inline-flex; align-items: center; gap: 8px;
@@ -88,7 +88,7 @@ $blue:        #3B82F6;
   .tab-btn.active & { background: rgba($white, 0.25); color: $white; }
 }
 
-// ── Toolbar ───────────────────────────────────────────────────
+// â”€â”€ Toolbar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
 .search-box {
   position: relative; flex: 1; min-width: 240px; max-width: 400px;
@@ -117,7 +117,7 @@ $blue:        #3B82F6;
   &.active { background: rgba($green-main, 0.07); border-color: $green-main; color: $green-main; }
 }
 
-// ── Table ─────────────────────────────────────────────────────
+// â”€â”€ Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .table-card { background: $white; border-radius: 16px; border: 1px solid rgba($ink, 0.06); overflow: hidden; }
 .skeleton-rows { padding: 20px; }
 .data-table-wrapper { overflow-x: auto; }
@@ -160,7 +160,7 @@ $blue:        #3B82F6;
 .empty-row { text-align: center; padding: 40px !important; }
 .empty-state-inline { display: inline-flex; align-items: center; gap: 10px; color: $ink-light; font-size: 14px; i { font-size: 20px; } }
 
-// ── Drawer ────────────────────────────────────────────────────
+// â”€â”€ Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .drawer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 1000; }
 .drawer-panel { position: fixed; top: 0; right: 0; bottom: 0; width: 520px; background: $white; z-index: 1001; display: flex; flex-direction: column; box-shadow: -8px 0 32px rgba(0,0,0,0.12); }
 .drawer-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 20px 24px 16px; border-bottom: 1px solid rgba($ink, 0.08); flex-shrink: 0; }

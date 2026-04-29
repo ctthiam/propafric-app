@@ -141,7 +141,7 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Bien <span class="req">*</span></label>
-            <p-dropdown formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" [filter]="true" styleClass="w-full" (onChange)="onPropertyChange($event.value)" />
+            <p-dropdown appendTo="body" formControlName="property_id" [options]="propertyOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un bien" [filter]="true" styleClass="w-full" (onChange)="onPropertyChange($event.value)" />
             @if (form.get('property_id')?.invalid && form.get('property_id')?.touched) { <span class="form-error">Requis</span> }
             @if (propertyUnits().length > 0) {
               <div class="form-group">
@@ -162,18 +162,18 @@
           </div>
           <div class="form-group">
             <label>Locataire <span class="req">*</span></label>
-            <p-dropdown formControlName="tenant_id" [options]="tenantOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un locataire" [filter]="true" styleClass="w-full" />
+            <p-dropdown appendTo="body" formControlName="tenant_id" [options]="tenantOptions" optionLabel="label" optionValue="value" placeholder="Sélectionner un locataire" [filter]="true" styleClass="w-full" />
             @if (form.get('tenant_id')?.invalid && form.get('tenant_id')?.touched) { <span class="form-error">Requis</span> }
           </div>
         </div>
         <div class="form-row-2">
           <div class="form-group">
             <label>Type de contrat <span class="req">*</span></label>
-            <p-dropdown formControlName="contract_type" [options]="contractTypeOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <p-dropdown appendTo="body" formControlName="contract_type" [options]="contractTypeOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
           <div class="form-group">
             <label>Mode de calcul <span class="req">*</span></label>
-            <p-dropdown formControlName="calculation_mode" [options]="[{label:'À partir du loyer de base → TTC', value:'from_base'},{label:'À partir du loyer TTC → base', value:'from_total'}]" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <p-dropdown appendTo="body" formControlName="calculation_mode" [options]="[{label:'À partir du loyer de base → TTC', value:'from_base'},{label:'À partir du loyer TTC → base', value:'from_total'}]" optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
         </div>
 
@@ -199,11 +199,11 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Fréquence de paiement</label>
-            <p-dropdown formControlName="payment_frequency" [options]="paymentFrequencyOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <p-dropdown appendTo="body" formControlName="payment_frequency" [options]="paymentFrequencyOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
           <div class="form-group">
             <label>Jour de paiement</label>
-            <p-dropdown formControlName="payment_day" [options]="paymentDayOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <p-dropdown appendTo="body" formControlName="payment_day" [options]="paymentDayOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
         </div>
 
@@ -276,7 +276,7 @@
         <div class="form-row-2">
           <div class="form-group">
             <label>Modalité <span class="req">*</span></label>
-            <p-dropdown formControlName="management_fee_type" [options]="feeTypeOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
+            <p-dropdown appendTo="body" formControlName="management_fee_type" [options]="feeTypeOptions" optionLabel="label" optionValue="value" styleClass="w-full" />
           </div>
           <div class="form-group">
             <label>

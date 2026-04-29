@@ -32,7 +32,9 @@ export interface Lease {
   management_fee_vat_rate: number | null;
   management_fee_ht: number | null;
   management_fee_ttc: number | null;
+  tax_amount: number | null;
   deposit_amount: number | null;
+  agency_commission_amount: number | null;
   advance_months: number | null;
   payment_frequency: string;
   payment_day: number | null;
@@ -121,6 +123,9 @@ export class LeasesComponent implements OnInit {
   calcFeeValue  = signal(0);
   calcMode      = signal('from_base');
 
+  calcCommission = signal(0);
+  calcDeposit    = signal(0);
+
   calcTom = computed(() => Math.round(this.calcBaseRent() * this.calcTomRate() / 100));
 
   calcFeeHt = computed(() => {
@@ -144,16 +149,21 @@ export class LeasesComponent implements OnInit {
     return 0;
   });
 
-  calcFeeVat  = computed(() => Math.round(this.calcFeeHt() * this.calcVatRate() / 100));
-  calcFeeTtc  = computed(() => this.calcFeeHt() + this.calcFeeVat());
-  calcTax     = computed(() => Math.round((this.calcBaseRent() + this.calcCharges()) * this.calcTaxRate() / 100));
+  // Pas de TVA sur les frais de gestion — la TVA s'applique sur le loyer de base
+  calcFeeVat  = computed(() => 0);
+  calcFeeTtc  = computed(() => this.calcFeeHt());
+  calcTax     = computed(() => Math.round(this.calcBaseRent() * this.calcVatRate() / 100));
   calcTotal = computed(() => {
-    const base = this.calcBaseRent() + this.calcCharges() + this.calcTom();
+    const base = this.calcBaseRent() + this.calcCharges() + this.calcTom() + this.calcTax();
     if (this.agencyFeeModel === 'deducted') {
       return base;
     }
     return base + this.calcFeeTtc();
   });
+
+  calcEntryTotal = computed(() =>
+    this.calcTotal() + this.calcDeposit() + this.calcCommission()
+  );
 
   form: FormGroup;
 
@@ -232,8 +242,9 @@ export class LeasesComponent implements OnInit {
       // Paiement
       payment_frequency:   ['monthly', Validators.required],
       payment_day:         [5],
-      deposit_amount:      [0],
-      advance_months:      [0],
+      deposit_amount:            [0],
+      agency_commission_amount:  [0],
+      advance_months:            [0],
       // Dates
       start_date:          [null, Validators.required],
       end_date:            [null],
@@ -258,6 +269,9 @@ export class LeasesComponent implements OnInit {
     this.form.get('tax_rate')?.valueChanges.subscribe(v => this.calcTaxRate.set(v ?? 0));
     this.form.get('management_fee_type')?.valueChanges.subscribe(v => this.calcFeeType.set(v ?? 'percent_ht'));
     this.form.get('management_fee_value')?.valueChanges.subscribe(v => this.calcFeeValue.set(v ?? 0));
+
+    this.form.get('deposit_amount')?.valueChanges.subscribe(v => this.calcDeposit.set(v ?? 0));
+    this.form.get('agency_commission_amount')?.valueChanges.subscribe(v => this.calcCommission.set(v ?? 0));
 
     // Recalcul base_rent depuis les postes
     this.baseRentItems.valueChanges.subscribe(() => this.updateCalcBaseRent());
@@ -372,7 +386,7 @@ export class LeasesComponent implements OnInit {
       management_fee_type: 'percent_ht', management_fee_value: 0,
       tom_rate: 3.6, management_fee_vat_rate: 18, tax_rate: 0,
       payment_frequency: 'monthly', payment_day: 5,
-      deposit_amount: 0, advance_months: 0, is_open_ended: true,
+      deposit_amount: 0, agency_commission_amount: 0, advance_months: 0, is_open_ended: true,
     });
     // Reset FormArrays
     while (this.baseRentItems.length) this.baseRentItems.removeAt(0);
@@ -403,8 +417,9 @@ export class LeasesComponent implements OnInit {
       management_fee_type:  lease.management_fee_type,
       management_fee_value: lease.management_fee_value,
       management_fee_vat_rate: lease.management_fee_vat_rate,
-      deposit_amount:       lease.deposit_amount,
-      advance_months:       lease.advance_months,
+      deposit_amount:            lease.deposit_amount,
+      agency_commission_amount:  lease.agency_commission_amount,
+      advance_months:            lease.advance_months,
       notes:                lease.notes ?? '',
       is_open_ended:        lease.end_date ? false : true,
     }, { emitEvent: false });
@@ -498,8 +513,9 @@ export class LeasesComponent implements OnInit {
       tax_rate:                 raw.tax_rate,
       payment_frequency:        raw.payment_frequency,
       payment_day:              raw.payment_day,
-      deposit_amount:           raw.deposit_amount,
-      advance_months:           raw.advance_months,
+      deposit_amount:            raw.deposit_amount,
+      agency_commission_amount:  raw.agency_commission_amount,
+      advance_months:            raw.advance_months,
       start_date:               this.formatDate(raw.start_date),
       end_date:                 raw.end_date ? this.formatDate(raw.end_date) : null,
       notes:                    raw.notes,

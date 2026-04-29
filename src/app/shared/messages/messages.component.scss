@@ -380,7 +380,7 @@ $blue:       #1971c2;
 
 /* ── Drawer ── */
 .drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:1000; }
-.drawer-panel { position:fixed; top:0; right:0; bottom:0; width:460px; background:$white; z-index:1001; display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,.12); }
+.drawer-panel { position:fixed; top:0; right:0; bottom:0; width:540px; background:$white; z-index:1001; display:flex; flex-direction:column; box-shadow:-8px 0 32px rgba(0,0,0,.12); }
 .drawer-header { display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid rgba($ink,.08); flex-shrink:0; }
 .drawer-title { font-family:'Cormorant Garamond',serif; font-size:20px; font-weight:700; color:$ink; }
 .drawer-close { width:32px; height:32px; border:none; background:transparent; cursor:pointer; border-radius:8px; display:flex; align-items:center; justify-content:center; color:$ink-light; &:hover { background:rgba($ink,.06); } }

@@ -1,4 +1,4 @@
-$green-main:  #2D6A4F;
+﻿$green-main:  #2D6A4F;
 $green-light: #52b788;
 $gold-main:   #C9A84C;
 $cream:       #faf8f3;
@@ -10,7 +10,7 @@ $red:         #e57373;
 $blue:        #1971c2;
 
 @keyframes fadeUp { from { opacity:0; transform:translateY(16px) } to { opacity:1; transform:translateY(0) } }
-:host { display:block; animation: fadeUp 0.4s ease both; }
+:host { display:block; animation: fadeUp 0.4s ease backwards; }
 
 .page-header { display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:28px; }
 .page-title { font-family:'Cormorant Garamond',serif; font-size:32px; font-weight:700; color:$ink; margin:0 0 4px; }
@@ -32,7 +32,7 @@ $blue:        #1971c2;
 .card-title    { font-family:'Cormorant Garamond',serif; font-size:18px; font-weight:700; color:$ink; margin-bottom:4px; }
 .card-subtitle { font-size:12px; color:$ink-light; margin-bottom:20px; }
 
-// ─── Logo ──────────────────────────────────────────────────
+// â”€â”€â”€ Logo â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .logo-zone { display:flex; flex-direction:column; align-items:center; gap:14px; }
 .logo-preview {
   position:relative; width:140px; height:140px;
@@ -78,7 +78,7 @@ $blue:        #1971c2;
 }
 .logo-hint { font-size:11px; color:$ink-light; text-align:center; }
 
-// ─── Couleurs PDF ──────────────────────────────────────────
+// â”€â”€â”€ Couleurs PDF â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .colors-zone { display:flex; flex-direction:column; gap:16px; }
 
 .color-row {
@@ -104,7 +104,7 @@ $blue:        #1971c2;
   min-width:70px; text-align:center;
 }
 
-// ─── Aperçu PDF miniature ──────────────────────────────────
+// â”€â”€â”€ AperÃ§u PDF miniature â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .pdf-preview {
   border:2px solid; border-radius:8px; overflow:hidden;
   margin-top:8px; font-family:'DejaVu Sans',sans-serif;
@@ -147,7 +147,7 @@ $blue:        #1971c2;
   margin-top:4px; font-style:italic;
 }
 
-// ─── Plan ──────────────────────────────────────────────────
+// â”€â”€â”€ Plan â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .plan-info { display:flex; flex-direction:column; gap:12px; }
 .plan-row  { display:flex; align-items:center; justify-content:space-between; }
 .plan-label { font-size:13px; color:$ink-light; }
@@ -159,7 +159,7 @@ $blue:        #1971c2;
 .badge-success { background:rgba($green-light,.15);  color:darken($green-light,20%); }
 .badge-warning { background:rgba($gold-main,.15);    color:darken($gold-main,20%); }
 
-// ─── Formulaire ────────────────────────────────────────────
+// â”€â”€â”€ Formulaire â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 .settings-form { display:flex; flex-direction:column; gap:0; }
 .form-section-title {
   font-size:11px; font-weight:700; color:$ink-light; text-transform:uppercase;

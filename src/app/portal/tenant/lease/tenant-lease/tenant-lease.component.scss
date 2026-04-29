@@ -92,7 +92,7 @@ $red:         #e57373;
 /* ── Drawer ── */
 .drawer-overlay { position:fixed; inset:0; background:rgba(0,0,0,.35); z-index:1000; }
 .drawer-panel {
-  position:fixed; top:0; right:0; bottom:0; width:480px;
+  position:fixed; top:0; right:0; bottom:0; width:540px;
   background:#fff; z-index:1001; display:flex; flex-direction:column;
   box-shadow:-8px 0 32px rgba(0,0,0,.12);
 }
