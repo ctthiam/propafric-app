@@ -22,6 +22,7 @@ export interface PaymentSchedule {
   lease_id: number;
   due_date: string;
   period_label: string;
+  schedule_type?: 'regular' | 'entry' | 'deposit_refund';
   total_amount: string;
   amount_paid: string;
   balance: string;
@@ -209,7 +210,9 @@ export class PaymentsComponent implements OnInit {
       .filter(s => s.status !== 'paid' && s.status !== 'cancelled')
       .filter(s => !leaseId || s.lease_id === leaseId)
       .map(s => ({
-        label: `${s.period_label} — solde ${this.formatCurrency(s.balance)}`,
+        label: s.schedule_type === 'entry'
+          ? `[ENTRÉE] ${s.period_label} — solde ${this.formatCurrency(s.balance)}`
+          : `${s.period_label} — solde ${this.formatCurrency(s.balance)}`,
         value: s.id,
       }));
   }

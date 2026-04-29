@@ -97,7 +97,12 @@
                 <td><span class="badge badge-ref">{{ sc.lease?.reference ?? '—' }}</span></td>
                 <td class="td-name">{{ sc.tenant?.full_name ?? '—' }}</td>
                 <td class="td-muted">{{ sc.property?.name ?? '—' }}</td>
-                <td class="td-muted">{{ sc.period_label }}</td>
+                <td class="td-muted">
+                  {{ sc.period_label }}
+                  @if (sc.schedule_type === 'entry') {
+                    <span class="badge badge-entry">Entrée</span>
+                  }
+                </td>
                 <td class="td-muted">{{ formatDateDisplay(sc.due_date) }}</td>
                 <td class="td-amount">{{ formatCurrency(sc.total_amount) }}</td>
                 <td class="td-paid">{{ formatCurrency(sc.amount_paid) }}</td>
