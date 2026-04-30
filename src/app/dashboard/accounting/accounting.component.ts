@@ -264,6 +264,8 @@ export class AccountingComponent implements OnInit {
   }
 
   openCreate(): void {
+    this.loadProperties();
+    this.loadTenants();
     this.editingEntry.set(null);
     this.form.reset({ date: this.todayStr(), type: 'expense', payment_method: 'cash' });
     this.form.markAsUntouched();
@@ -273,6 +275,8 @@ export class AccountingComponent implements OnInit {
 
   openEdit(e: AccountingEntry): void {
     if (e.is_auto) return;
+    this.loadProperties();
+    this.loadTenants();
     this.editingEntry.set(e);
     this.form.reset({
       date:           e.date,

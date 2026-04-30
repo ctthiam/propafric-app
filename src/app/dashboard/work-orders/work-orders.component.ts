@@ -170,9 +170,19 @@ export class WorkOrdersComponent implements OnInit {
     });
   }
 
+  private loadDropdownData(): void {
+    this.http.get<any>(`${this.api}/properties`).subscribe({
+      next: (res: any) => this.properties.set(Array.isArray(res?.data) ? res.data : [])
+    });
+    this.http.get<any>(`${this.api}/contractors`).subscribe({
+      next: (res: any) => this.contractors.set(Array.isArray(res?.data) ? res.data : [])
+    });
+  }
+
   // ── CRUD ──────────────────────────────────────────────────
 
   openCreate(): void {
+    this.loadDropdownData();
     this.editingOrder.set(null);
     this.form.reset({ category: 'entretien', priority: 'medium' });
     this.drawerOpen = true;
@@ -180,6 +190,7 @@ export class WorkOrdersComponent implements OnInit {
   }
 
   openEdit(o: WorkOrder): void {
+    this.loadDropdownData();
     this.editingOrder.set(o);
     this.form.patchValue({
       property_id:    o.property?.id ?? '',
@@ -203,6 +214,7 @@ export class WorkOrdersComponent implements OnInit {
   }
 
   openAssign(o: WorkOrder): void {
+    this.loadDropdownData();
     this.editingOrder.set(o);
     this.assignForm.reset({ contractor_id: o.contractor?.id ?? '' });
     this.assignOpen = true;

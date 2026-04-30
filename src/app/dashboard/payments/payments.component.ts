@@ -218,6 +218,8 @@ export class PaymentsComponent implements OnInit {
   }
 
   openCreate(schedule?: PaymentSchedule): void {
+    this.loadLeases();
+    this.loadSchedules();
     this.selectedSchedule.set(schedule ?? null);
     this.form.reset({ payment_date: this.todayStr, payment_method: 'cash' });
     if (schedule) {

@@ -145,6 +145,8 @@ export class MandatesComponent implements OnInit {
   }
 
   openCreate(): void {
+    this.loadOwners();
+    this.loadProperties();
     this.editingMandate.set(null);
     this.form.reset({
       owner_id: '',
@@ -163,6 +165,8 @@ export class MandatesComponent implements OnInit {
   }
 
   openEdit(m: any): void {
+    this.loadOwners();
+    this.loadProperties();
     this.editingMandate.set(m);
     this.form.patchValue({
       owner_id:          m.owner_id,

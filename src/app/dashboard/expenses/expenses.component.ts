@@ -214,6 +214,8 @@ export class ExpensesComponent implements OnInit {
 
   // ── Dépenses ──
   openCreateExpense(): void {
+    this.loadContractors();
+    this.loadProperties();
     this.editingExpense.set(null);
     this.expenseForm.reset({ category: 'entretien', vat_rate: 18, expense_date: new Date(), charged_to_owner: true });
     this.drawerOpen = true;
@@ -221,6 +223,8 @@ export class ExpensesComponent implements OnInit {
   }
 
   openEditExpense(e: Expense): void {
+    this.loadContractors();
+    this.loadProperties();
     this.editingExpense.set(e);
     this.expenseForm.patchValue({
       ...e,

@@ -122,6 +122,9 @@ export class PropertyTaxesComponent implements OnInit {
   }
 
   openCreate(): void {
+    this.http.get<any>(`${this.api}/properties`).subscribe({
+      next: (res: any) => this.properties.set(Array.isArray(res?.data) ? res.data : [])
+    });
     this.editingTax.set(null);
     this.form.reset({ tax_year: this.currentYear, tax_type: 'Taxe foncière' });
     this.drawerOpen = true;

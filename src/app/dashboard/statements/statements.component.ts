@@ -152,6 +152,7 @@ export class StatementsComponent implements OnInit {
   }
 
   openGenerate(): void {
+    this.loadOwners();
     this.generateForm.reset();
     this.drawerOpen = true;
     this.cdr.detectChanges();

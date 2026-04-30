@@ -400,6 +400,7 @@ export class LeasesComponent implements OnInit {
   }
 
   openCreate(): void {
+    this.loadDropdowns();
     this.editingLease.set(null);
     this.form.reset({
       contract_type: 'habitation', calculation_mode: 'from_base',
@@ -422,6 +423,7 @@ export class LeasesComponent implements OnInit {
   }
 
   openEdit(lease: Lease): void {
+    this.loadDropdowns();
     this.editingLease.set(lease);
     this.form.patchValue({
       property_id:          lease.property?.id,
