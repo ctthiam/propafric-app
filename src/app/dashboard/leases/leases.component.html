@@ -514,6 +514,34 @@
         <div class="detail-row"><span class="detail-label">Jour de paiement</span><span class="detail-value">Le {{ viewingLease()!.payment_day }} du mois</span></div>
         <div class="detail-row"><span class="detail-label">Statut</span><span class="detail-value"><span class="badge {{ viewingLease()!.status === 'active' ? 'badge-success' : 'badge-neutral' }}">{{ viewingLease()!.status }}</span></span></div>
 
+        @if (viewingLease()!.status === 'terminated' && (viewingLease()!.deposit_amount ?? 0) > 0) {
+          <div class="detail-section-title refund-section-title">
+            <i class="pi pi-home"></i> Sortie locataire — Caution
+          </div>
+          @if (viewingLease()!.inspection_date) {
+            <div class="detail-row"><span class="detail-label">Date état des lieux</span><span class="detail-value">{{ formatDate(viewingLease()!.inspection_date) }}</span></div>
+          }
+          <div class="detail-row"><span class="detail-label">Dépôt initial</span><span class="detail-value">{{ formatCurrency(viewingLease()!.deposit_amount) }}</span></div>
+          @if ((viewingLease()!.deposit_retention_amount ?? 0) > 0) {
+            <div class="detail-row"><span class="detail-label" style="color:#e57373">Retenue</span><span class="detail-value" style="color:#e57373">− {{ formatCurrency(viewingLease()!.deposit_retention_amount) }}</span></div>
+            @if (viewingLease()!.deposit_retention_notes) {
+              <div class="detail-row"><span class="detail-label">Motif retenue</span><span class="detail-value">{{ viewingLease()!.deposit_retention_notes }}</span></div>
+            }
+          }
+          <div class="refund-box">
+            <span class="refund-box-label">Montant à restituer</span>
+            <span class="refund-box-amount">{{ formatCurrency((viewingLease()!.deposit_amount ?? 0) - (viewingLease()!.deposit_retention_amount ?? 0)) }}</span>
+            @if (viewingLease()!.refund_status === 'paid') {
+              <span class="badge badge-success" style="margin-left:10px">Remboursé</span>
+            } @else {
+              <button class="btn-secondary btn-refund" (click)="markRefunded(viewingLease()!)" [disabled]="refundingId() === viewingLease()!.id">
+                @if (refundingId() === viewingLease()!.id) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-check"></i> }
+                Marquer remboursé
+              </button>
+            }
+          </div>
+        }
+
         <div class="drawer-actions">
           <button type="button" class="btn-secondary" (click)="closeDetail()">Fermer</button>
           @if (viewingLease()!.status === 'active') {
@@ -523,6 +551,76 @@
           }
         </div>
       </div>
+    </div>
+  </div>
+}
+
+<!-- ─── DRAWER RÉSILIATION ─── -->
+@if (terminateDrawerOpen && terminatingLease()) {
+  <div class="drawer-overlay" (click)="closeTerminateDrawer()"></div>
+  <div class="drawer-panel">
+    <div class="drawer-header">
+      <div>
+        <div class="drawer-title">Résiliation du bail</div>
+        <div class="drawer-sub">{{ terminatingLease()!.reference }} — {{ terminatingLease()!.tenant?.full_name }}</div>
+      </div>
+      <button class="drawer-close" (click)="closeTerminateDrawer()"><i class="pi pi-times"></i></button>
+    </div>
+    <div class="drawer-body">
+      <form [formGroup]="terminateForm" (ngSubmit)="saveTerminate()" class="drawer-form">
+
+        <div class="form-section-title">Résiliation</div>
+        <div class="form-row-2">
+          <div class="form-group">
+            <label>Date de résiliation <span class="req">*</span></label>
+            <input class="pa-input" formControlName="termination_date" type="date" />
+          </div>
+          <div class="form-group">
+            <label>Date état des lieux</label>
+            <input class="pa-input" formControlName="inspection_date" type="date" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Motif (optionnel)</label>
+          <input class="pa-input" formControlName="reason" placeholder="Ex: fin de bail, départ volontaire…" />
+        </div>
+
+        @if ((terminatingLease()!.deposit_amount ?? 0) > 0) {
+          <div class="form-section-title">Restitution de caution</div>
+          <div class="info-box">
+            <i class="pi pi-info-circle"></i>
+            Dépôt de garantie initial : <strong>{{ formatCurrency(terminatingLease()!.deposit_amount ?? 0) }}</strong>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label>Retenue (dommages, impayés…)</label>
+              <input class="pa-input" formControlName="deposit_retention_amount" type="number" min="0"
+                     [max]="terminatingLease()!.deposit_amount ?? 0" placeholder="0" />
+              @if (terminateForm.get('deposit_retention_amount')?.invalid && terminateForm.get('deposit_retention_amount')?.touched) {
+                <span class="form-error">Max {{ formatCurrency(terminatingLease()!.deposit_amount ?? 0) }}</span>
+              }
+            </div>
+            <div class="form-group">
+              <label>Montant à restituer</label>
+              <div class="refund-preview">{{ formatCurrency(calcRefund()) }}</div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Motif de la retenue</label>
+            <textarea class="pa-input" formControlName="deposit_retention_notes" rows="2"
+                      placeholder="Détail des dommages constatés, loyers impayés…"></textarea>
+          </div>
+        }
+
+        <div class="drawer-actions">
+          <button type="button" class="btn-secondary" (click)="closeTerminateDrawer()">Annuler</button>
+          <button type="submit" class="btn-danger" [disabled]="saving()">
+            @if (saving()) { <i class="pi pi-spin pi-spinner"></i> } @else { <i class="pi pi-times-circle"></i> }
+            Résilier le bail
+          </button>
+        </div>
+
+      </form>
     </div>
   </div>
 }

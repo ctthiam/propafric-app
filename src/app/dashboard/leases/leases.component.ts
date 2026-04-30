@@ -48,6 +48,11 @@ export interface Lease {
   property?: LeaseProperty;
   property_unit_id: number | null;
   created_at: string;
+  // Sortie locataire
+  inspection_date: string | null;
+  deposit_retention_amount: number | null;
+  deposit_retention_notes: string | null;
+  refund_status?: 'pending' | 'paid' | null;
 }
 
 export interface DropdownProperty { id: number; name: string; reference: string; }
@@ -82,6 +87,11 @@ export class LeasesComponent implements OnInit {
 
   detailOpen   = false;
   viewingLease = signal<any>(null);
+
+  terminateDrawerOpen = false;
+  terminatingLease    = signal<Lease | null>(null);
+  terminateForm: FormGroup;
+  refundingId         = signal<number | null>(null);
 
   propertyUnits = signal<any[]>([]);
   loadingUnits  = signal(false);
@@ -260,6 +270,14 @@ export class LeasesComponent implements OnInit {
 
     this.revisionForm = this.fb.group({
       revision_rate: ['', [Validators.required, Validators.min(0), Validators.max(50)]],
+    });
+
+    this.terminateForm = this.fb.group({
+      termination_date:          [new Date().toISOString().split('T')[0], Validators.required],
+      reason:                    [''],
+      inspection_date:           [''],
+      deposit_retention_amount:  [0, [Validators.min(0)]],
+      deposit_retention_notes:   [''],
     });
 
     // Abonnements pour calculs temps réel
@@ -550,25 +568,82 @@ export class LeasesComponent implements OnInit {
 
   // ── Résiliation ─────────────────────────────────────────────
   confirmTerminate(lease: Lease): void {
-    this.confirm.confirm({
-      message: `Résilier le bail <strong>${lease.reference}</strong> ?`,
-      header: 'Confirmer la résiliation',
-      icon: 'pi pi-exclamation-triangle',
-      acceptLabel: 'Résilier', rejectLabel: 'Annuler',
-      acceptButtonStyleClass: 'p-button-danger',
-      accept: () => this.terminate(lease.id),
+    this.terminatingLease.set(lease);
+    const maxRetention = lease.deposit_amount ?? 0;
+    this.terminateForm.patchValue({
+      termination_date:         new Date().toISOString().split('T')[0],
+      reason:                   '',
+      inspection_date:          '',
+      deposit_retention_amount: 0,
+      deposit_retention_notes:  '',
+    });
+    this.terminateForm.get('deposit_retention_amount')?.setValidators([
+      Validators.min(0), Validators.max(maxRetention),
+    ]);
+    this.terminateForm.get('deposit_retention_amount')?.updateValueAndValidity();
+    this.terminateDrawerOpen = true;
+    this.cdr.detectChanges();
+  }
+
+  closeTerminateDrawer(): void {
+    this.terminateDrawerOpen = false;
+    this.terminatingLease.set(null);
+    this.cdr.detectChanges();
+  }
+
+  calcRefund(): number {
+    const lease = this.terminatingLease();
+    if (!lease) return 0;
+    const deposit   = lease.deposit_amount ?? 0;
+    const retention = +(this.terminateForm.get('deposit_retention_amount')?.value ?? 0);
+    return Math.max(0, deposit - retention);
+  }
+
+  saveTerminate(): void {
+    if (this.terminateForm.invalid) { this.terminateForm.markAllAsTouched(); return; }
+    const lease = this.terminatingLease();
+    if (!lease) return;
+    this.saving.set(true);
+    const raw = this.terminateForm.value;
+    const payload: any = {
+      termination_date: raw.termination_date,
+      reason:           raw.reason || null,
+      inspection_date:  raw.inspection_date || null,
+      deposit_retention_amount: raw.deposit_retention_amount ?? 0,
+      deposit_retention_notes:  raw.deposit_retention_notes || null,
+    };
+    this.http.post<any>(`${this.api}/leases/${lease.id}/terminate`, payload).subscribe({
+      next: (res: any) => {
+        this.toast.add({ severity: 'success', summary: 'Résilié', detail: res.message });
+        this.saving.set(false);
+        this.closeTerminateDrawer();
+        this.load();
+      },
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Résiliation impossible.' });
+        this.saving.set(false);
+      }
     });
   }
 
-  private terminate(id: number): void {
-  this.http.post<any>(`${this.api}/leases/${id}/terminate`, {
-    termination_date: new Date().toISOString().split('T')[0],
-    reason: 'Résiliation à l\'initiative de l\'agence',}).subscribe({
+  markRefunded(lease: any): void {
+    this.refundingId.set(lease.id);
+    this.http.post<any>(`${this.api}/leases/${lease.id}/refund-deposit`, {}).subscribe({
       next: (res: any) => {
-        this.toast.add({ severity: 'success', summary: 'Résilié', detail: res.message });
+        this.toast.add({ severity: 'success', summary: 'Remboursé', detail: res.message });
+        this.refundingId.set(null);
+        // Rafraîchir le bail dans la vue détail
+        this.http.get<any>(`${this.api}/leases/${lease.id}`).subscribe({
+          next: (r: any) => {
+            if (r?.data) { this.viewingLease.set(r.data); this.cdr.detectChanges(); }
+          }
+        });
         this.load();
       },
-      error: () => this.toast.add({ severity: 'error', summary: 'Erreur', detail: 'Résiliation impossible.' })
+      error: (err: any) => {
+        this.toast.add({ severity: 'error', summary: 'Erreur', detail: err.error?.message ?? 'Opération impossible.' });
+        this.refundingId.set(null);
+      }
     });
   }
 
